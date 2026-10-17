@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>SaveVid V44 • IG, FB & TT</title>
+  <title>SaveVid V47 • IG, FB & TT</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Fragment+Mono&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
   <style>
@@ -18,7 +18,7 @@
     <header class="flex items-center justify-between mb-6">
       <div class="flex items-baseline gap-2">
         <h1 class="text-[28px] tracking-[-0.02em] font-normal leading-none">SaveVid</h1>
-        <span class="text-[11px] px-2 py-[3px] rounded-full border border-[var(--border)] bg-black text-white dark:bg-white dark:text-black tracking-widest uppercase">V44</span>
+        <span class="text-[11px] px-2 py-[3px] rounded-full border border-[var(--border)] bg-black text-white dark:bg-white dark:text-black tracking-widest uppercase">V47</span>
       </div>
       <div class="flex items-center gap-2">
         <span class="h-2 w-2 rounded-full bg-[#00d26a] animate-pulse"></span>
@@ -28,7 +28,7 @@
 
     <div class="mb-6">
       <h2 class="serif text-[40px] leading-[0.95] tracking-[-0.03em] mb-2">Shkarko <span class="italic">pa</span><br>watermark.</h2>
-      <p class="text-[12px] leading-[1.5] text-[var(--muted)]">Instagram, TikTok & Facebook (HD & SD).</p>
+      <p class="text-[12px] leading-[1.5] text-[var(--muted)]">Instagram Reels, TikTok & Facebook (HD & SD).</p>
     </div>
 
     <div class="bg-[var(--card)] border border-[var(--border)] rounded-[18px] p-[14px] shadow-[0_10px_30px_-18px_rgba(0,0,0,0.3)]">
@@ -52,7 +52,7 @@
     <div id="progressBox" class="hidden mt-5 border border-[var(--border)] rounded-[14px] bg-[var(--card)] p-4">
       <div class="flex items-center justify-between mb-3">
         <span class="text-[10px] uppercase tracking-[0.14em] text-[var(--muted)]">Progresi</span>
-        <span id="progressStatus" class="text-[10px] text-[var(--muted)] animate-pulse">Duke kontaktuar serverin...</span>
+        <span id="progressStatus" class="text-[10px] text-[var(--muted)] animate-pulse">Duke u lidhur me serverin...</span>
       </div>
     </div>
 
@@ -90,10 +90,11 @@
     document.getElementById('pasteBtn').onclick = async () => { try { urlInput.value = await navigator.clipboard.readText(); } catch (e) {} };
     document.getElementById('clearBtn').onclick = () => { urlInput.value = ''; errorBox.classList.add('hidden'); resultBox.classList.add('hidden'); progressBox.classList.add('hidden'); };
 
-    function downloadFile(videoUrl, btn, label) {
+    async function downloadFile(videoUrl, btn, label) {
       const orig = btn.textContent;
       btn.textContent = 'Duke shkarkuar...';
       btn.disabled = true;
+
       const proxyUrl = `/api/extract?proxy=1&url=${encodeURIComponent(videoUrl)}`;
       const a = document.createElement('a');
       a.href = proxyUrl;
@@ -101,6 +102,7 @@
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
+
       setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 3000);
     }
 
@@ -127,7 +129,7 @@
       } catch (err) {
         progressStatus.textContent = 'Gabim';
         errorText.textContent = err.message;
-        errorBox.classList.remove('hidden');
+        errorBox.classList.add('hidden');
       } finally {
         downloadBtn.disabled = false;
       }
