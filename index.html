@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>SaveVid V36 • Universal Downloader</title>
+  <title>SaveVid V40 • Universal Downloader</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Fragment+Mono&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
   <style>
@@ -39,11 +39,11 @@
     <header class="flex items-center justify-between mb-6">
       <div class="flex items-baseline gap-2">
         <h1 class="text-[28px] tracking-[-0.02em] font-normal leading-none">SaveVid</h1>
-        <span class="text-[11px] px-2 py-[3px] rounded-full border border-[var(--border)] bg-black text-white dark:bg-white dark:text-black tracking-widest uppercase">V36</span>
+        <span class="text-[11px] px-2 py-[3px] rounded-full border border-[var(--border)] bg-black text-white dark:bg-white dark:text-black tracking-widest uppercase">V40</span>
       </div>
       <div class="flex items-center gap-2">
         <span class="h-2 w-2 rounded-full bg-[#00d26a] animate-pulse"></span>
-        <span class="text-[10px] uppercase tracking-widest text-[var(--muted)]">Auto-Convert</span>
+        <span class="text-[10px] uppercase tracking-widest text-[var(--muted)]">FB • IG • TT</span>
       </div>
     </header>
 
@@ -53,7 +53,7 @@
         Shkarko <span class="italic">pa</span><br>watermark.
       </h2>
       <p class="text-[12px] leading-[1.5] text-[var(--muted)]">
-        Konvertim automatik në sfond për <code class="text-[var(--fg)]">facebook.com/share/v/</code>, Instagram & TikTok.
+        TikTok, Instagram Reels & Facebook (<code class="text-[var(--fg)]">/share/r/</code>, <code class="text-[var(--fg)]">/share/v/</code> & Watch).
       </p>
     </div>
 
@@ -80,9 +80,10 @@
     <div id="progressBox" class="hidden mt-5 border border-[var(--border)] rounded-[14px] bg-[var(--card)] p-4">
       <div class="flex items-center justify-between mb-3">
         <span class="text-[10px] uppercase tracking-[0.14em] text-[var(--muted)]">Progresi</span>
-        <span id="progressStatus" class="text-[10px] text-[var(--muted)] animate-pulse">Duke konvertuar & shkarkuar...</span>
+        <span id="progressStatus" class="text-[10px] text-[var(--muted)] animate-pulse">Duke kërkuar...</span>
       </div>
       <div id="stepsList" class="space-y-2"></div>
+      <div id="resolvedBox" class="hidden mt-2.5 pt-2 border-t border-[var(--border)] text-[10px] text-[var(--muted)] truncate"></div>
     </div>
 
     <!-- Error Box -->
@@ -95,7 +96,7 @@
       <div class="relative bg-black aspect-[9/12] max-h-[480px] overflow-hidden">
         <video id="videoPreview" controls playsinline class="relative w-full h-full object-contain"></video>
         <div class="absolute top-3 left-3">
-          <span class="text-[10px] uppercase tracking-widest px-2 py-1 rounded-full bg-white text-black font-medium">MP4 GATI</span>
+          <span id="platformBadge" class="text-[10px] uppercase tracking-widest px-2 py-1 rounded-full bg-white text-black font-medium">MP4</span>
         </div>
         <div class="absolute bottom-0 inset-x-0 p-4 bg-gradient-to-t from-black/80 to-transparent pointer-events-none">
           <p id="videoTitle" class="text-white text-[13px] leading-[1.3] line-clamp-2"></p>
@@ -118,12 +119,14 @@
     const stepsList = document.getElementById('stepsList');
     const progressBox = document.getElementById('progressBox');
     const progressStatus = document.getElementById('progressStatus');
+    const resolvedBox = document.getElementById('resolvedBox');
     const errorBox = document.getElementById('errorBox');
     const errorText = document.getElementById('errorText');
     const resultBox = document.getElementById('resultBox');
     const videoPreview = document.getElementById('videoPreview');
     const videoTitle = document.getElementById('videoTitle');
     const videoAuthor = document.getElementById('videoAuthor');
+    const platformBadge = document.getElementById('platformBadge');
     const dlHdBtn = document.getElementById('dlHdBtn');
     const downloadBtn = document.getElementById('downloadBtn');
 
@@ -143,11 +146,104 @@
       stepsList.innerHTML = steps.map(s => `
         <div class="flex items-center justify-between text-[11px]">
           <span class="${s.status === 'pending' ? 'text-[var(--muted)]' : ''}">${s.name}</span>
-          <span class="text-[10px] uppercase font-medium ${s.status === 'success' ? 'text-[#00a651]' : s.status === 'fail' ? 'text-[#ff4d4d]' : 'text-[var(--muted)]'}">
-            ${s.status === 'trying' ? 'duke u procesuar...' : s.status}
+          <span class="text-[10px] uppercase font-medium ${s.status === 'success' || s.status.startsWith('OK') ? 'text-[#00a651]' : s.status === 'fail' ? 'text-[#ff4d4d]' : 'text-[var(--muted)]'}">
+            ${s.status === 'trying' ? 'duke provuar...' : s.status}
           </span>
         </div>
       `).join('');
+    }
+
+    async function fetchWithTimeout(resource, options = {}, timeout = 8000) {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeout);
+      try {
+        const res = await fetch(resource, { ...options, signal: controller.signal });
+        clearTimeout(id);
+        return res;
+      } catch (e) {
+        clearTimeout(id);
+        throw e;
+      }
+    }
+
+    async function fetchViaProxy(targetUrl) {
+      const proxies = [
+        `https://corsproxy.io/?url=${encodeURIComponent(targetUrl)}`,
+        `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
+        `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`
+      ];
+      for (const p of proxies) {
+        try {
+          const r = await fetchWithTimeout(p, {}, 7500);
+          if (r.ok) {
+            const t = await r.text();
+            if (t && t.length > 20) return t;
+          }
+        } catch (e) {}
+      }
+      throw new Error('Proxy failed');
+    }
+
+    function cleanVideoUrl(raw) {
+      if (!raw || typeof raw !== 'string') return null;
+      const s = raw
+        .replace(/\\u0025/g, '%')
+        .replace(/\\u0026/g, '&')
+        .replace(/\\u003D/g, '=')
+        .replace(/\\\//g, '/')
+        .replace(/&amp;/g, '&')
+        .trim();
+      if (/\.(jpg|jpeg|png|webp|gif|svg)(\?.*)?$/i.test(s)) return null;
+      if (s.includes('fbcdn.net') && !s.includes('.mp4') && !s.includes('/v/')) return null;
+      return s.startsWith('http') ? s : null;
+    }
+
+    function findStrictMp4InJson(obj) {
+      if (!obj) return null;
+      const rawStr = typeof obj === 'string' ? obj : JSON.stringify(obj);
+      const matches = rawStr.match(/https?:\\?\/\\?\/[^"'\s\\]+(?:\.mp4|fbcdn\.net\/o1\/v\/|fbcdn\.net\/v\/t42|cdninstagram\.com\/o1\/v\/)[^"'\s\\]*/gi) || [];
+      for (const m of matches) {
+        const v = cleanVideoUrl(m);
+        if (v) return v;
+      }
+      if (typeof obj === 'object') {
+        const d = obj.data || obj.result || obj;
+        const fields = [d.hd, d.hdplay, d.sd, d.play, d.url, d.videoUrl, d.download_url, d.video?.noWatermark];
+        for (const f of fields) {
+          const v = cleanVideoUrl(f);
+          if (v) return v;
+        }
+      }
+      return null;
+    }
+
+    // Zgjidhës inteligjent në shfletues për facebook.com/share/r/... dhe /share/v/...
+    async function unshortenFbShareClient(url) {
+      let resolved = url;
+
+      // 1. Provojmë allorigins /get (i cili kthen fushën status.url pas ridrejtimit të Facebook!)
+      try {
+        const aoRes = await fetchWithTimeout(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`, {}, 7000);
+        if (aoRes.ok) {
+          const aoJson = await aoRes.json();
+          const finalUrl = aoJson?.status?.url;
+          if (finalUrl && !finalUrl.includes('/login') && !finalUrl.includes('/share/')) {
+            resolved = finalUrl;
+          }
+          const html = aoJson?.contents || '';
+          const mp4 = findStrictMp4InJson(html);
+          if (mp4) return { directMp4: mp4, resolvedUrl: resolved };
+
+          const idMatch = html.match(/\/reel\/(\d{8,25})/) ||
+                          html.match(/\/videos\/(\d{8,25})/) ||
+                          html.match(/"video_id"\s*:\s*"(\d{8,25})"/);
+          if (idMatch?.[1]) {
+            resolved = `https://www.facebook.com/reel/${idMatch[1]}`;
+          }
+        }
+      } catch (e) {}
+
+      return { directMp4: null, resolvedUrl: resolved };
     }
 
     downloadBtn.onclick = async () => {
@@ -157,59 +253,168 @@
 
       errorBox.classList.add('hidden');
       resultBox.classList.add('hidden');
+      resolvedBox.classList.add('hidden');
       progressBox.classList.remove('hidden');
-      progressStatus.textContent = 'Duke konvertuar në sfond...';
+      progressStatus.textContent = 'Duke analizuar...';
       downloadBtn.disabled = true;
 
+      const isTikTok = /tiktok\.com|vm\.tiktok|vt\.tiktok/i.test(url);
+
       const steps = [
-        { name: '1. Vercel Serverless Share->Reel Engine', status: 'trying' },
-        { name: '2. Direct Client Fallback', status: 'pending' }
+        { name: '1. Vercel / Share Resolver', status: 'pending' },
+        { name: '2. Direct Social Engine (TikWM / Agatz)', status: 'pending' },
+        { name: '3. Multi-Cloud API (Siputzx / Ryzen / Vkr)', status: 'pending' },
+        { name: '4. FB Embed & Proxy Fallback', status: 'pending' }
       ];
       renderSteps(steps);
 
+      const setStep = (idx, status) => {
+        if (steps[idx]) { steps[idx].status = status; renderSteps(steps); }
+      };
+
       try {
         let data = null;
+        let workingUrl = url;
 
-        // 1. Thirrja e funksionit tonë të brendshëm në Vercel (/api/extract)
+        // HAPI 1: Vercel Backend (/api/extract) + Share Resolver në Shfletues
+        setStep(0, 'trying');
         try {
-          const res = await fetch(`/api/extract?url=${encodeURIComponent(url)}`);
-          const json = await res.json();
-          if (res.ok && json.hd) {
-            steps[0].status = 'success';
-            renderSteps(steps);
-            data = json;
-          } else {
-            throw new Error(json.error || 'Server fallback');
-          }
-        } catch (e) {
-          steps[0].status = 'fail';
-          renderSteps(steps);
-        }
-
-        // 2. Fallback në shfletues nëse nuk e ke ngarkuar ende skedarin api/extract.js
-        if (!data) {
-          steps[1].status = 'trying';
-          renderSteps(steps);
-
-          if (/tiktok\.com/i.test(url)) {
-            const r = await fetch('https://www.tikwm.com/api/', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-              body: `url=${encodeURIComponent(url)}&hd=1`
-            });
-            const j = await r.json();
-            if (j?.data?.play) {
-              data = { hd: j.data.hdplay || j.data.play, title: j.data.title || 'TikTok Video', author: j.data.author?.unique_id || 'tiktok', source: 'TikWM' };
-              steps[1].status = 'success';
-              renderSteps(steps);
+          const vRes = await fetchWithTimeout(`/api/extract?url=${encodeURIComponent(url)}`, {}, 9000);
+          if (vRes.ok) {
+            const vJson = await vRes.json();
+            if (vJson.hd) {
+              data = vJson;
+              setStep(0, 'success');
+            } else if (vJson.resolvedUrl) {
+              workingUrl = vJson.resolvedUrl;
             }
           }
+        } catch (e) {}
+
+        if (!data && /facebook\.com|fb\.watch/i.test(url)) {
+          const shareRes = await unshortenFbShareClient(workingUrl);
+          if (shareRes.directMp4) {
+            data = { hd: shareRes.directMp4, title: 'Facebook Reel', author: 'Facebook', source: 'FB Share Direct' };
+            setStep(0, 'success');
+          } else if (shareRes.resolvedUrl && shareRes.resolvedUrl !== url) {
+            workingUrl = shareRes.resolvedUrl;
+            resolvedBox.textContent = `Linku u konvertua: ${workingUrl}`;
+            resolvedBox.classList.remove('hidden');
+            setStep(0, 'OK (Reel)');
+          } else {
+            setStep(0, 'OK');
+          }
+        } else if (!data) {
+          setStep(0, 'OK');
+        }
+
+        // HAPI 2: TikWM (për TikTok) ose Agatz FB/IG Engine
+        if (!data) {
+          setStep(1, 'trying');
+          if (isTikTok) {
+            try {
+              const r = await fetchWithTimeout('https://www.tikwm.com/api/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `url=${encodeURIComponent(workingUrl)}&hd=1`
+              }, 7000);
+              const j = await r.json();
+              const mp4 = cleanVideoUrl(j?.data?.hdplay || j?.data?.play);
+              if (mp4) {
+                data = { hd: mp4, title: j.data.title || 'TikTok Video', author: j.data.author?.unique_id || 'tiktok', source: 'TikWM HD' };
+                setStep(1, 'success');
+              }
+            } catch (e) {}
+          } else {
+            const urlsToTry = [workingUrl];
+            if (url !== workingUrl) urlsToTry.push(url);
+            for (const u of urlsToTry) {
+              try {
+                const api = `https://api.agatz.xyz/api/facebook?url=${encodeURIComponent(u)}`;
+                let txt = '';
+                try {
+                  const r = await fetchWithTimeout(api, {}, 6000);
+                  if (r.ok) txt = await r.text();
+                } catch (e) {
+                  txt = await fetchViaProxy(api);
+                }
+                const mp4 = findStrictMp4InJson(JSON.parse(txt));
+                if (mp4) {
+                  data = { hd: mp4, title: 'Facebook Video', author: 'Facebook', source: 'Agatz FB' };
+                  setStep(1, 'success');
+                  break;
+                }
+              } catch (e) {}
+            }
+          }
+          if (!data) setStep(1, 'fail');
+        }
+
+        // HAPI 3: Multi-Cloud API Pool (Teston si linkun e konvertuar ashtu edhe linkun origjinal)
+        if (!data) {
+          setStep(2, 'trying');
+          const urlsToTry = [workingUrl];
+          if (url !== workingUrl) urlsToTry.push(url);
+
+          outerLoop:
+          for (const u of urlsToTry) {
+            const enc = encodeURIComponent(u);
+            const pool = [
+              `https://api.siputzx.my.id/api/d/facebook?url=${enc}`,
+              `https://api.siputzx.my.id/api/d/igdl?url=${enc}`,
+              `https://api.ryzendesu.vip/api/downloader/fbdl?url=${enc}`,
+              `https://api.ryzendesu.vip/api/downloader/allinone?url=${enc}`,
+              `https://vkrdownloader.xyz/server?vkr=${enc}`,
+              `https://bk9.fun/download/alldownload?url=${enc}`
+            ];
+
+            for (const api of pool) {
+              try {
+                let txt = '';
+                try {
+                  const r = await fetchWithTimeout(api, {}, 6000);
+                  if (r.ok) txt = await r.text();
+                } catch (e) {}
+                if (!txt) txt = await fetchViaProxy(api);
+
+                if (txt) {
+                  const mp4 = findStrictMp4InJson(JSON.parse(txt));
+                  if (mp4) {
+                    data = {
+                      hd: mp4,
+                      title: 'Social Video MP4',
+                      author: 'Creator',
+                      source: new URL(api).hostname.replace('api.', '')
+                    };
+                    setStep(2, 'success');
+                    break outerLoop;
+                  }
+                }
+              } catch (e) {}
+            }
+          }
+          if (!data) setStep(2, 'fail');
+        }
+
+        // HAPI 4: Facebook Embed Player Bypass përmes Proxy
+        if (!data) {
+          setStep(3, 'trying');
+          try {
+            const embedUrl = `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(workingUrl)}&show_text=false`;
+            const embHtml = await fetchViaProxy(embedUrl);
+            const hd = embHtml.match(/"hd_src_no_ratelimit"\s*:\s*"([^"]+)"/) || embHtml.match(/"hd_src"\s*:\s*"([^"]+)"/);
+            const sd = embHtml.match(/"sd_src_no_ratelimit"\s*:\s*"([^"]+)"/) || embHtml.match(/"sd_src"\s*:\s*"([^"]+)"/);
+            const mp4 = cleanVideoUrl(hd?.[1] || sd?.[1]);
+            if (mp4) {
+              data = { hd: mp4, title: 'Facebook Reel', author: 'Facebook', source: 'FB Embed Player' };
+              setStep(3, 'success');
+            }
+          } catch (e) {}
+          if (!data) setStep(3, 'fail');
         }
 
         if (!data) {
-          steps[1].status = 'fail';
-          renderSteps(steps);
-          throw new Error('Sigurohu që ke shtuar skedarin "api/extract.js" në projektin tënd të Vercel që të konvertojë linqet /share/v/ automatikisht.');
+          throw new Error('Videoja nuk u gjet. Sigurohu që ke ngarkuar edhe skedarin "api/extract.js" në GitHub që serveri i Vercel të hapë linqet /share/r/ të Facebook-ut.');
         }
 
         currentVideoData = data;
@@ -217,6 +422,7 @@
         videoPreview.src = data.hd;
         videoTitle.textContent = data.title;
         videoAuthor.textContent = `@${data.author} • ${data.source}`;
+        platformBadge.textContent = isTikTok ? 'TIKTOK' : 'FACEBOOK / IG';
         resultBox.classList.remove('hidden');
       } catch (err) {
         progressStatus.textContent = 'Gabim';
@@ -227,10 +433,24 @@
       }
     };
 
-    dlHdBtn.onclick = () => {
+    dlHdBtn.onclick = async () => {
       if (!currentVideoData?.hd) return;
-      // Shkarkon direkt si skedar MP4 përmes serverit tënd të Vercel
-      window.location.href = `/api/extract?proxy=1&url=${encodeURIComponent(currentVideoData.hd)}`;
+      dlHdBtn.textContent = 'Duke shkarkuar...';
+      try {
+        const res = await fetch(`https://corsproxy.io/?url=${encodeURIComponent(currentVideoData.hd)}`);
+        if (!res.ok) throw new Error();
+        const blob = await res.blob();
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `savevid_${Date.now()}.mp4`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        dlHdBtn.textContent = '✓ U Shkarkua!';
+      } catch (e) {
+        window.open(currentVideoData.hd, '_blank');
+        dlHdBtn.textContent = 'Shkarko MP4';
+      }
     };
 
     document.getElementById('openDirectBtn').onclick = () => {
@@ -239,4 +459,3 @@
   </script>
 </body>
 </html>
-
