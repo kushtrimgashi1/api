@@ -1,25 +1,55 @@
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Range');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  // Tuneli për shkarkim direkt si skedar MP4 në telefon
+  // 1. TUNELI PËR SHKARKIM DIREKT NË DOWNLOADS SI SKEDAR .MP4
   if (req.query.proxy === '1' && req.query.url) {
+    const targetVideoUrl = req.query.url;
     try {
-      const vRes = await fetch(req.query.url, {
-        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' }
+      const urlObj = new URL(targetVideoUrl);
+      let referer = `${urlObj.protocol}//${urlObj.hostname}/`;
+      if (targetVideoUrl.includes('fbcdn.net') || targetVideoUrl.includes('facebook.com')) {
+        referer = 'https://www.facebook.com/';
+      } else if (targetVideoUrl.includes('cdninstagram.com') || targetVideoUrl.includes('instagram.com')) {
+        referer = 'https://www.instagram.com/';
+      } else if (targetVideoUrl.includes('tiktok')) {
+        referer = 'https://www.tiktok.com/';
+      }
+
+      const vRes = await fetch(targetVideoUrl, {
+        method: 'GET',
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+          'Accept': '*/*',
+          'Referer': referer
+        }
       });
-      res.setHeader('Content-Type', 'video/mp4');
-      res.setHeader('Content-Disposition', `attachment; filename="savevid_${Date.now()}.mp4"`);
-      const buf = Buffer.from(await vRes.arrayBuffer());
-      return res.status(200).send(buf);
+
+      if (!vRes.ok) throw new Error(`CDN HTTP ${vRes.status}`);
+
+      const filename = `savevid_${Date.now()}.mp4`;
+      res.setHeader('Content-Type', 'application/octet-stream');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.setHeader('Cache-Control', 'no-store');
+
+      const contentLength = vRes.headers.get('content-length');
+      if (contentLength) {
+        res.setHeader('Content-Length', contentLength);
+      }
+
+      const arrayBuffer = await vRes.arrayBuffer();
+      return res.status(200).send(Buffer.from(arrayBuffer));
     } catch (e) {
-      return res.redirect(req.query.url);
+      // Fallback: shtojmë dl=1 që CDN ta trajtojë si shkarkim
+      const dlUrl = targetVideoUrl.includes('?') ? `${targetVideoUrl}&dl=1` : `${targetVideoUrl}?dl=1`;
+      return res.redirect(302, dlUrl);
     }
   }
 
+  // 2. NXJERRJA E LINKUT MP4 NGA FACEBOOK, INSTAGRAM & TIKTOK
   const rawUrl = req.query.url;
   if (!rawUrl) return res.status(400).json({ error: 'Mungon linku' });
 
@@ -32,14 +62,14 @@ export default async function handler(req, res) {
       .replace(/\\\//g, '/')
       .replace(/&amp;/g, '&')
       .trim();
-    if (/\.(jpg|jpeg|png|webp|gif)(\?.*)?$/i.test(c)) return null;
+    if (/\.(jpg|jpeg|png|webp|gif|svg)(\?.*)?$/i.test(c)) return null;
     return c.startsWith('http') ? c : null;
   };
 
   try {
     let workingUrl = rawUrl.trim();
 
-    // 1. ZGJIDHËSI I /share/r/ DHE /share/v/ NË SERVERIN VERCEL
+    // A. ZGJIDHËSI I /share/r/ DHE /share/v/ PËR FACEBOOK
     if (/facebook\.com|fb\.watch|fb\.com/i.test(workingUrl)) {
       const userAgents = [
         'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)',
@@ -55,8 +85,7 @@ export default async function handler(req, res) {
             headers: {
               'User-Agent': ua,
               'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-              'Accept-Language': 'en-US,en;q=0.9',
-              'Sec-Fetch-Mode': 'navigate'
+              'Accept-Language': 'en-US,en;q=0.9'
             }
           });
 
@@ -66,7 +95,6 @@ export default async function handler(req, res) {
 
           const html = await r.text();
 
-          // Kërkojmë direkt MP4 brenda burimit të Facebook
           const hdMatch = html.match(/"playable_url_quality_hd"\s*:\s*"([^"]+)"/) ||
                           html.match(/"browser_native_hd_url"\s*:\s*"([^"]+)"/) ||
                           html.match(/"hd_src_no_ratelimit"\s*:\s*"([^"]+)"/) ||
@@ -87,7 +115,6 @@ export default async function handler(req, res) {
             });
           }
 
-          // Nxjerrim linkun e vërtetë të Reel-it nëse ende jemi te /share/
           const ogUrl = html.match(/property="og:url"\s+content="([^"]+)"/) ||
                         html.match(/rel="canonical"\s+href="([^"]+)"/);
           if (ogUrl?.[1] && !ogUrl[1].includes('/login') && !ogUrl[1].includes('/share/')) {
@@ -106,7 +133,7 @@ export default async function handler(req, res) {
         } catch (e) {}
       }
 
-      // 2. FACEBOOK EMBED PLAYER BYPASS
+      // B. FACEBOOK EMBED PLAYER BYPASS
       try {
         const embRes = await fetch(`https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(workingUrl)}&show_text=false`, {
           headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
@@ -126,8 +153,8 @@ export default async function handler(req, res) {
       } catch (e) {}
     }
 
-    // 3. TIKTOK -> TikWM Direct
-    if (/tiktok\.com/i.test(workingUrl)) {
+    // C. TIKTOK -> TikWM Direct
+    if (/tiktok\.com|vm\.tiktok|vt\.tiktok/i.test(workingUrl)) {
       const ttRes = await fetch('https://www.tikwm.com/api/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -145,7 +172,7 @@ export default async function handler(req, res) {
       }
     }
 
-    // 4. MULTI-API SERVER POOL (Provon si workingUrl ashtu edhe rawUrl)
+    // D. MULTI-API SERVER POOL (FB, IG, TikTok)
     const urlsToTest = [workingUrl];
     if (rawUrl !== workingUrl) urlsToTest.push(rawUrl);
 
@@ -166,7 +193,7 @@ export default async function handler(req, res) {
           const r = await fetch(api, { headers: { 'User-Agent': 'Mozilla/5.0' } });
           if (!r.ok) continue;
           const rawText = await r.text();
-          const matches = rawText.match(/https?:\\?\/\\?\/[^"'\s\\]+(?:\.mp4|fbcdn\.net\/v\/|cdninstagram\.com\/v\/)[^"'\s\\]*/gi) || [];
+          const matches = rawText.match(/https?:\\?\/\\?\/[^"'\s\\]+(?:\.mp4|fbcdn\.net\/o1\/v\/|fbcdn\.net\/v\/|cdninstagram\.com\/v\/)[^"'\s\\]*/gi) || [];
           for (const m of matches) {
             const valid = cleanUrl(m);
             if (valid) {
