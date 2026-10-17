@@ -3,34 +3,61 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>SaveVid V50 • Server Backend</title>
+  <title>SaveVid V42 • HD & SD Download</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Fragment+Mono&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
   <style>
-    :root { --bg: #fcfcf9; --fg: #0a0a0a; --muted: #6b6b6b; --border: #e8e6e1; --card: #ffffff; }
-    @media (prefers-color-scheme: dark) { :root { --bg: #0e0e0e; --fg: #f5f5f0; --muted: #9a9a9a; --border: #232323; --card: #161616; } }
-    body { font-family: "Fragment Mono", monospace; background-color: var(--bg); color: var(--fg); margin: 0; }
+    :root {
+      --bg: #fcfcf9;
+      --fg: #0a0a0a;
+      --muted: #6b6b6b;
+      --border: #e8e6e1;
+      --card: #ffffff;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0e0e0e;
+        --fg: #f5f5f0;
+        --muted: #9a9a9a;
+        --border: #232323;
+        --card: #161616;
+      }
+    }
+    body {
+      font-family: "Fragment Mono", monospace;
+      background-color: var(--bg);
+      color: var(--fg);
+      margin: 0;
+    }
     h1, h2, .serif { font-family: "Instrument Serif", serif; }
   </style>
 </head>
 <body class="min-h-screen selection:bg-black selection:text-white">
+
   <div class="w-full max-w-[520px] mx-auto min-h-screen flex flex-col px-5 pb-10 pt-6">
+    <!-- Header -->
     <header class="flex items-center justify-between mb-6">
       <div class="flex items-baseline gap-2">
         <h1 class="text-[28px] tracking-[-0.02em] font-normal leading-none">SaveVid</h1>
-        <span class="text-[11px] px-2 py-[3px] rounded-full border border-[var(--border)] bg-black text-white dark:bg-white dark:text-black tracking-widest uppercase">V50</span>
+        <span class="text-[11px] px-2 py-[3px] rounded-full border border-[var(--border)] bg-black text-white dark:bg-white dark:text-black tracking-widest uppercase">V42</span>
       </div>
       <div class="flex items-center gap-2">
         <span class="h-2 w-2 rounded-full bg-[#00d26a] animate-pulse"></span>
-        <span class="text-[10px] uppercase tracking-widest text-[var(--muted)]">Vercel Backend</span>
+        <span class="text-[10px] uppercase tracking-widest text-[var(--muted)]">HD & SD</span>
       </div>
     </header>
 
+    <!-- Title -->
     <div class="mb-6">
-      <h2 class="serif text-[40px] leading-[0.95] tracking-[-0.03em] mb-2">Shkarko <span class="italic">pa</span><br>watermark.</h2>
-      <p class="text-[12px] leading-[1.5] text-[var(--muted)]">Instagram Reels, TikTok & Facebook (HD & SD).</p>
+      <h2 class="serif text-[40px] leading-[0.95] tracking-[-0.03em] mb-2">
+        Shkarko <span class="italic">pa</span><br>watermark.
+      </h2>
+      <p class="text-[12px] leading-[1.5] text-[var(--muted)]">
+        Zgjidh cilësinë HD ose SD për TikTok, Instagram & Facebook.
+      </p>
     </div>
 
+    <!-- Input Card -->
     <div class="bg-[var(--card)] border border-[var(--border)] rounded-[18px] p-[14px] shadow-[0_10px_30px_-18px_rgba(0,0,0,0.3)]">
       <div class="flex items-center gap-2 mb-3 px-1">
         <span class="text-[10px] uppercase tracking-widest text-[var(--muted)]">Linku i Videos</span>
@@ -39,7 +66,7 @@
       </div>
 
       <div class="relative">
-        <input id="urlInput" type="text" placeholder="Ngjit çdo link (IG, FB Share, TikTok)..." 
+        <input id="urlInput" type="text" placeholder="Ngjit çdo link (FB Share, IG, TikTok)..." 
           class="w-full h-[54px] rounded-[12px] bg-[#f5f4ef] dark:bg-[#1e1e1e] border border-transparent focus:border-black dark:focus:border-white focus:outline-none px-4 pr-[54px] text-[13px] placeholder:text-[#b0aea8]">
         <button id="clearBtn" class="absolute right-[6px] top-[6px] bottom-[6px] w-[42px] rounded-[9px] bg-white dark:bg-black border border-[var(--border)] grid place-items-center text-[12px]">✕</button>
       </div>
@@ -49,61 +76,236 @@
       </button>
     </div>
 
+    <!-- Progress Box -->
     <div id="progressBox" class="hidden mt-5 border border-[var(--border)] rounded-[14px] bg-[var(--card)] p-4">
       <div class="flex items-center justify-between mb-3">
         <span class="text-[10px] uppercase tracking-[0.14em] text-[var(--muted)]">Progresi</span>
-        <span id="progressStatus" class="text-[10px] text-[var(--muted)] animate-pulse">Duke u lidhur me serverin Vercel...</span>
+        <span id="progressStatus" class="text-[10px] text-[var(--muted)] animate-pulse">Duke kërkuar...</span>
       </div>
+      <div id="stepsList" class="space-y-2"></div>
+      <div id="resolvedBox" class="hidden mt-2.5 pt-2 border-t border-[var(--border)] text-[10px] text-[var(--muted)] truncate"></div>
     </div>
 
-    <div id="errorBox" class="hidden mt-5 rounded-[14px] border border-[#ffd1d1] bg-[#fff3f3] dark:bg-[#1f1212] p-4">
-      <p id="errorText" class="text-[12px] leading-[1.5] text-[#7a1f1f]"></p>
+    <!-- Error Box -->
+    <div id="errorBox" class="hidden mt-5 rounded-[14px] border border-[#ffd1d1] bg-[#fff3f3] dark:bg-[#1f1212] dark:border-[#5a2222] p-4">
+      <p id="errorText" class="text-[12px] leading-[1.5] text-[#7a1f1f] dark:text-[#ffb3b3]"></p>
     </div>
 
+    <!-- Result Card (Me 2 opsione: Shkarko HD & Shkarko SD) -->
     <div id="resultBox" class="hidden mt-5 rounded-[18px] border border-[var(--border)] bg-[var(--card)] overflow-hidden shadow-[0_20px_50px_-24px_rgba(0,0,0,0.4)]">
       <div class="relative bg-black aspect-[9/12] max-h-[440px] overflow-hidden">
         <video id="videoPreview" controls playsinline class="relative w-full h-full object-contain"></video>
+        <div class="absolute top-3 left-3">
+          <span id="platformBadge" class="text-[10px] uppercase tracking-widest px-2 py-1 rounded-full bg-white text-black font-medium">MP4 GATI</span>
+        </div>
+        <div class="absolute bottom-0 inset-x-0 p-4 bg-gradient-to-t from-black/80 to-transparent pointer-events-none">
+          <p id="videoTitle" class="text-white text-[13px] leading-[1.3] line-clamp-2"></p>
+          <p id="videoAuthor" class="text-white/60 text-[11px] mt-1"></p>
+        </div>
       </div>
       <div class="p-4">
         <div class="grid grid-cols-2 gap-3 mb-2">
-          <button id="dlHdBtn" class="h-[48px] rounded-[12px] bg-black text-white dark:bg-white dark:text-black grid place-items-center text-[12px] uppercase tracking-[0.12em] font-medium">Shkarko HD</button>
-          <button id="dlSdBtn" class="h-[48px] rounded-[12px] border border-[var(--border)] bg-[#f7f7f5] dark:bg-[#1e1e1e] grid place-items-center text-[12px] uppercase tracking-[0.12em] font-medium">Shkarko SD</button>
+          <button id="dlHdBtn" class="h-[48px] rounded-[12px] bg-black text-white dark:bg-white dark:text-black grid place-items-center text-[12px] uppercase tracking-[0.12em] font-medium hover:opacity-90 active:scale-[0.98]">
+            Shkarko HD
+          </button>
+          <button id="dlSdBtn" class="h-[48px] rounded-[12px] border border-[var(--border)] bg-[#f7f7f5] dark:bg-[#1e1e1e] grid place-items-center text-[12px] uppercase tracking-[0.12em] font-medium hover:bg-[#efede8] active:scale-[0.98]">
+            Shkarko SD
+          </button>
         </div>
+        <button id="openDirectBtn" class="w-full h-[38px] rounded-[10px] text-[11px] uppercase tracking-wider text-[var(--muted)] hover:underline">
+          Hap në tab të ri ↗
+        </button>
       </div>
     </div>
+
+    <iframe id="hiddenDownloader" style="display:none;"></iframe>
   </div>
 
   <script>
     const urlInput = document.getElementById('urlInput');
+    const stepsList = document.getElementById('stepsList');
     const progressBox = document.getElementById('progressBox');
     const progressStatus = document.getElementById('progressStatus');
+    const resolvedBox = document.getElementById('resolvedBox');
     const errorBox = document.getElementById('errorBox');
     const errorText = document.getElementById('errorText');
     const resultBox = document.getElementById('resultBox');
     const videoPreview = document.getElementById('videoPreview');
+    const videoTitle = document.getElementById('videoTitle');
+    const videoAuthor = document.getElementById('videoAuthor');
+    const platformBadge = document.getElementById('platformBadge');
     const dlHdBtn = document.getElementById('dlHdBtn');
     const dlSdBtn = document.getElementById('dlSdBtn');
     const downloadBtn = document.getElementById('downloadBtn');
+    const hiddenDownloader = document.getElementById('hiddenDownloader');
 
     let currentVideoData = null;
 
-    document.getElementById('pasteBtn').onclick = async () => { try { urlInput.value = await navigator.clipboard.readText(); } catch (e) {} };
-    document.getElementById('clearBtn').onclick = () => { urlInput.value = ''; errorBox.classList.add('hidden'); resultBox.classList.add('hidden'); progressBox.classList.add('hidden'); };
+    document.getElementById('pasteBtn').onclick = async () => {
+      try { urlInput.value = await navigator.clipboard.readText(); } catch (e) { urlInput.focus(); }
+    };
+    document.getElementById('clearBtn').onclick = () => {
+      urlInput.value = '';
+      errorBox.classList.add('hidden');
+      resultBox.classList.add('hidden');
+      progressBox.classList.add('hidden');
+    };
 
-    async function downloadFile(videoUrl, btn, label) {
-      const orig = btn.textContent;
-      btn.textContent = 'Duke shkarkuar...';
-      btn.disabled = true;
+    function renderSteps(steps) {
+      stepsList.innerHTML = steps.map(s => `
+        <div class="flex items-center justify-between text-[11px]">
+          <span class="${s.status === 'pending' ? 'text-[var(--muted)]' : ''}">${s.name}</span>
+          <span class="text-[10px] uppercase font-medium ${s.status === 'success' || s.status.startsWith('OK') ? 'text-[#00a651]' : s.status === 'fail' ? 'text-[#ff4d4d]' : 'text-[var(--muted)]'}">
+            ${s.status === 'trying' ? 'duke provuar...' : s.status}
+          </span>
+        </div>
+      `).join('');
+    }
 
-      const proxyUrl = `/api/extract?proxy=1&url=${encodeURIComponent(videoUrl)}`;
-      const a = document.createElement('a');
-      a.href = proxyUrl;
-      a.download = `savevid_${label}_${Date.now()}.mp4`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+    async function fetchWithTimeout(resource, options = {}, timeout = 8000) {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeout);
+      try {
+        const res = await fetch(resource, { ...options, signal: controller.signal });
+        clearTimeout(id);
+        return res;
+      } catch (e) {
+        clearTimeout(id);
+        throw e;
+      }
+    }
 
-      setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 3000);
+    async function fetchViaProxy(targetUrl) {
+      const proxies = [
+        `https://corsproxy.io/?url=${encodeURIComponent(targetUrl)}`,
+        `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`
+      ];
+      for (const p of proxies) {
+        try {
+          const r = await fetchWithTimeout(p, {}, 7500);
+          if (r.ok) {
+            const t = await r.text();
+            if (t && t.length > 20) return t;
+          }
+        } catch (e) {}
+      }
+      throw new Error('Proxy failed');
+    }
+
+    function cleanVideoUrl(raw) {
+      if (!raw || typeof raw !== 'string') return null;
+      const s = raw
+        .replace(/\\u0025/g, '%')
+        .replace(/\\u0026/g, '&')
+        .replace(/\\u003D/g, '=')
+        .replace(/\\\//g, '/')
+        .replace(/&amp;/g, '&')
+        .trim();
+      if (/\.(jpg|jpeg|png|webp|gif|svg)(\?.*)?$/i.test(s)) return null;
+      if (s.includes('fbcdn.net') && !s.includes('.mp4') && !s.includes('/v/')) return null;
+      return s.startsWith('http') ? s : null;
+    }
+
+    function findStrictMp4InJson(obj) {
+      if (!obj) return null;
+      const rawStr = typeof obj === 'string' ? obj : JSON.stringify(obj);
+      const matches = rawStr.match(/https?:\\?\/\\?\/[^"'\s\\]+(?:\.mp4|fbcdn\.net\/o1\/v\/|fbcdn\.net\/v\/t42|cdninstagram\.com\/o1\/v\/)[^"'\s\\]*/gi) || [];
+      for (const m of matches) {
+        const v = cleanVideoUrl(m);
+        if (v) return v;
+      }
+      if (typeof obj === 'object') {
+        const d = obj.data || obj.result || obj;
+        const fields = [d.hd, d.hdplay, d.sd, d.play, d.url, d.videoUrl, d.download_url, d.video?.noWatermark];
+        for (const f of fields) {
+          const v = cleanVideoUrl(f);
+          if (v) return v;
+        }
+      }
+      return null;
+    }
+
+    async function unshortenFbShareClient(url) {
+      let resolved = url;
+      try {
+        const aoRes = await fetchWithTimeout(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`, {}, 7000);
+        if (aoRes.ok) {
+          const aoJson = await aoRes.json();
+          const finalUrl = aoJson?.status?.url;
+          if (finalUrl && !finalUrl.includes('/login') && !finalUrl.includes('/share/')) {
+            resolved = finalUrl;
+          }
+          const html = aoJson?.contents || '';
+          const mp4 = findStrictMp4InJson(html);
+          if (mp4) return { directMp4: mp4, resolvedUrl: resolved };
+
+          const idMatch = html.match(/\/reel\/(\d{8,25})/) ||
+                          html.match(/\/videos\/(\d{8,25})/) ||
+                          html.match(/"video_id"\s*:\s*"(\d{8,25})"/);
+          if (idMatch?.[1]) {
+            resolved = `https://www.facebook.com/reel/${idMatch[1]}`;
+          }
+        }
+      } catch (e) {}
+      return { directMp4: null, resolvedUrl: resolved };
+    }
+
+    // FUNKSIONI QË KRYEN SHKARKIMIN DIREKT KUR KLIKOHET HD OSE SD
+    async function downloadQuality(videoUrl, qualityBtn, qualityLabel) {
+      const origText = qualityBtn.textContent;
+      qualityBtn.textContent = `Duke u shkarkuar (${qualityLabel})...`;
+      qualityBtn.disabled = true;
+
+      const filename = `savevid_${qualityLabel}_${Date.now()}.mp4`;
+      const vercelProxyUrl = `/api/extract?proxy=1&url=${encodeURIComponent(videoUrl)}`;
+
+      try {
+        const res = await fetchWithTimeout(vercelProxyUrl, {}, 12000);
+        if (res.ok) {
+          const blob = await res.blob();
+          if (blob.size > 15000) {
+            const blobUrl = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(blobUrl), 20000);
+            qualityBtn.textContent = `✓ U Shkarkua (${qualityLabel})!`;
+            setTimeout(() => { qualityBtn.textContent = origText; qualityBtn.disabled = false; }, 3000);
+            return;
+          }
+        }
+      } catch (e) {}
+
+      // Fallback me Blob proxies
+      const blobProxies = [videoUrl, `https://corsproxy.io/?url=${encodeURIComponent(videoUrl)}`];
+      for (const pUrl of blobProxies) {
+        try {
+          const res = await fetchWithTimeout(pUrl, {}, 10000);
+          if (res.ok) {
+            const blob = await res.blob();
+            if (blob.size > 15000) {
+              const blobUrl = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = blobUrl;
+              a.download = filename;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              setTimeout(() => URL.revokeObjectURL(blobUrl), 20000);
+              qualityBtn.textContent = `✓ U Shkarkua (${qualityLabel})!`;
+              setTimeout(() => { qualityBtn.textContent = origText; qualityBtn.disabled = false; }, 3000);
+              return;
+            }
+          }
+        } catch (e) {}
+      }
+
+      window.location.href = videoUrl.includes('?') ? `${videoUrl}&dl=1` : `${videoUrl}?dl=1`;
+      qualityBtn.textContent = origText;
+      qualityBtn.disabled = false;
     }
 
     downloadBtn.onclick = async () => {
@@ -113,30 +315,201 @@
 
       errorBox.classList.add('hidden');
       resultBox.classList.add('hidden');
+      resolvedBox.classList.add('hidden');
       progressBox.classList.remove('hidden');
-      progressStatus.textContent = 'Duke procesuar në Vercel...';
+      progressStatus.textContent = 'Duke analizuar...';
       downloadBtn.disabled = true;
 
-      try {
-        const res = await fetch(`/api/extract?url=${encodeURIComponent(url)}`);
-        const json = await res.json();
-        if (!res.ok || !json.hd) throw new Error(json.error || 'Videoja nuk u gjet.');
+      const isTikTok = /tiktok\.com|vm\.tiktok|vt\.tiktok/i.test(url);
 
-        currentVideoData = json;
-        videoPreview.src = json.hd;
-        progressBox.classList.add('hidden');
+      const steps = [
+        { name: '1. Vercel / Share Resolver', status: 'pending' },
+        { name: '2. Direct Social Engine', status: 'pending' },
+        { name: '3. Multi-Cloud API', status: 'pending' },
+        { name: '4. FB Embed & Proxy', status: 'pending' }
+      ];
+      renderSteps(steps);
+
+      const setStep = (idx, status) => {
+        if (steps[idx]) { steps[idx].status = status; renderSteps(steps); }
+      };
+
+      try {
+        let data = null;
+        let workingUrl = url;
+
+        setStep(0, 'trying');
+        try {
+          const vRes = await fetchWithTimeout(`/api/extract?url=${encodeURIComponent(url)}`, {}, 9000);
+          if (vRes.ok) {
+            const vJson = await vRes.json();
+            if (vJson.hd) {
+              data = vJson;
+              setStep(0, 'success');
+            } else if (vJson.resolvedUrl) {
+              workingUrl = vJson.resolvedUrl;
+            }
+          }
+        } catch (e) {}
+
+        if (!data && /facebook\.com|fb\.watch/i.test(url)) {
+          const shareRes = await unshortenFbShareClient(workingUrl);
+          if (shareRes.directMp4) {
+            data = { hd: shareRes.directMp4, sd: shareRes.directMp4, title: 'Facebook Reel', author: 'Facebook', source: 'FB Share Direct' };
+            setStep(0, 'success');
+          } else if (shareRes.resolvedUrl && shareRes.resolvedUrl !== url) {
+            workingUrl = shareRes.resolvedUrl;
+            resolvedBox.textContent = `Linku u konvertua: ${workingUrl}`;
+            resolvedBox.classList.remove('hidden');
+            setStep(0, 'OK (Reel)');
+          } else {
+            setStep(0, 'OK');
+          }
+        } else if (!data) {
+          setStep(0, 'OK');
+        }
+
+        if (!data) {
+          setStep(1, 'trying');
+          if (isTikTok) {
+            try {
+              const r = await fetchWithTimeout('https://www.tikwm.com/api/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `url=${encodeURIComponent(workingUrl)}&hd=1`
+              }, 7000);
+              const j = await r.json();
+              const hd = cleanVideoUrl(j?.data?.hdplay || j?.data?.play);
+              const sd = cleanVideoUrl(j?.data?.play);
+              if (hd) {
+                data = { hd: hd, sd: sd || hd, title: j.data.title || 'TikTok Video', author: j.data.author?.unique_id || 'tiktok', source: 'TikWM HD' };
+                setStep(1, 'success');
+              }
+            } catch (e) {}
+          } else {
+            const urlsToTry = [workingUrl];
+            if (url !== workingUrl) urlsToTry.push(url);
+            for (const u of urlsToTry) {
+              try {
+                const api = `https://api.agatz.xyz/api/facebook?url=${encodeURIComponent(u)}`;
+                let txt = '';
+                try {
+                  const r = await fetchWithTimeout(api, {}, 6000);
+                  if (r.ok) txt = await r.text();
+                } catch (e) {
+                  txt = await fetchViaProxy(api);
+                }
+                const mp4 = findStrictMp4InJson(JSON.parse(txt));
+                if (mp4) {
+                  data = { hd: mp4, sd: mp4, title: 'Facebook Video', author: 'Facebook', source: 'Agatz FB' };
+                  setStep(1, 'success');
+                  break;
+                }
+              } catch (e) {}
+            }
+          }
+          if (!data) setStep(1, 'fail');
+        }
+
+        if (!data) {
+          setStep(2, 'trying');
+          const urlsToTry = [workingUrl];
+          if (url !== workingUrl) urlsToTry.push(url);
+
+          outerLoop:
+          for (const u of urlsToTry) {
+            const enc = encodeURIComponent(u);
+            const pool = [
+              `https://api.siputzx.my.id/api/d/facebook?url=${enc}`,
+              `https://api.siputzx.my.id/api/d/igdl?url=${enc}`,
+              `https://api.ryzendesu.vip/api/downloader/fbdl?url=${enc}`,
+              `https://vkrdownloader.xyz/server?vkr=${enc}`,
+              `https://bk9.fun/download/alldownload?url=${enc}`
+            ];
+
+            for (const api of pool) {
+              try {
+                let txt = '';
+                try {
+                  const r = await fetchWithTimeout(api, {}, 6000);
+                  if (r.ok) txt = await r.text();
+                } catch (e) {}
+                if (!txt) txt = await fetchViaProxy(api);
+
+                if (txt) {
+                  const mp4 = findStrictMp4InJson(JSON.parse(txt));
+                  if (mp4) {
+                    data = {
+                      hd: mp4,
+                      sd: mp4,
+                      title: 'Social Video MP4',
+                      author: 'Creator',
+                      source: new URL(api).hostname.replace('api.', '')
+                    };
+                    setStep(2, 'success');
+                    break outerLoop;
+                  }
+                }
+              } catch (e) {}
+            }
+          }
+          if (!data) setStep(2, 'fail');
+        }
+
+        if (!data) {
+          setStep(3, 'trying');
+          try {
+            const embedUrl = `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(workingUrl)}&show_text=false`;
+            const embHtml = await fetchViaProxy(embedUrl);
+            const hd = embHtml.match(/"hd_src_no_ratelimit"\s*:\s*"([^"]+)"/) || embHtml.match(/"hd_src"\s*:\s*"([^"]+)"/);
+            const sd = embHtml.match(/"sd_src_no_ratelimit"\s*:\s*"([^"]+)"/) || embHtml.match(/"sd_src"\s*:\s*"([^"]+)"/);
+            const mp4 = cleanVideoUrl(hd?:[1] || sd?:[1]);
+            if (mp4) {
+              data = { hd: mp4, sd: cleanVideoUrl(sd?.[1]) || mp4, title: 'Facebook Reel', author: 'Facebook', source: 'FB Embed Player' };
+              setStep(3, 'success');
+            }
+          } catch (e) {}
+          if (!data) setStep(3, 'fail');
+        }
+
+        if (!data) {
+          throw new Error('Videoja nuk u gjet. Sigurohu që postimi është publik.');
+        }
+
+        currentVideoData = data;
+        progressStatus.textContent = 'U gjet!';
+        videoPreview.src = data.hd;
+        videoTitle.textContent = data.title;
+        videoAuthor.textContent = `@${data.author} • ${data.source}`;
+        platformBadge.textContent = isTikTok ? 'TIKTOK' : 'FACEBOOK / IG';
         resultBox.classList.remove('hidden');
+
       } catch (err) {
         progressStatus.textContent = 'Gabim';
         errorText.textContent = err.message;
-        errorBox.classList.add('hidden');
+        errorBox.classList.remove('hidden');
       } finally {
         downloadBtn.disabled = false;
       }
     };
 
-    dlHdBtn.onclick = () => { if (currentVideoData?.hd) downloadFile(currentVideoData.hd, dlHdBtn, 'HD'); };
-    dlSdBtn.onclick = () => { if (currentVideoData?.sd || currentVideoData?.hd) downloadFile(currentVideoData.sd || currentVideoData.hd, dlSdBtn, 'SD'); };
+    // Lidhja e butonit Shkarko HD
+    dlHdBtn.onclick = () => {
+      if (currentVideoData?.hd) {
+        downloadQuality(currentVideoData.hd, dlHdBtn, 'HD');
+      }
+    };
+
+    // Lidhja e butonit Shkarko SD
+    dlSdBtn.onclick = () => {
+      if (currentVideoData?.sd || currentVideoData?.hd) {
+        downloadQuality(currentVideoData.sd || currentVideoData.hd, dlSdBtn, 'SD');
+      }
+    };
+
+    document.getElementById('openDirectBtn').onclick = () => {
+      if (currentVideoData?.hd) window.open(currentVideoData.hd, '_blank');
+    };
   </script>
 </body>
 </html>
