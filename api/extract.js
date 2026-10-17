@@ -5,16 +5,26 @@ export default async function handler(req, res) {
 
   if (req.method === 'OPTIONS') return res.status(200).end();
 
+  // Tuneli për shkarkim direkt në Downloads si skedar .mp4
   if (req.query.proxy === '1' && req.query.url) {
+    const targetUrl = req.query.url;
     try {
-      const vRes = await fetch(req.query.url, {
-        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', 'Referer': 'https://www.instagram.com/' }
+      let referer = 'https://www.instagram.com/';
+      if (targetUrl.includes('facebook') || targetUrl.includes('fbcdn')) referer = 'https://www.facebook.com/';
+      if (targetUrl.includes('tiktok')) referer = 'https://www.tiktok.com/';
+
+      const vRes = await fetch(targetUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+          'Referer': referer
+        }
       });
+      if (!vRes.ok) throw new Error('CDN error');
       res.setHeader('Content-Type', 'video/mp4');
       res.setHeader('Content-Disposition', `attachment; filename="savevid_${Date.now()}.mp4"`);
       return res.status(200).send(Buffer.from(await vRes.arrayBuffer()));
     } catch (e) {
-      return res.redirect(302, req.query.url);
+      return res.redirect(302, targetUrl.includes('?') ? `${targetUrl}&dl=1` : `${targetUrl}?dl=1`);
     }
   }
 
@@ -31,7 +41,7 @@ export default async function handler(req, res) {
   try {
     let workingUrl = rawUrl.trim();
 
-    // 1. Zgjidhësi i Share Links për Facebook
+    // 1. Zgjidhësi për linqet e Facebook /share/
     if (/facebook\.com|fb\.watch/i.test(workingUrl) && workingUrl.includes('/share/')) {
       try {
         const r = await fetch(workingUrl, { headers: { 'User-Agent': 'facebookexternalhit/1.1' }, redirect: 'follow' });
@@ -53,7 +63,7 @@ export default async function handler(req, res) {
       } catch (e) {}
     }
 
-    // 3. Multi-API Server Pool (Instagram, Facebook, TikTok)
+    // 3. Multi-API Server Pool (Për Instagram Reels, Facebook, etj.)
     const enc = encodeURIComponent(workingUrl);
     const apis = [
       `https://api.agatz.xyz/api/instagram?url=${enc}`,
@@ -79,7 +89,7 @@ export default async function handler(req, res) {
       } catch (e) {}
     }
 
-    return res.status(404).json({ error: 'Videoja nuk u gjet. Sigurohu që postimi është publik.' });
+    return res.status(404).json({ error: 'Videoja nuk u gjet. Sigurohu që postimi të jetë publik.' });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
