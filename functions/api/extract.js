@@ -113,6 +113,43 @@ const cleanUrl = (s) => {
   return c.startsWith('http') ? c : null;
 };
 
+// =========================================================================
+// PROXY (fallback vetëm kur browseri s'mund ta tërheqë direkt nga CDN)
+// =========================================================================
+async function proxyDownload(targetVideoUrl) {
+  try {
+    const urlObj = new URL(targetVideoUrl);
+    let referer = `${urlObj.protocol}//${urlObj.hostname}/`;
+    if (targetVideoUrl.includes('fbcdn.net') || targetVideoUrl.includes('facebook.com')) {
+      referer = 'https://www.facebook.com/';
+    } else if (targetVideoUrl.includes('cdninstagram.com') || targetVideoUrl.includes('instagram.com')) {
+      referer = 'https://www.instagram.com/';
+    } else if (targetVideoUrl.includes('tiktok')) {
+      referer = 'https://www.tiktok.com/';
+    }
+
+    const vRes = await fetch(targetVideoUrl, {
+      method: 'GET',
+      redirect: 'follow',
+      headers: { 'User-Agent': UA, 'Accept': '*/*', 'Referer': referer }
+    });
+
+    if (!vRes.ok) throw new Error(`CDN HTTP ${vRes.status}`);
+
+    const headers = new Headers(CORS);
+    headers.set('Content-Type', vRes.headers.get('content-type') || 'video/mp4');
+    headers.set('Content-Disposition', `attachment; filename="savevid_${Date.now()}.mp4"`);
+    headers.set('Cache-Control', 'no-store');
+    const contentLength = vRes.headers.get('content-length');
+    if (contentLength) headers.set('Content-Length', contentLength);
+
+    return new Response(vRes.body, { status: 200, headers });
+  } catch (e) {
+    const dlUrl = targetVideoUrl.includes('?') ? `${targetVideoUrl}&dl=1` : `${targetVideoUrl}?dl=1`;
+    return Response.redirect(dlUrl, 302);
+  }
+}
+
 async function extract(rawUrl) {
   try {
     let workingUrl = rawUrl.trim();
@@ -441,6 +478,9 @@ export async function onRequest(context) {
   }
 
   const target = url.searchParams.get('url');
+  if (url.searchParams.get('proxy') === '1' && target) {
+    return proxyDownload(target);
+  }
   if (!target) return json({ error: 'Mungon linku' }, 400);
 
   return extract(target);

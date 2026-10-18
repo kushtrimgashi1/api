@@ -112,6 +112,12 @@
             Shkarko SD
           </button>
         </div>
+        <div id="dlProgressWrap" class="hidden mb-2">
+          <div class="h-[6px] w-full rounded-full bg-[var(--border)] overflow-hidden">
+            <div id="dlProgressBar" class="h-full w-0 rounded-full bg-[var(--fg)] transition-all duration-150"></div>
+          </div>
+          <p id="dlProgressText" class="text-[10px] text-[var(--muted)] mt-1.5"></p>
+        </div>
         <button id="openDirectBtn" class="w-full h-[36px] rounded-[10px] text-[11px] uppercase tracking-wider text-[var(--muted)] hover:underline">
           Hap Video në Tab të ri ↗
         </button>
@@ -138,6 +144,9 @@
     const dlSdBtn = document.getElementById('dlSdBtn');
     const downloadBtn = document.getElementById('downloadBtn');
     const hiddenDownloader = document.getElementById('hiddenDownloader');
+    const dlProgressWrap = document.getElementById('dlProgressWrap');
+    const dlProgressBar = document.getElementById('dlProgressBar');
+    const dlProgressText = document.getElementById('dlProgressText');
 
     let currentVideoData = null;
 
@@ -294,11 +303,57 @@
       return { directMp4: null, resolvedUrl: resolved };
     }
 
+    function hideDlProgress() {
+      dlProgressWrap.classList.add('hidden');
+      dlProgressBar.style.width = '0%';
+      dlProgressText.textContent = '';
+    }
+
+    function setDlProgress(received, total) {
+      dlProgressWrap.classList.remove('hidden');
+      const mb = (received / 1048576).toFixed(1);
+      if (total > 0) {
+        const pct = Math.min(100, Math.round((received / total) * 100));
+        dlProgressBar.style.width = pct + '%';
+        dlProgressText.textContent = `Duke shkarkuar... ${pct}% (${mb} / ${(total / 1048576).toFixed(1)} MB)`;
+      } else {
+        dlProgressBar.style.width = '90%';
+        dlProgressText.textContent = `Duke shkarkuar... ${mb} MB`;
+      }
+    }
+
+    async function fetchBlobWithProgress(url, options = {}) {
+      const res = await fetch(url, { mode: 'cors', credentials: 'omit', referrerPolicy: 'no-referrer', ...options });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const ct = (res.headers.get('content-type') || '').toLowerCase();
+      if (ct.includes('text/html') || ct.includes('application/json')) throw new Error('Jo-video');
+      const total = Number(res.headers.get('content-length') || 0);
+      if (!res.body || !res.body.getReader) {
+        const blob = await res.blob();
+        setDlProgress(blob.size, blob.size);
+        return blob;
+      }
+      const reader = res.body.getReader();
+      const chunks = [];
+      let received = 0;
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(value);
+        received += value.length;
+        setDlProgress(received, total);
+      }
+      if (received < 10000) throw new Error('Skedar bosh');
+      return new Blob(chunks, { type: ct.includes('mp4') || !ct ? 'video/mp4' : ct });
+    }
+
     async function triggerDirectDownload(videoUrl, btnElement, qualityLabel) {
       const origText = `Shkarko ${qualityLabel}`;
       btnElement.textContent = `Duke shkarkuar ${qualityLabel}...`;
       btnElement.disabled = true;
-      progressStatus.textContent = `Po shkarkohet skedari MP4 (${qualityLabel})...`;
+      progressStatus.textContent = `Po përgatitet shkarkimi (${qualityLabel})...`;
+      hideDlProgress();
+      dlProgressWrap.classList.remove('hidden');
 
       const filename = `savevid_${qualityLabel}_${Date.now()}.mp4`;
 
@@ -313,47 +368,35 @@
         setTimeout(() => URL.revokeObjectURL(blobUrl), 20000);
       };
 
-      // 1. SHKARKIM DIREKT NGA CDN — browseri e tërheq vetë (IG/TikTok/FB lejojnë CORS)
+      const done = (via) => {
+        btnElement.textContent = `✓ U Shkarkua ${qualityLabel}!`;
+        progressStatus.textContent = `✓ U Shkarkua (${qualityLabel})${via ? ' • ' + via : ''}!`;
+        dlProgressBar.style.width = '100%';
+        dlProgressText.textContent = 'Përfundoi';
+        setTimeout(() => { btnElement.textContent = origText; btnElement.disabled = false; hideDlProgress(); }, 3500);
+      };
+
+      // 1. DIREKT NGA CDN (më i shpejtë — pa server)
       try {
-        const res = await fetch(videoUrl, { mode: 'cors', credentials: 'omit', referrerPolicy: 'no-referrer' });
-        if (res.ok) {
-          const contentType = res.headers.get('content-type') || '';
-          if (!contentType.includes('text/html')) {
-            const blob = await res.blob();
-            if (blob.size > 10000) {
-              saveBlob(blob);
-              btnElement.textContent = `✓ U Shkarkua ${qualityLabel}!`;
-              progressStatus.textContent = `✓ U Shkarkua (${qualityLabel})!`;
-              setTimeout(() => { btnElement.textContent = origText; btnElement.disabled = false; }, 3500);
-              return;
-            }
-          }
-        }
+        dlProgressText.textContent = 'Duke u lidhur drejt CDN...';
+        const blob = await fetchBlobWithProgress(videoUrl);
+        saveBlob(blob);
+        done('direkt');
+        return;
       } catch (e) {}
 
-      // 2. FALLBACK: proxy publik (vetëm nëse CDN bllokon CORS)
-      const blobProxies = [
-        `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(videoUrl)}`,
-        `https://corsproxy.io/?url=${encodeURIComponent(videoUrl)}`
-      ];
-
-      for (const pUrl of blobProxies) {
-        try {
-          const res = await fetchWithTimeout(pUrl, {}, 15000);
-          if (res.ok) {
-            const blob = await res.blob();
-            if (blob.size > 10000) {
-              saveBlob(blob);
-              btnElement.textContent = `✓ U Shkarkua ${qualityLabel}!`;
-              progressStatus.textContent = `✓ U Shkarkua!`;
-              setTimeout(() => { btnElement.textContent = origText; btnElement.disabled = false; }, 3500);
-              return;
-            }
-          }
-        } catch (e) {}
-      }
+      // 2. FALLBACK: proxy server-side (kur CDN/browseri bllokon)
+      try {
+        dlProgressText.textContent = 'Duke u lidhur përmes serverit...';
+        const proxyUrl = `/api/extract?proxy=1&url=${encodeURIComponent(videoUrl)}`;
+        const blob = await fetchBlobWithProgress(proxyUrl);
+        saveBlob(blob);
+        done('server');
+        return;
+      } catch (e) {}
 
       // 3. FUNDIT: hape direkt (browseri e riprodhon ose e shkarkon)
+      hideDlProgress();
       const a = document.createElement('a');
       a.href = videoUrl;
       a.target = '_blank';
