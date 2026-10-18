@@ -21,6 +21,7 @@ export default async function handler(req, res) {
 
       const vRes = await fetch(targetVideoUrl, {
         method: 'GET',
+        redirect: 'follow',
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
           'Accept': '*/*',
@@ -31,7 +32,7 @@ export default async function handler(req, res) {
       if (!vRes.ok) throw new Error(`CDN HTTP ${vRes.status}`);
 
       const filename = `savevid_${Date.now()}.mp4`;
-      res.setHeader('Content-Type', 'application/octet-stream');
+      res.setHeader('Content-Type', 'video/mp4');
       res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
       res.setHeader('Cache-Control', 'no-store');
 
@@ -64,101 +65,117 @@ export default async function handler(req, res) {
     return c.startsWith('http') ? c : null;
   };
 
+  // Funksion specifik për të nxjerrë videon e Instagramit (edhe kur linku është me token pa .mp4 në fund)
+  const extractIgVideoUrl = (obj) => {
+    if (!obj) return null;
+    if (typeof obj === 'string') {
+      try { obj = JSON.parse(obj); } catch (e) {
+        const m = obj.match(/https?:\\?\/\\?\/[^"'\s\\]+(?:\.mp4|cdninstagram\.com|rapidcdn|snapinsta|dl\?token=)[^"'\s\\]*/i);
+        return m ? cleanUrl(m[0]) : null;
+      }
+    }
+
+    const checkItem = (item) => {
+      if (!item) return null;
+      if (typeof item === 'string') return cleanUrl(item);
+      if (typeof item === 'object') {
+        if (item.type && /image|photo|jpg/i.test(item.type)) return null;
+        const candidates = [
+          item.video_url, item.videoUrl, item.hd, item.url,
+          item.download_url, item.downloadUrl, item.sd, item.play
+        ];
+        for (const c of candidates) {
+          const valid = cleanUrl(c);
+          if (valid) return valid;
+        }
+      }
+      return null;
+    };
+
+    const roots = [obj.data, obj.result, obj.results, obj.medias, obj.media, obj];
+    for (const r of roots) {
+      if (!r) continue;
+      if (Array.isArray(r)) {
+        for (const el of r) {
+          const v = checkItem(el);
+          if (v) return v;
+        }
+      } else if (typeof r === 'object') {
+        const subArrays = [r.data, r.medias, r.media, r.url, r.urls, r.video, r.videos, r.downloads];
+        for (const arr of subArrays) {
+          if (Array.isArray(arr)) {
+            for (const el of arr) {
+              const v = checkItem(el);
+              if (v) return v;
+            }
+          }
+        }
+        const direct = checkItem(r);
+        if (direct) return direct;
+      }
+    }
+    return null;
+  };
+
   try {
     let workingUrl = rawUrl.trim();
 
     // =========================================================================
-    // SHTESA E RE VETËM PËR INSTAGRAM (Nuk e prek fare Facebook-un apo TikTok-un)
+    // BLLOKU I RI PËR INSTAGRAM (Nuk prek asnjë rresht të FB apo TikTok)
     // =========================================================================
     if (/instagram\.com|instagr\.am/i.test(workingUrl)) {
-      // Pastrojmë linkun nga parametrat ?igsh=... ose ?dl=... që prishin API-t
       const igMatch = workingUrl.match(/instagram\.com\/(?:[^\/]+\/)?(?:reel|reels|p|tv)\/([A-Za-z0-9_-]+)/i);
       const shortcode = igMatch ? igMatch[1] : null;
       const cleanIgUrl = shortcode ? `https://www.instagram.com/reel/${shortcode}/` : workingUrl.split('?')[0];
-
-      // Metoda IG-1: Instagram Embed Captions Page (Nuk kërkon login për Reels publike!)
-      if (shortcode) {
-        try {
-          const embRes = await fetch(`https://www.instagram.com/p/${shortcode}/embed/captioned/`, {
-            headers: {
-              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-              'Accept': 'text/html,application/xhtml+xml'
-            }
-          });
-          const embHtml = await embRes.text();
-          const vMatch = embHtml.match(/"video_url"\s*:\s*"([^"]+)"/) ||
-                         embHtml.match(/\\?"video_url\\?"\s*:\s*\\?"([^"\\]+)\\?"/) ||
-                         embHtml.match(/class="EmbeddedMediaVideo"[^>]+src="([^"]+)"/);
-          const directIgMp4 = cleanUrl(vMatch?.[1]);
-          if (directIgMp4) {
-            return res.status(200).json({
-              hd: directIgMp4,
-              sd: directIgMp4,
-              title: 'Instagram Reel',
-              author: 'Instagram',
-              source: 'IG Embed Direct'
-            });
-          }
-        } catch (e) {}
-
-        // Metoda IG-2: Polar / GraphQL JSON Embed
-        try {
-          const gqlRes = await fetch(`https://www.instagram.com/graphql/query/?query_hash=b3055c01b4b222b8a47dc12b090e4e64&variables=${encodeURIComponent(JSON.stringify({ shortcode }))}`, {
-            headers: {
-              'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)',
-              'X-IG-App-ID': '936619743392459'
-            }
-          });
-          if (gqlRes.ok) {
-            const gqlJson = await gqlRes.json();
-            const vUrl = cleanUrl(gqlJson?.data?.shortcode_media?.video_url);
-            if (vUrl) {
-              return res.status(200).json({
-                hd: vUrl,
-                sd: vUrl,
-                title: 'Instagram Reel',
-                author: gqlJson?.data?.shortcode_media?.owner?.username || 'Instagram',
-                source: 'IG GraphQL'
-              });
-            }
-          }
-        } catch (e) {}
-      }
-
-      // Metoda IG-3: 6 API të dedikuara për Instagram me URL të pastruar
       const encIg = encodeURIComponent(cleanIgUrl);
-      const igApis = [
-        `https://api.ryzendesu.vip/api/downloader/igdl?url=${encIg}`,
-        `https://api.siputzx.my.id/api/d/igdl?url=${encIg}`,
-        `https://api.agatz.xyz/api/instagram?url=${encIg}`,
-        `https://bk9.fun/download/instagram?url=${encIg}`,
-        `https://bk9.fun/download/alldownload?url=${encIg}`,
-        `https://vkrdownloader.xyz/server?vkr=${encIg}`
+
+      const igTasks = [
+        // 1. Ryzen IGDL
+        fetch(`https://api.ryzendesu.vip/api/downloader/igdl?url=${encIg}`, { headers: { 'User-Agent': 'Mozilla/5.0' } })
+          .then(r => r.json()).then(j => { const u = extractIgVideoUrl(j); if (!u) throw 0; return { hd: u, sd: u, source: 'Ryzen IG' }; }),
+        // 2. Siputzx IGDL
+        fetch(`https://api.siputzx.my.id/api/d/igdl?url=${encIg}`, { headers: { 'User-Agent': 'Mozilla/5.0' } })
+          .then(r => r.json()).then(j => { const u = extractIgVideoUrl(j); if (!u) throw 0; return { hd: u, sd: u, source: 'Siputzx IG' }; }),
+        // 3. Agatz Instagram
+        fetch(`https://api.agatz.xyz/api/instagram?url=${encIg}`, { headers: { 'User-Agent': 'Mozilla/5.0' } })
+          .then(r => r.json()).then(j => { const u = extractIgVideoUrl(j); if (!u) throw 0; return { hd: u, sd: u, source: 'Agatz IG' }; }),
+        // 4. BK9 Instagram
+        fetch(`https://bk9.fun/download/instagram?url=${encIg}`, { headers: { 'User-Agent': 'Mozilla/5.0' } })
+          .then(r => r.json()).then(j => { const u = extractIgVideoUrl(j); if (!u) throw 0; return { hd: u, sd: u, source: 'BK9 IG' }; }),
+        // 5. VkrDownloader
+        fetch(`https://vkrdownloader.xyz/server?vkr=${encIg}`, { headers: { 'User-Agent': 'Mozilla/5.0' } })
+          .then(r => r.json()).then(j => { const u = extractIgVideoUrl(j); if (!u) throw 0; return { hd: u, sd: u, source: 'Vkr IG' }; }),
+        // 6. Ryzen AIO
+        fetch(`https://api.ryzendesu.vip/api/downloader/allinone?url=${encIg}`, { headers: { 'User-Agent': 'Mozilla/5.0' } })
+          .then(r => r.json()).then(j => { const u = extractIgVideoUrl(j); if (!u) throw 0; return { hd: u, sd: u, source: 'AIO IG' }; })
       ];
 
-      for (const api of igApis) {
-        try {
-          const r = await fetch(api, { headers: { 'User-Agent': 'Mozilla/5.0' } });
-          if (!r.ok) continue;
-          const rawText = await r.text();
-          // Kërkojmë çdo link videoje të Instagramit (edhe kur nuk ka .mp4 në fund të path-it)
-          const matches = rawText.match(/https?:\\?\/\\?\/[^"'\s\\]+(?:\.mp4|cdninstagram\.com|fbcdn\.net\/v\/)[^"'\s\\]*/gi) || [];
-          for (const m of matches) {
-            const valid = cleanUrl(m);
-            if (valid) {
-              return res.status(200).json({
-                hd: valid,
-                sd: valid,
-                title: 'Instagram Reel',
-                author: 'Instagram',
-                source: new URL(api).hostname.replace('api.', '')
-              });
-            }
-          }
-        } catch (e) {}
+      // 7. Shtojmë edhe leximin direkt të Embed-it nëse kemi shortcode
+      if (shortcode) {
+        igTasks.push(
+          fetch(`https://www.instagram.com/p/${shortcode}/embed/captioned/`, {
+            headers: { 'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)' }
+          }).then(r => r.text()).then(html => {
+            const m = html.match(/"video_url"\s*:\s*"([^"]+)"/) || html.match(/\\?"video_url\\?"\s*:\s*\\?"([^"\\]+)\\?"/);
+            const u = cleanUrl(m?.[1]);
+            if (!u) throw 0;
+            return { hd: u, sd: u, source: 'IG Direct Embed' };
+          })
+        );
       }
 
-      return res.status(404).json({ error: 'Videoja e Instagramit nuk u gjet. Sigurohu që llogaria e Instagramit të jetë publike.' });
+      try {
+        const winner = await Promise.any(igTasks);
+        return res.status(200).json({
+          hd: winner.hd,
+          sd: winner.sd,
+          title: 'Instagram Reel',
+          author: 'Instagram',
+          source: winner.source
+        });
+      } catch (e) {
+        return res.status(404).json({ error: 'Serverët e Instagramit nuk u përgjigjën. Provo përsëri.' });
+      }
     }
 
     // =========================================================================
