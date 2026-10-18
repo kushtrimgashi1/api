@@ -91,7 +91,7 @@
       <p id="errorText" class="text-[12px] leading-[1.5] text-[#7a1f1f] dark:text-[#ffb3b3]"></p>
     </div>
 
-    <!-- Result Card (Me 2 opsione: Shkarko HD dhe Shkarko SD) -->
+    <!-- Result Card -->
     <div id="resultBox" class="hidden mt-5 rounded-[18px] border border-[var(--border)] bg-[var(--card)] overflow-hidden shadow-[0_20px_50px_-24px_rgba(0,0,0,0.4)]">
       <div class="relative bg-black aspect-[9/12] max-h-[480px] overflow-hidden">
         <video id="videoPreview" controls playsinline class="relative w-full h-full object-contain"></video>
@@ -207,10 +207,11 @@
       return s.startsWith('http') ? s : null;
     }
 
+    // Funksioni origjinal i V41 për FB dhe TikTok (i paprekur)
     function findStrictMp4InJson(obj) {
       if (!obj) return null;
       const rawStr = typeof obj === 'string' ? obj : JSON.stringify(obj);
-      const matches = rawStr.match(/https?:\\?\/\\?\/[^"'\s\\]+(?:\.mp4|fbcdn\.net\/o1\/v\/|fbcdn\.net\/v\/t42|cdninstagram\.com)[^"'\s\\]*/gi) || [];
+      const matches = rawStr.match(/https?:\\?\/\\?\/[^"'\s\\]+(?:\.mp4|fbcdn\.net\/o1\/v\/|fbcdn\.net\/v\/t42|cdninstagram\.com\/o1\/v\/)[^"'\s\\]*/gi) || [];
       for (const m of matches) {
         const v = cleanVideoUrl(m);
         if (v) return v;
@@ -224,6 +225,48 @@
         }
       }
       return null;
+    }
+
+    // Funksion specifik VETËM për Instagram që lexon edhe linqet me token (rapidcdn, snapinsta, etj.)
+    function extractIgUrlFromClient(input) {
+      if (!input) return null;
+      let obj = input;
+      if (typeof input === 'string') {
+        try { obj = JSON.parse(input); } catch (e) {
+          const m = input.match(/https?:\\?\/\\?\/[^"'\s\\]+(?:\.mp4|cdninstagram\.com|rapidcdn|snapinsta|dl\?token=)[^"'\s\\]*/i);
+          return m ? cleanVideoUrl(m[0]) : null;
+        }
+      }
+      const checkItem = (item) => {
+        if (!item) return null;
+        if (typeof item === 'string') return cleanVideoUrl(item);
+        if (typeof item === 'object') {
+          if (item.type && /image|photo|jpg/i.test(item.type)) return null;
+          const candidates = [item.video_url, item.videoUrl, item.hd, item.url, item.download_url, item.downloadUrl, item.sd];
+          for (const c of candidates) {
+            const v = cleanVideoUrl(c);
+            if (v) return v;
+          }
+        }
+        return null;
+      };
+      const roots = [obj.data, obj.result, obj.results, obj.medias, obj.media, obj];
+      for (const r of roots) {
+        if (!r) continue;
+        if (Array.isArray(r)) {
+          for (const el of r) { const v = checkItem(el); if (v) return v; }
+        } else if (typeof r === 'object') {
+          const subArrays = [r.data, r.medias, r.media, r.url, r.urls, r.video, r.videos, r.downloads];
+          for (const arr of subArrays) {
+            if (Array.isArray(arr)) {
+              for (const el of arr) { const v = checkItem(el); if (v) return v; }
+            }
+          }
+          const d = checkItem(r);
+          if (d) return d;
+        }
+      }
+      return findStrictMp4InJson(obj);
     }
 
     async function unshortenFbShareClient(url) {
@@ -251,7 +294,6 @@
       return { directMp4: null, resolvedUrl: resolved };
     }
 
-    // FUNKSIONI I V41 PËR SHKARKIM DIREKT NË DOWNLOADS KUR KLIKOHET HD OSE SD
     async function triggerDirectDownload(videoUrl, btnElement, qualityLabel) {
       const origText = `Shkarko ${qualityLabel}`;
       btnElement.textContent = `Duke shkarkuar ${qualityLabel}...`;
@@ -261,7 +303,6 @@
       const filename = `savevid_${qualityLabel}_${Date.now()}.mp4`;
       const vercelProxyUrl = `/api/extract?proxy=1&url=${encodeURIComponent(videoUrl)}`;
 
-      // 1. Shkarkojmë përmes /api/extract?proxy=1 si Blob
       try {
         const res = await fetchWithTimeout(vercelProxyUrl, {}, 12000);
         if (res.ok) {
@@ -286,7 +327,6 @@
         }
       } catch (e) {}
 
-      // 2. Nëse skedari është shumë i madh për Blob, e nisim përmes iframe të padukshëm nga Vercel
       try {
         const headCheck = await fetchWithTimeout(vercelProxyUrl, { method: 'HEAD' }, 4000);
         if (headCheck.ok) {
@@ -298,7 +338,6 @@
         }
       } catch (e) {}
 
-      // 3. Fallback përmes Proxy-ve të Shfletuesit si Blob
       const blobProxies = [
         videoUrl,
         `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(videoUrl)}`,
@@ -328,7 +367,6 @@
         } catch (e) {}
       }
 
-      // 4. Fallback i fundit me ?dl=1
       const fbForceDl = videoUrl.includes('?') ? `${videoUrl}&dl=1` : `${videoUrl}?dl=1`;
       window.location.href = fbForceDl;
       btnElement.textContent = origText;
@@ -350,7 +388,6 @@
       const isTikTok = /tiktok\.com|vm\.tiktok|vt\.tiktok/i.test(url);
       const isInstagram = /instagram\.com|instagr\.am/i.test(url);
 
-      // Për Instagram pasurojmë/pastrojmë linkun nga ?dl=... ose ?igsh=...
       if (isInstagram) {
         const igMatch = url.match(/instagram\.com\/(?:[^\/]+\/)?(?:reel|reels|p|tv)\/([A-Za-z0-9_-]+)/i);
         if (igMatch?.[1]) {
@@ -374,14 +411,14 @@
         let data = null;
         let workingUrl = url;
 
-        // HAPI 1: Vercel Backend (/api/extract) + Share Resolver (Identik me V41)
+        // HAPI 1: Vercel Backend (/api/extract) + Share Resolver
         setStep(0, 'trying');
         try {
-          const vRes = await fetchWithTimeout(`/api/extract?url=${encodeURIComponent(url)}`, {}, 9000);
+          const vRes = await fetchWithTimeout(`/api/extract?url=${encodeURIComponent(url)}`, {}, 9500);
           if (vRes.ok) {
             const vJson = await vRes.json();
             if (vJson.hd) {
-              data = vJson;
+              data = { ...vJson, sd: vJson.sd || vJson.hd };
               setStep(0, 'success');
             } else if (vJson.resolvedUrl) {
               workingUrl = vJson.resolvedUrl;
@@ -438,7 +475,7 @@
                 } catch (e) {
                   txt = await fetchViaProxy(api);
                 }
-                const mp4 = findStrictMp4InJson(JSON.parse(txt));
+                const mp4 = isInstagram ? extractIgUrlFromClient(txt) : findStrictMp4InJson(JSON.parse(txt));
                 if (mp4) {
                   data = { hd: mp4, sd: mp4, title: isInstagram ? 'Instagram Reel' : 'Facebook Video', author: isInstagram ? 'Instagram' : 'Facebook', source: `Agatz ${endpointType.toUpperCase()}` };
                   setStep(1, 'success');
@@ -464,6 +501,7 @@
                   `https://api.ryzendesu.vip/api/downloader/igdl?url=${enc}`,
                   `https://api.siputzx.my.id/api/d/igdl?url=${enc}`,
                   `https://bk9.fun/download/instagram?url=${enc}`,
+                  `https://api.ryzendesu.vip/api/downloader/allinone?url=${enc}`,
                   `https://vkrdownloader.xyz/server?vkr=${enc}`
                 ]
               : [
@@ -478,19 +516,19 @@
               try {
                 let txt = '';
                 try {
-                  const r = await fetchWithTimeout(api, {}, 6000);
+                  const r = await fetchWithTimeout(api, {}, 6500);
                   if (r.ok) txt = await r.text();
                 } catch (e) {}
                 if (!txt) txt = await fetchViaProxy(api);
 
                 if (txt) {
-                  const mp4 = findStrictMp4InJson(JSON.parse(txt));
+                  const mp4 = isInstagram ? extractIgUrlFromClient(txt) : findStrictMp4InJson(JSON.parse(txt));
                   if (mp4) {
                     data = {
                       hd: mp4,
                       sd: mp4,
-                      title: 'Social Video MP4',
-                      author: 'Creator',
+                      title: isInstagram ? 'Instagram Reel' : 'Social Video MP4',
+                      author: isInstagram ? 'Instagram' : 'Creator',
                       source: new URL(api).hostname.replace('api.', '')
                     };
                     setStep(2, 'success');
@@ -503,20 +541,28 @@
           if (!data) setStep(2, 'fail');
         }
 
-        // HAPI 4: Embed Player Bypass (Për Instagram ose Facebook)
+        // HAPI 4: Embed Player & Cobalt Fallback
         if (!data) {
           setStep(3, 'trying');
           try {
             if (isInstagram) {
-              const scMatch = workingUrl.match(/\/(?:reel|reels|p|tv)\/([A-Za-z0-9_-]+)/i);
-              if (scMatch?.[1]) {
-                const igEmbHtml = await fetchViaProxy(`https://www.instagram.com/p/${scMatch[1]}/embed/captioned/`);
-                const vMatch = igEmbHtml.match(/"video_url"\s*:\s*"([^"]+)"/) || igEmbHtml.match(/\\?"video_url\\?"\s*:\s*\\?"([^"\\]+)\\?"/);
-                const mp4 = cleanVideoUrl(vMatch?.[1]);
-                if (mp4) {
-                  data = { hd: mp4, sd: mp4, title: 'Instagram Reel', author: 'Instagram', source: 'IG Embed Bypass' };
-                  setStep(3, 'success');
-                }
+              // Provojmë Cobalt mahnitës për Instagram nëse API-t e tjera vonohen
+              const cobaltEndpoints = ['https://cobalt-backend.canine.tools/', 'https://cobalt-api.kwiatekmiki.com/'];
+              for (const ep of cobaltEndpoints) {
+                try {
+                  const cRes = await fetchWithTimeout(ep, {
+                    method: 'POST',
+                    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: workingUrl, videoQuality: '1080' })
+                  }, 6000);
+                  const cJson = await cRes.json();
+                  const mp4 = cleanVideoUrl(cJson?.url || cJson?.picker?.[0]?.url);
+                  if (mp4) {
+                    data = { hd: mp4, sd: mp4, title: 'Instagram Reel', author: 'Instagram', source: 'Cobalt IG' };
+                    setStep(3, 'success');
+                    break;
+                  }
+                } catch (e) {}
               }
             } else {
               const embedUrl = `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(workingUrl)}&show_text=false`;
@@ -554,12 +600,10 @@
       }
     };
 
-    // Kur klikohet Shkarko HD -> shkarkon direkt në Downloads
     dlHdBtn.onclick = () => {
       if (currentVideoData?.hd) triggerDirectDownload(currentVideoData.hd, dlHdBtn, 'HD');
     };
 
-    // Kur klikohet Shkarko SD -> shkarkon direkt në Downloads
     dlSdBtn.onclick = () => {
       if (currentVideoData?.sd || currentVideoData?.hd) {
         triggerDirectDownload(currentVideoData.sd || currentVideoData.hd, dlSdBtn, 'SD');
