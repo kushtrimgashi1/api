@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>SaveVid V41+ • TT, FB & IG</title>
+  <title>SaveVid — Shkarko video & reels pa watermark (TikTok, Facebook, Instagram)</title>
+  <meta name="description" content="Shkarko video, reels dhe postime nga TikTok, Facebook dhe Instagram në HD & SD. Falas, pa login, pa watermark.">
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Fragment+Mono&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
   <style>
@@ -13,6 +14,7 @@
       --muted: #6b6b6b;
       --border: #e8e6e1;
       --card: #ffffff;
+      --soft: #f5f4ef;
     }
     @media (prefers-color-scheme: dark) {
       :root {
@@ -20,112 +22,306 @@
         --fg: #f5f5f0;
         --muted: #9a9a9a;
         --border: #232323;
-        --card: #161616;
+        --card: #141414;
+        --soft: #1e1e1e;
       }
     }
+    html { scroll-behavior: smooth; }
     body {
       font-family: "Fragment Mono", monospace;
       background-color: var(--bg);
       color: var(--fg);
       margin: 0;
     }
-    h1, h2, .serif { font-family: "Instrument Serif", serif; }
+    h1, h2, h3, .serif { font-family: "Instrument Serif", serif; }
+    .grid-bg {
+      background-image: radial-gradient(circle at 1px 1px, var(--border) 1px, transparent 0);
+      background-size: 22px 22px;
+    }
+    details summary::-webkit-details-marker { display: none; }
+    details[open] .faq-icon { transform: rotate(45deg); }
   </style>
 </head>
 <body class="min-h-screen selection:bg-black selection:text-white">
 
-  <div class="w-full max-w-[520px] mx-auto min-h-screen flex flex-col px-5 pb-10 pt-6">
-    <!-- Header -->
-    <header class="flex items-center justify-between mb-6">
-      <div class="flex items-baseline gap-2">
-        <h1 class="text-[28px] tracking-[-0.02em] font-normal leading-none">SaveVid</h1>
-        <span class="text-[11px] px-2 py-[3px] rounded-full border border-[var(--border)] bg-black text-white dark:bg-white dark:text-black tracking-widest uppercase">V41+</span>
-      </div>
+  <!-- NAV -->
+  <header class="sticky top-0 z-40 backdrop-blur bg-[var(--bg)]/85 border-b border-[var(--border)]">
+    <div class="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
+      <a href="#" class="flex items-baseline gap-2">
+        <span class="serif text-[24px] leading-none">SaveVid</span>
+        <span class="text-[10px] px-2 py-[3px] rounded-full bg-[var(--fg)] text-[var(--bg)] tracking-widest uppercase">V41+</span>
+      </a>
+      <nav class="hidden md:flex items-center gap-7 text-[11px] uppercase tracking-widest text-[var(--muted)]">
+        <a href="#platforms" class="hover:text-[var(--fg)]">Platformat</a>
+        <a href="#how" class="hover:text-[var(--fg)]">Si funksionon</a>
+        <a href="#why" class="hover:text-[var(--fg)]">Pse SaveVid</a>
+        <a href="#faq" class="hover:text-[var(--fg)]">FAQ</a>
+      </nav>
       <div class="flex items-center gap-2">
         <span class="h-2 w-2 rounded-full bg-[#00d26a] animate-pulse"></span>
-        <span class="text-[10px] uppercase tracking-widest text-[var(--muted)]">HD & SD MP4</span>
+        <span class="text-[10px] uppercase tracking-widest text-[var(--muted)]">Falas • Pa login</span>
       </div>
-    </header>
-
-    <!-- Title -->
-    <div class="mb-6">
-      <h2 class="serif text-[40px] leading-[0.95] tracking-[-0.03em] mb-2">
-        Shkarko <span class="italic">pa</span><br>watermark.
-      </h2>
-      <p class="text-[12px] leading-[1.5] text-[var(--muted)]">
-        TikTok, Facebook (<code class="text-[var(--fg)]">/share/r/</code>, <code class="text-[var(--fg)]">/share/v/</code>) & Instagram Reels në HD dhe SD.
-      </p>
     </div>
+  </header>
 
-    <!-- Input Card -->
-    <div class="bg-[var(--card)] border border-[var(--border)] rounded-[18px] p-[14px] shadow-[0_10px_30px_-18px_rgba(0,0,0,0.3)]">
-      <div class="flex items-center gap-2 mb-3 px-1">
-        <span class="text-[10px] uppercase tracking-widest text-[var(--muted)]">Linku i Videos</span>
-        <div class="h-px flex-1 bg-[var(--border)]"></div>
-        <button id="pasteBtn" class="text-[10px] uppercase tracking-widest underline underline-offset-4 hover:opacity-60">Ngjit (Paste)</button>
-      </div>
+  <main>
+    <!-- HERO -->
+    <section class="grid-bg border-b border-[var(--border)]">
+      <div class="max-w-3xl mx-auto px-5 pt-14 pb-14 text-center">
+        <p class="text-[10px] uppercase tracking-[0.25em] text-[var(--muted)] mb-4">Shkarkues video • HD & SD • Pa watermark</p>
+        <h1 class="serif text-[44px] sm:text-[64px] leading-[0.95] tracking-[-0.03em] mb-4">
+          Shkarko <span class="italic">video & reels</span><br>pa watermark.
+        </h1>
+        <p class="text-[13px] leading-[1.6] text-[var(--muted)] max-w-xl mx-auto mb-8">
+          Ngjit linkun nga TikTok, Facebook ose Instagram dhe shkarko videon në HD ose SD — direkt në pajisje, falas dhe pa regjistrim.
+        </p>
 
-      <div class="relative">
-        <input id="urlInput" type="text" placeholder="Ngjit çdo link (FB Share, IG, TikTok)..." 
-          class="w-full h-[54px] rounded-[12px] bg-[#f5f4ef] dark:bg-[#1e1e1e] border border-transparent focus:border-black dark:focus:border-white focus:outline-none px-4 pr-[54px] text-[13px] placeholder:text-[#b0aea8]">
-        <button id="clearBtn" class="absolute right-[6px] top-[6px] bottom-[6px] w-[42px] rounded-[9px] bg-white dark:bg-black border border-[var(--border)] grid place-items-center text-[12px]">✕</button>
-      </div>
-
-      <button id="downloadBtn" class="mt-3 w-full h-[52px] rounded-[12px] bg-[var(--fg)] text-[var(--bg)] text-[13px] uppercase tracking-[0.16em] font-medium hover:opacity-[0.9] active:scale-[0.99] transition-all flex items-center justify-center gap-2">
-        <span>Gjej Videon</span>
-      </button>
-    </div>
-
-    <!-- Progress Box -->
-    <div id="progressBox" class="hidden mt-5 border border-[var(--border)] rounded-[14px] bg-[var(--card)] p-4">
-      <div class="flex items-center justify-between mb-3">
-        <span class="text-[10px] uppercase tracking-[0.14em] text-[var(--muted)]">Progresi</span>
-        <span id="progressStatus" class="text-[10px] text-[var(--muted)] animate-pulse">Duke kërkuar...</span>
-      </div>
-      <div id="stepsList" class="space-y-2"></div>
-      <div id="resolvedBox" class="hidden mt-2.5 pt-2 border-t border-[var(--border)] text-[10px] text-[var(--muted)] truncate"></div>
-    </div>
-
-    <!-- Error Box -->
-    <div id="errorBox" class="hidden mt-5 rounded-[14px] border border-[#ffd1d1] bg-[#fff3f3] dark:bg-[#1f1212] dark:border-[#5a2222] p-4">
-      <p id="errorText" class="text-[12px] leading-[1.5] text-[#7a1f1f] dark:text-[#ffb3b3]"></p>
-    </div>
-
-    <!-- Result Card -->
-    <div id="resultBox" class="hidden mt-5 rounded-[18px] border border-[var(--border)] bg-[var(--card)] overflow-hidden shadow-[0_20px_50px_-24px_rgba(0,0,0,0.4)]">
-      <div class="relative bg-black aspect-[9/12] max-h-[480px] overflow-hidden">
-        <video id="videoPreview" controls playsinline class="relative w-full h-full object-contain"></video>
-        <div class="absolute top-3 left-3">
-          <span id="platformBadge" class="text-[10px] uppercase tracking-widest px-2 py-1 rounded-full bg-white text-black font-medium">MP4</span>
-        </div>
-        <div class="absolute bottom-0 inset-x-0 p-4 bg-gradient-to-t from-black/80 to-transparent pointer-events-none">
-          <p id="videoTitle" class="text-white text-[13px] leading-[1.3] line-clamp-2"></p>
-          <p id="videoAuthor" class="text-white/60 text-[11px] mt-1"></p>
-        </div>
-      </div>
-      <div class="p-4">
-        <div class="grid grid-cols-2 gap-3 mb-2.5">
-          <button id="dlHdBtn" class="h-[48px] rounded-[12px] bg-black text-white dark:bg-white dark:text-black grid place-items-center text-[12px] uppercase tracking-[0.12em] font-medium hover:opacity-90 active:scale-[0.98] transition">
-            Shkarko HD
-          </button>
-          <button id="dlSdBtn" class="h-[48px] rounded-[12px] border border-[var(--border)] bg-[#f7f7f5] dark:bg-[#1e1e1e] grid place-items-center text-[12px] uppercase tracking-[0.12em] font-medium hover:bg-[#efede8] active:scale-[0.98] transition">
-            Shkarko SD
-          </button>
-        </div>
-        <div id="dlProgressWrap" class="hidden mb-2">
-          <div class="h-[6px] w-full rounded-full bg-[var(--border)] overflow-hidden">
-            <div id="dlProgressBar" class="h-full w-0 rounded-full bg-[var(--fg)] transition-all duration-150"></div>
+        <!-- INPUT CARD -->
+        <div class="text-left bg-[var(--card)] border border-[var(--border)] rounded-[20px] p-[14px] shadow-[0_20px_60px_-25px_rgba(0,0,0,0.35)]">
+          <div class="flex items-center gap-2 mb-3 px-1">
+            <span class="text-[10px] uppercase tracking-widest text-[var(--muted)]">Linku i videos</span>
+            <div class="h-px flex-1 bg-[var(--border)]"></div>
+            <button id="pasteBtn" class="text-[10px] uppercase tracking-widest underline underline-offset-4 hover:opacity-60">Ngjit (Paste)</button>
           </div>
-          <p id="dlProgressText" class="text-[10px] text-[var(--muted)] mt-1.5"></p>
+
+          <div class="relative">
+            <input id="urlInput" type="text" placeholder="https://www.tiktok.com/... ose linku i reels..."
+              class="w-full h-[56px] rounded-[13px] bg-[var(--soft)] border border-transparent focus:border-[var(--fg)] focus:outline-none px-4 pr-[56px] text-[13px] placeholder:text-[#b0aea8]">
+            <button id="clearBtn" class="absolute right-[6px] top-[6px] bottom-[6px] w-[44px] rounded-[10px] bg-[var(--card)] border border-[var(--border)] grid place-items-center text-[12px]">✕</button>
+          </div>
+
+          <button id="downloadBtn" class="mt-3 w-full h-[54px] rounded-[13px] bg-[var(--fg)] text-[var(--bg)] text-[13px] uppercase tracking-[0.16em] font-medium hover:opacity-[0.9] active:scale-[0.99] transition-all">
+            Gjej videon
+          </button>
         </div>
-        <button id="openDirectBtn" class="w-full h-[36px] rounded-[10px] text-[11px] uppercase tracking-wider text-[var(--muted)] hover:underline">
-          Hap Video në Tab të ri ↗
-        </button>
+
+        <!-- CHIPS -->
+        <div class="flex flex-wrap items-center justify-center gap-2 mt-5 text-[10px] uppercase tracking-widest text-[var(--muted)]">
+          <span class="px-3 py-1.5 rounded-full border border-[var(--border)]">TikTok</span>
+          <span class="px-3 py-1.5 rounded-full border border-[var(--border)]">Facebook</span>
+          <span class="px-3 py-1.5 rounded-full border border-[var(--border)]">Instagram</span>
+          <span class="px-3 py-1.5 rounded-full border border-[var(--border)]">HD & SD</span>
+        </div>
+
+        <!-- PROGRESS BOX -->
+        <div id="progressBox" class="hidden text-left mt-6 border border-[var(--border)] rounded-[16px] bg-[var(--card)] p-4">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-[10px] uppercase tracking-[0.14em] text-[var(--muted)]">Progresi</span>
+            <span id="progressStatus" class="text-[10px] text-[var(--muted)] animate-pulse">Duke kërkuar...</span>
+          </div>
+          <div id="stepsList" class="space-y-2"></div>
+          <div id="resolvedBox" class="hidden mt-2.5 pt-2 border-t border-[var(--border)] text-[10px] text-[var(--muted)] truncate"></div>
+        </div>
+
+        <!-- ERROR BOX -->
+        <div id="errorBox" class="hidden text-left mt-5 rounded-[16px] border border-[#ffd1d1] bg-[#fff3f3] dark:bg-[#1f1212] dark:border-[#5a2222] p-4">
+          <p id="errorText" class="text-[12px] leading-[1.5] text-[#7a1f1f] dark:text-[#ffb3b3]"></p>
+        </div>
+
+        <!-- RESULT CARD -->
+        <div id="resultBox" class="hidden text-left mt-6 rounded-[20px] border border-[var(--border)] bg-[var(--card)] overflow-hidden shadow-[0_25px_60px_-28px_rgba(0,0,0,0.45)] max-w-md mx-auto">
+          <div class="relative bg-black aspect-[9/16] max-h-[520px] overflow-hidden">
+            <video id="videoPreview" controls playsinline class="relative w-full h-full object-contain"></video>
+            <div class="absolute top-3 left-3">
+              <span id="platformBadge" class="text-[10px] uppercase tracking-widest px-2 py-1 rounded-full bg-white text-black font-medium">MP4</span>
+            </div>
+            <div class="absolute bottom-0 inset-x-0 p-4 bg-gradient-to-t from-black/80 to-transparent pointer-events-none">
+              <p id="videoTitle" class="text-white text-[13px] leading-[1.3] line-clamp-2"></p>
+              <p id="videoAuthor" class="text-white/60 text-[11px] mt-1"></p>
+            </div>
+          </div>
+          <div class="p-4">
+            <div class="grid grid-cols-2 gap-3 mb-2.5">
+              <button id="dlHdBtn" class="h-[48px] rounded-[12px] bg-[var(--fg)] text-[var(--bg)] grid place-items-center text-[12px] uppercase tracking-[0.12em] font-medium hover:opacity-90 active:scale-[0.98] transition">
+                Shkarko HD
+              </button>
+              <button id="dlSdBtn" class="h-[48px] rounded-[12px] border border-[var(--border)] bg-[var(--soft)] grid place-items-center text-[12px] uppercase tracking-[0.12em] font-medium hover:opacity-80 active:scale-[0.98] transition">
+                Shkarko SD
+              </button>
+            </div>
+            <div id="dlProgressWrap" class="hidden mb-2">
+              <div class="h-[6px] w-full rounded-full bg-[var(--border)] overflow-hidden">
+                <div id="dlProgressBar" class="h-full w-0 rounded-full bg-[var(--fg)] transition-all duration-150"></div>
+              </div>
+              <p id="dlProgressText" class="text-[10px] text-[var(--muted)] mt-1.5"></p>
+            </div>
+            <button id="openDirectBtn" class="w-full h-[36px] rounded-[10px] text-[11px] uppercase tracking-wider text-[var(--muted)] hover:underline">
+              Hap videon në tab të ri ↗
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PLATFORMS -->
+    <section id="platforms" class="max-w-6xl mx-auto px-5 py-16 border-b border-[var(--border)]">
+      <div class="mb-8">
+        <p class="text-[10px] uppercase tracking-[0.25em] text-[var(--muted)] mb-2">Platformat e mbështetura</p>
+        <h2 class="serif text-[32px] sm:text-[40px] tracking-[-0.02em]">Tre platforma, një mjet.</h2>
+      </div>
+      <div class="grid sm:grid-cols-3 gap-4">
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-[18px] p-6 hover:-translate-y-1 transition-transform">
+          <div class="h-11 w-11 rounded-[12px] grid place-items-center mb-4" style="background:linear-gradient(135deg,#f9ce34,#ee2a7b,#6228d7)">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1.1" fill="#fff" stroke="none"/></svg>
+          </div>
+          <h3 class="serif text-[24px] mb-1">Instagram</h3>
+          <p class="text-[12px] leading-[1.6] text-[var(--muted)]">Reels, video postime dhe foto — në HD ose SD.</p>
+        </div>
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-[18px] p-6 hover:-translate-y-1 transition-transform">
+          <div class="h-11 w-11 rounded-[12px] grid place-items-center mb-4 bg-[#1877f2]">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="#fff"><path d="M14 8.5h2.2l.4-2.9H14V3.9c0-.8.3-1.4 1.5-1.4H17V0h-2.4C12.2 0 11 1.5 11 3.6v2H8.8v2.9H11V15h3V8.5z"/></svg>
+          </div>
+          <h3 class="serif text-[24px] mb-1">Facebook</h3>
+          <p class="text-[12px] leading-[1.6] text-[var(--muted)]">Reels, Watch dhe video nga faqet publike.</p>
+        </div>
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-[18px] p-6 hover:-translate-y-1 transition-transform">
+          <div class="h-11 w-11 rounded-[12px] grid place-items-center mb-4 bg-black">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="#fff"><path d="M16 3c.4 2.1 1.9 3.7 4 4v3c-1.5 0-2.9-.5-4-1.3V15a6 6 0 1 1-6-6c.3 0 .7 0 1 .1v3.1a3 3 0 1 0 2 2.8V3h3z"/></svg>
+          </div>
+          <h3 class="serif text-[24px] mb-1">TikTok</h3>
+          <p class="text-[12px] leading-[1.6] text-[var(--muted)]">Video pa watermark, në HD dhe SD.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW -->
+    <section id="how" class="max-w-6xl mx-auto px-5 py-16 border-b border-[var(--border)]">
+      <div class="mb-8">
+        <p class="text-[10px] uppercase tracking-[0.25em] text-[var(--muted)] mb-2">Proces i thjeshtë</p>
+        <h2 class="serif text-[32px] sm:text-[40px] tracking-[-0.02em]">Si shkarkohet në 3 hapa.</h2>
+      </div>
+      <div class="grid sm:grid-cols-3 gap-8">
+        <div>
+          <span class="serif text-[52px] text-[var(--muted)] leading-none">01</span>
+          <h3 class="serif text-[24px] mt-2 mb-1">Kopjo linkun</h3>
+          <p class="text-[12px] leading-[1.6] text-[var(--muted)]">Hap videon në aplikacion dhe shtyp <span class="text-[var(--fg)]">Share → Copy link</span>.</p>
+        </div>
+        <div>
+          <span class="serif text-[52px] text-[var(--muted)] leading-none">02</span>
+          <h3 class="serif text-[24px] mt-2 mb-1">Ngjit linkun</h3>
+          <p class="text-[12px] leading-[1.6] text-[var(--muted)]">Vendose në kutinë lart dhe shtyp <span class="text-[var(--fg)]">Gjej videon</span>.</p>
+        </div>
+        <div>
+          <span class="serif text-[52px] text-[var(--muted)] leading-none">03</span>
+          <h3 class="serif text-[24px] mt-2 mb-1">Shkarko</h3>
+          <p class="text-[12px] leading-[1.6] text-[var(--muted)]">Zgjidh <span class="text-[var(--fg)]">HD</span> ose <span class="text-[var(--fg)]">SD</span> dhe ruaje direkt në pajisje.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- WHY -->
+    <section id="why" class="max-w-6xl mx-auto px-5 py-16 border-b border-[var(--border)]">
+      <div class="mb-8">
+        <p class="text-[10px] uppercase tracking-[0.25em] text-[var(--muted)] mb-2">Pse SaveVid</p>
+        <h2 class="serif text-[32px] sm:text-[40px] tracking-[-0.02em]">I shpejtë, i thjeshtë, falas.</h2>
+      </div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-[16px] p-6">
+          <h3 class="serif text-[22px] mb-1">Pa watermark</h3>
+          <p class="text-[12px] leading-[1.6] text-[var(--muted)]">Video pa logo të mbivendosur kur platforma e lejon.</p>
+        </div>
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-[16px] p-6">
+          <h3 class="serif text-[22px] mb-1">HD & SD</h3>
+          <p class="text-[12px] leading-[1.6] text-[var(--muted)]">Zgjidh cilësinë më të lartë të disponueshme ose më të lehtë.</p>
+        </div>
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-[16px] p-6">
+          <h3 class="serif text-[22px] mb-1">Telefon & PC</h3>
+          <p class="text-[12px] leading-[1.6] text-[var(--muted)]">Punon në Android, iPhone dhe desktop — pa aplikacion.</p>
+        </div>
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-[16px] p-6">
+          <h3 class="serif text-[22px] mb-1">Pa login</h3>
+          <p class="text-[12px] leading-[1.6] text-[var(--muted)]">Nuk kërkohet llogari, email apo instalim.</p>
+        </div>
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-[16px] p-6">
+          <h3 class="serif text-[22px] mb-1">Privatësi</h3>
+          <p class="text-[12px] leading-[1.6] text-[var(--muted)]">Nuk ruajmë skedarët e tua në server.</p>
+        </div>
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-[16px] p-6">
+          <h3 class="serif text-[22px] mb-1">100% Falas</h3>
+          <p class="text-[12px] leading-[1.6] text-[var(--muted)]">Pa abonim dhe pa pagesa të fshehura.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="max-w-3xl mx-auto px-5 py-16">
+      <div class="mb-8 text-center">
+        <p class="text-[10px] uppercase tracking-[0.25em] text-[var(--muted)] mb-2">Pyetje të shpeshta</p>
+        <h2 class="serif text-[32px] sm:text-[40px] tracking-[-0.02em]">FAQ</h2>
+      </div>
+      <div class="space-y-3">
+        <details class="bg-[var(--card)] border border-[var(--border)] rounded-[14px] px-5 py-4">
+          <summary class="flex items-center justify-between cursor-pointer list-none">
+            <span class="text-[13px]">A është falas SaveVid?</span>
+            <span class="faq-icon text-[18px] text-[var(--muted)] transition-transform">+</span>
+          </summary>
+          <p class="text-[12px] leading-[1.6] text-[var(--muted)] mt-3">Po, plotësisht falas dhe pa limit pagese. Nuk kërkohet regjistrim.</p>
+        </details>
+        <details class="bg-[var(--card)] border border-[var(--border)] rounded-[14px] px-5 py-4">
+          <summary class="flex items-center justify-between cursor-pointer list-none">
+            <span class="text-[13px]">Cilat platforma mbështeten?</span>
+            <span class="faq-icon text-[18px] text-[var(--muted)] transition-transform">+</span>
+          </summary>
+          <p class="text-[12px] leading-[1.6] text-[var(--muted)] mt-3">Aktualisht TikTok, Facebook (Reels & Watch) dhe Instagram (Reels). Po shtohen platforma të tjera.</p>
+        </details>
+        <details class="bg-[var(--card)] border border-[var(--border)] rounded-[14px] px-5 py-4">
+          <summary class="flex items-center justify-between cursor-pointer list-none">
+            <span class="text-[13px]">Pse ndonjë link nuk funksionon?</span>
+            <span class="faq-icon text-[18px] text-[var(--muted)] transition-transform">+</span>
+          </summary>
+          <p class="text-[12px] leading-[1.6] text-[var(--muted)] mt-3">Vetëm postimet publike shkarkohen. Postimet private, të fshira ose me kyçje moshe nuk mund të merren.</p>
+        </details>
+        <details class="bg-[var(--card)] border border-[var(--border)] rounded-[14px] px-5 py-4">
+          <summary class="flex items-center justify-between cursor-pointer list-none">
+            <span class="text-[13px]">Ku ruhen skedarët?</span>
+            <span class="faq-icon text-[18px] text-[var(--muted)] transition-transform">+</span>
+          </summary>
+          <p class="text-[12px] leading-[1.6] text-[var(--muted)] mt-3">Direkt në pajisjen tënde (Gallery / Downloads). Ne nuk i ruajmë ato.</p>
+        </details>
+        <details class="bg-[var(--card)] border border-[var(--border)] rounded-[14px] px-5 py-4">
+          <summary class="flex items-center justify-between cursor-pointer list-none">
+            <span class="text-[13px]">A duhet t'i respektoj të drejtat e autorit?</span>
+            <span class="faq-icon text-[18px] text-[var(--muted)] transition-transform">+</span>
+          </summary>
+          <p class="text-[12px] leading-[1.6] text-[var(--muted)] mt-3">Po. Përdore vetëm për arshivim personal të përmbajtjes që ke të drejtë ta shkarkosh.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-[var(--border)]">
+    <div class="max-w-6xl mx-auto px-5 py-12 grid sm:grid-cols-3 gap-8">
+      <div>
+        <div class="flex items-baseline gap-2 mb-3">
+          <span class="serif text-[22px]">SaveVid</span>
+          <span class="text-[10px] px-2 py-[2px] rounded-full bg-[var(--fg)] text-[var(--bg)] tracking-widest uppercase">V41+</span>
+        </div>
+        <p class="text-[11px] leading-[1.6] text-[var(--muted)]">Shkarkues video falas për TikTok, Facebook dhe Instagram — në HD & SD, pa watermark.</p>
+      </div>
+      <div>
+        <p class="text-[10px] uppercase tracking-widest text-[var(--muted)] mb-3">Navigimi</p>
+        <div class="flex flex-col gap-2 text-[12px]">
+          <a href="#platforms" class="hover:underline">Platformat</a>
+          <a href="#how" class="hover:underline">Si funksionon</a>
+          <a href="#why" class="hover:underline">Pse SaveVid</a>
+          <a href="#faq" class="hover:underline">FAQ</a>
+        </div>
+      </div>
+      <div>
+        <p class="text-[10px] uppercase tracking-widest text-[var(--muted)] mb-3">Shënim</p>
+        <p class="text-[11px] leading-[1.6] text-[var(--muted)]">Përdore vetëm për përmbajtje publike dhe për arshivim personal. Respekto të drejtat e autorit.</p>
       </div>
     </div>
+    <div class="border-t border-[var(--border)]">
+      <div class="max-w-6xl mx-auto px-5 py-5 text-[10px] uppercase tracking-widest text-[var(--muted)] flex flex-wrap items-center justify-between gap-2">
+        <span>© 2026 SaveVid</span>
+        <span>Bërë për arshivim personal</span>
+      </div>
+    </div>
+  </footer>
 
-    <iframe id="hiddenDownloader" style="display:none;"></iframe>
-  </div>
+  <iframe id="hiddenDownloader" style="display:none;"></iframe>
 
   <script>
     const urlInput = document.getElementById('urlInput');
