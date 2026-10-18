@@ -1,3 +1,82 @@
+const IG_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
+const IG_B64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+
+let igSession = null;
+
+function igShortcodeToId(shortcode) {
+  let n = 0n;
+  for (const ch of shortcode) {
+    const v = IG_B64.indexOf(ch);
+    if (v === -1) return null;
+    n = n * 64n + BigInt(v);
+  }
+  return n.toString();
+}
+
+function igPickVideo(node) {
+  if (!node) return null;
+  const fromNode = (n) => {
+    const vv = n && n.video_versions;
+    if (Array.isArray(vv) && vv.length && vv[0] && vv[0].url) {
+      const last = vv[vv.length - 1] && vv[vv.length - 1].url;
+      return { hd: vv[0].url, sd: last || vv[0].url };
+    }
+    return null;
+  };
+  const direct = fromNode(node);
+  if (direct) return direct;
+  if (Array.isArray(node.carousel_media)) {
+    for (const item of node.carousel_media) {
+      const v = fromNode(item);
+      if (v) return v;
+    }
+  }
+  return null;
+}
+
+async function getIgSession() {
+  const now = Date.now();
+  if (igSession && now - igSession.ts < 8 * 60 * 1000) return igSession;
+  try {
+    const r = await fetch('https://www.instagram.com/', {
+      headers: {
+        'User-Agent': IG_UA,
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'none',
+        'Upgrade-Insecure-Requests': '1'
+      }
+    });
+    const html = await r.text();
+    const raw = typeof r.headers.getSetCookie === 'function'
+      ? r.headers.getSetCookie()
+      : (r.headers.get('set-cookie') ? [r.headers.get('set-cookie')] : []);
+    const cookies = {};
+    for (const c of raw) {
+      const pair = c.split(';')[0];
+      const i = pair.indexOf('=');
+      if (i > 0) cookies[pair.slice(0, i).trim()] = pair.slice(i + 1).trim();
+    }
+    let lsd = (html.match(/\["LSD",\[\],\{"token":"([^"]+)"/) || [])[1];
+    if (!lsd) {
+      const eqmc = html.match(/<script\b[^>]*\bid="__eqmc"[^>]*>(\{.*?\})<\/script>/s);
+      if (eqmc) { try { lsd = JSON.parse(eqmc[1]).l; } catch (e) {} }
+    }
+    if (!lsd) return null;
+    igSession = {
+      lsd,
+      csrf: cookies.csrftoken || '',
+      cookie: Object.entries(cookies).map(([k, v]) => `${k}=${v}`).join('; '),
+      ts: now
+    };
+    return igSession;
+  } catch (e) {
+    return null;
+  }
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -102,118 +181,93 @@ export default async function handler(req, res) {
       const cleanIgUrl = shortcode ? `https://www.instagram.com/reel/${shortcode}/` : workingUrl.split('?')[0];
 
       if (shortcode) {
-        // METODA 1: Instagram Official GraphQL POST API (Metoda më e sigurt që përdor yt-dlp & Cobalt)
-        const docIds = ['10015901848480474', '8845758582119845', '7153631198062348'];
-        for (const doc_id of docIds) {
-          try {
-            const bodyParams = new URLSearchParams({
-              av: '0',
-              __d: 'www',
-              __user: '0',
-              __a: '1',
-              __req: '3',
-              __hs: '19888.HYP:instagram_web_pkg.2.1..0.0',
-              dpr: '1',
-              __ccg: 'UNKNOWN',
-              lsd: 'AVqbxe3J_YA',
-              jazoest: '2957',
-              doc_id: doc_id,
-              variables: JSON.stringify({
-                shortcode: shortcode,
-                fetch_comment_count: 2,
-                fetch_related_profile_media_count: 0,
-                parent_comment_count: 0,
-                child_comment_count: 0,
-                fetch_like_count: 10,
-                fetch_tagged_user_count: null,
-                fetch_preview_comment_count: 2,
-                has_threaded_comments: true,
-                hoisted_comment_id: null,
-                hoisted_reply_id: null
-              })
+        // METODA 1: Instagram Logged-out GraphQL (Polaris) — metoda zyrtare pa login (e njëjta që përdor yt-dlp)
+        try {
+          const sess = await getIgSession();
+          if (sess) {
+            const mediaId = igShortcodeToId(shortcode);
+            const body = new URLSearchParams({
+              lsd: sess.lsd,
+              fb_api_caller_class: 'RelayModern',
+              fb_api_req_friendly_name: 'PolarisLoggedOutDesktopWWWPostRootContentQuery',
+              server_timestamps: 'true',
+              variables: JSON.stringify({ media_id: mediaId }),
+              doc_id: '27130156389949648'
             });
 
             const gqlRes = await fetch('https://www.instagram.com/api/graphql', {
               method: 'POST',
               headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+                'User-Agent': IG_UA,
                 'Content-Type': 'application/x-www-form-urlencoded',
-                'X-IG-App-ID': '936619743392459',
-                'X-FB-LSD': 'AVqbxe3J_YA',
-                'X-ASBD-ID': '129477',
-                'Sec-Fetch-Site': 'same-origin',
+                'Accept': '*/*',
                 'Origin': 'https://www.instagram.com',
-                'Referer': `https://www.instagram.com/reel/${shortcode}/`
+                'Referer': `https://www.instagram.com/reel/${shortcode}/`,
+                'Sec-Fetch-Dest': 'empty',
+                'Sec-Fetch-Mode': 'cors',
+                'Sec-Fetch-Site': 'same-origin',
+                'X-ASBD-ID': '129477',
+                'X-CSRFToken': sess.csrf,
+                'X-FB-LSD': sess.lsd,
+                'X-IG-App-ID': '936619743392459',
+                'X-IG-WWW-Claim': '0',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Cookie': sess.cookie
               },
-              body: bodyParams.toString()
+              body: body.toString()
             });
 
             if (gqlRes.ok) {
               const gqlText = await gqlRes.text();
-              const cleanJsonText = gqlText.replace(/^for\s*\(\s*;\s*;\s*\)\s*;/, '');
-              const gqlJson = JSON.parse(cleanJsonText);
-              const media = gqlJson?.data?.xdt_shortcode_media || gqlJson?.data?.shortcode_media;
-
-              const hdUrl = cleanUrl(
-                media?.video_url ||
-                media?.video_versions?.[0]?.url ||
-                media?.edge_sidecar_to_children?.edges?.[0]?.node?.video_url
-              );
-              const sdUrl = cleanUrl(media?.video_versions?.[media.video_versions.length - 1]?.url) || hdUrl;
-
-              if (hdUrl) {
+              let gqlJson = null;
+              try {
+                gqlJson = JSON.parse(gqlText.replace(/^for\s*\(\s*;\s*;\s*\)\s*;/, ''));
+              } catch (e) {}
+              const media = gqlJson?.data?.xig_polaris_media;
+              const product = media?.if_not_gated_logged_out || (media?.__isXIGPolarisMedia ? media : null);
+              const picked = igPickVideo(product);
+              if (picked) {
                 return res.status(200).json({
-                  hd: hdUrl,
-                  sd: sdUrl,
-                  title: media?.edge_media_to_caption?.edges?.[0]?.node?.text?.slice(0, 80) || 'Instagram Reel',
-                  author: media?.owner?.username || 'instagram',
-                  source: 'IG GraphQL Direct'
+                  hd: cleanUrl(picked.hd) || picked.hd,
+                  sd: cleanUrl(picked.sd) || picked.sd,
+                  title: (product.caption?.text || 'Instagram Reel').slice(0, 80),
+                  author: product.user?.username || 'instagram',
+                  source: 'IG Polaris'
                 });
               }
             }
-          } catch (e) {}
-        }
+          }
+        } catch (e) {}
 
-        // METODA 2: Instagram Embed Page Deep Unescape (Kap video_url brenda contextJSON të fshehur)
-        const embedUrls = [
-          `https://www.instagram.com/p/${shortcode}/embed/captioned/`,
-          `https://www.instagram.com/reel/${shortcode}/embed/captioned/`,
-          `https://www.instagram.com/p/${shortcode}/embed/`
-        ];
-
-        for (const embUrl of embedUrls) {
+        // METODA 2: Fallback nga faqja publike — lexon "video_versions" nga JSON-i i faqes
+        for (const pageUrl of [`https://www.instagram.com/p/${shortcode}/`, `https://www.instagram.com/reel/${shortcode}/`]) {
           try {
-            const embRes = await fetch(embUrl, {
+            const pageRes = await fetch(pageUrl, {
               headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+                'User-Agent': IG_UA,
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                'Accept-Language': 'en-US,en;q=0.9'
+                'Accept-Language': 'en-US,en;q=0.9',
+                ...(igSession ? { 'Cookie': igSession.cookie } : {}),
+                'Sec-Fetch-Dest': 'document',
+                'Sec-Fetch-Mode': 'navigate',
+                'Sec-Fetch-Site': 'none',
+                'Upgrade-Insecure-Requests': '1'
               }
             });
-            const html = await embRes.text();
-
-            // Kërkojmë video_url edhe kur është e koduar me \\"video_url\\":\\"https:...\\"
-            const patterns = [
-              /\\*"video_url\\*"\s*:\s*\\*"([^"\\]+(?:\\.[^"\\]+)*)\\*"/i,
-              /"video_url"\s*:\s*"([^"]+)"/i,
-              /class="EmbeddedMediaVideo"[^>]+src="([^"]+)"/i,
-              /property="og:video:secure_url"\s+content="([^"]+)"/i,
-              /property="og:video"\s+content="([^"]+)"/i
-            ];
-
-            for (const reg of patterns) {
-              const m = html.match(reg);
-              if (m && m[1]) {
-                const decoded = cleanUrl(m[1]);
-                if (decoded) {
-                  return res.status(200).json({
-                    hd: decoded,
-                    sd: decoded,
-                    title: 'Instagram Reel',
-                    author: 'instagram',
-                    source: 'IG Embed Engine'
-                  });
-                }
+            const html = await pageRes.text();
+            const block = html.match(/"video_versions"\s*:\s*\[(.*?)\]/s);
+            if (block) {
+              const urls = [...block[1].matchAll(/"url"\s*:\s*"([^"]+)"/g)]
+                .map((m) => cleanUrl(m[1]))
+                .filter(Boolean);
+              if (urls.length) {
+                return res.status(200).json({
+                  hd: urls[0],
+                  sd: urls[urls.length - 1] || urls[0],
+                  title: 'Instagram Reel',
+                  author: 'instagram',
+                  source: 'IG Webpage'
+                });
               }
             }
           } catch (e) {}
