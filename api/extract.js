@@ -5,7 +5,9 @@ export default async function handler(req, res) {
 
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  // 1. TUNELI PËR SHKARKIM DIREKT NË DOWNLOADS SI SKEDAR .MP4 (I PAPREKUR NGA V41)
+  // =========================================================================
+  // 1. TUNELI PËR SHKARKIM DIREKT NË DOWNLOADS SI SKEDAR .MP4 (I PAPREKUR)
+  // =========================================================================
   if (req.query.proxy === '1' && req.query.url) {
     const targetVideoUrl = req.query.url;
     try {
@@ -23,7 +25,7 @@ export default async function handler(req, res) {
         method: 'GET',
         redirect: 'follow',
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
           'Accept': '*/*',
           'Referer': referer
         }
@@ -54,128 +56,217 @@ export default async function handler(req, res) {
 
   const cleanUrl = (s) => {
     if (!s || typeof s !== 'string') return null;
-    const c = s
-      .replace(/\\u0025/g, '%')
-      .replace(/\\u0026/g, '&')
-      .replace(/\\u003D/g, '=')
-      .replace(/\\\//g, '/')
-      .replace(/&amp;/g, '&')
-      .trim();
+    let c = s;
+    // Dekodim i dyfishtë sepse Instagram Embed e kodon dy herë tekstin (p.sh. \\u0026 ose \\\/)
+    for (let i = 0; i < 2; i++) {
+      c = c
+        .replace(/\\\\u0025/g, '%')
+        .replace(/\\u0025/g, '%')
+        .replace(/\\\\u0026/g, '&')
+        .replace(/\\u0026/g, '&')
+        .replace(/\\\\u003D/g, '=')
+        .replace(/\\u003D/g, '=')
+        .replace(/\\\\\//g, '/')
+        .replace(/\\\//g, '/')
+        .replace(/\\"/g, '"')
+        .replace(/&amp;/g, '&')
+        .trim();
+    }
     if (/\.(jpg|jpeg|png|webp|gif|svg)(\?.*)?$/i.test(c)) return null;
     return c.startsWith('http') ? c : null;
-  };
-
-  // Funksion specifik për të nxjerrë videon e Instagramit (edhe kur linku është me token pa .mp4 në fund)
-  const extractIgVideoUrl = (obj) => {
-    if (!obj) return null;
-    if (typeof obj === 'string') {
-      try { obj = JSON.parse(obj); } catch (e) {
-        const m = obj.match(/https?:\\?\/\\?\/[^"'\s\\]+(?:\.mp4|cdninstagram\.com|rapidcdn|snapinsta|dl\?token=)[^"'\s\\]*/i);
-        return m ? cleanUrl(m[0]) : null;
-      }
-    }
-
-    const checkItem = (item) => {
-      if (!item) return null;
-      if (typeof item === 'string') return cleanUrl(item);
-      if (typeof item === 'object') {
-        if (item.type && /image|photo|jpg/i.test(item.type)) return null;
-        const candidates = [
-          item.video_url, item.videoUrl, item.hd, item.url,
-          item.download_url, item.downloadUrl, item.sd, item.play
-        ];
-        for (const c of candidates) {
-          const valid = cleanUrl(c);
-          if (valid) return valid;
-        }
-      }
-      return null;
-    };
-
-    const roots = [obj.data, obj.result, obj.results, obj.medias, obj.media, obj];
-    for (const r of roots) {
-      if (!r) continue;
-      if (Array.isArray(r)) {
-        for (const el of r) {
-          const v = checkItem(el);
-          if (v) return v;
-        }
-      } else if (typeof r === 'object') {
-        const subArrays = [r.data, r.medias, r.media, r.url, r.urls, r.video, r.videos, r.downloads];
-        for (const arr of subArrays) {
-          if (Array.isArray(arr)) {
-            for (const el of arr) {
-              const v = checkItem(el);
-              if (v) return v;
-            }
-          }
-        }
-        const direct = checkItem(r);
-        if (direct) return direct;
-      }
-    }
-    return null;
   };
 
   try {
     let workingUrl = rawUrl.trim();
 
     // =========================================================================
-    // BLLOKU I RI PËR INSTAGRAM (Nuk prek asnjë rresht të FB apo TikTok)
+    // BLLOKU I RI DHE I FUQISHËM VETËM PËR INSTAGRAM (Nuk prek FB apo TikTok)
     // =========================================================================
     if (/instagram\.com|instagr\.am/i.test(workingUrl)) {
+      // 1. Nëse është link share i ri (p.sh. instagram.com/share/reel/...), ndjekim ridrejtimin
+      if (workingUrl.includes('/share/')) {
+        try {
+          const redir = await fetch(workingUrl, {
+            method: 'GET',
+            redirect: 'follow',
+            headers: { 'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X)' }
+          });
+          if (redir.url && !redir.url.includes('/login')) {
+            workingUrl = redir.url;
+          }
+        } catch (e) {}
+      }
+
       const igMatch = workingUrl.match(/instagram\.com\/(?:[^\/]+\/)?(?:reel|reels|p|tv)\/([A-Za-z0-9_-]+)/i);
       const shortcode = igMatch ? igMatch[1] : null;
       const cleanIgUrl = shortcode ? `https://www.instagram.com/reel/${shortcode}/` : workingUrl.split('?')[0];
-      const encIg = encodeURIComponent(cleanIgUrl);
 
-      const igTasks = [
-        // 1. Ryzen IGDL
-        fetch(`https://api.ryzendesu.vip/api/downloader/igdl?url=${encIg}`, { headers: { 'User-Agent': 'Mozilla/5.0' } })
-          .then(r => r.json()).then(j => { const u = extractIgVideoUrl(j); if (!u) throw 0; return { hd: u, sd: u, source: 'Ryzen IG' }; }),
-        // 2. Siputzx IGDL
-        fetch(`https://api.siputzx.my.id/api/d/igdl?url=${encIg}`, { headers: { 'User-Agent': 'Mozilla/5.0' } })
-          .then(r => r.json()).then(j => { const u = extractIgVideoUrl(j); if (!u) throw 0; return { hd: u, sd: u, source: 'Siputzx IG' }; }),
-        // 3. Agatz Instagram
-        fetch(`https://api.agatz.xyz/api/instagram?url=${encIg}`, { headers: { 'User-Agent': 'Mozilla/5.0' } })
-          .then(r => r.json()).then(j => { const u = extractIgVideoUrl(j); if (!u) throw 0; return { hd: u, sd: u, source: 'Agatz IG' }; }),
-        // 4. BK9 Instagram
-        fetch(`https://bk9.fun/download/instagram?url=${encIg}`, { headers: { 'User-Agent': 'Mozilla/5.0' } })
-          .then(r => r.json()).then(j => { const u = extractIgVideoUrl(j); if (!u) throw 0; return { hd: u, sd: u, source: 'BK9 IG' }; }),
-        // 5. VkrDownloader
-        fetch(`https://vkrdownloader.xyz/server?vkr=${encIg}`, { headers: { 'User-Agent': 'Mozilla/5.0' } })
-          .then(r => r.json()).then(j => { const u = extractIgVideoUrl(j); if (!u) throw 0; return { hd: u, sd: u, source: 'Vkr IG' }; }),
-        // 6. Ryzen AIO
-        fetch(`https://api.ryzendesu.vip/api/downloader/allinone?url=${encIg}`, { headers: { 'User-Agent': 'Mozilla/5.0' } })
-          .then(r => r.json()).then(j => { const u = extractIgVideoUrl(j); if (!u) throw 0; return { hd: u, sd: u, source: 'AIO IG' }; })
+      if (shortcode) {
+        // METODA 1: Instagram Official GraphQL POST API (Metoda më e sigurt që përdor yt-dlp & Cobalt)
+        const docIds = ['10015901848480474', '8845758582119845', '7153631198062348'];
+        for (const doc_id of docIds) {
+          try {
+            const bodyParams = new URLSearchParams({
+              av: '0',
+              __d: 'www',
+              __user: '0',
+              __a: '1',
+              __req: '3',
+              __hs: '19888.HYP:instagram_web_pkg.2.1..0.0',
+              dpr: '1',
+              __ccg: 'UNKNOWN',
+              lsd: 'AVqbxe3J_YA',
+              jazoest: '2957',
+              doc_id: doc_id,
+              variables: JSON.stringify({
+                shortcode: shortcode,
+                fetch_comment_count: 2,
+                fetch_related_profile_media_count: 0,
+                parent_comment_count: 0,
+                child_comment_count: 0,
+                fetch_like_count: 10,
+                fetch_tagged_user_count: null,
+                fetch_preview_comment_count: 2,
+                has_threaded_comments: true,
+                hoisted_comment_id: null,
+                hoisted_reply_id: null
+              })
+            });
+
+            const gqlRes = await fetch('https://www.instagram.com/api/graphql', {
+              method: 'POST',
+              headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-IG-App-ID': '936619743392459',
+                'X-FB-LSD': 'AVqbxe3J_YA',
+                'X-ASBD-ID': '129477',
+                'Sec-Fetch-Site': 'same-origin',
+                'Origin': 'https://www.instagram.com',
+                'Referer': `https://www.instagram.com/reel/${shortcode}/`
+              },
+              body: bodyParams.toString()
+            });
+
+            if (gqlRes.ok) {
+              const gqlText = await gqlRes.text();
+              const cleanJsonText = gqlText.replace(/^for\s*\(\s*;\s*;\s*\)\s*;/, '');
+              const gqlJson = JSON.parse(cleanJsonText);
+              const media = gqlJson?.data?.xdt_shortcode_media || gqlJson?.data?.shortcode_media;
+
+              const hdUrl = cleanUrl(
+                media?.video_url ||
+                media?.video_versions?.[0]?.url ||
+                media?.edge_sidecar_to_children?.edges?.[0]?.node?.video_url
+              );
+              const sdUrl = cleanUrl(media?.video_versions?.[media.video_versions.length - 1]?.url) || hdUrl;
+
+              if (hdUrl) {
+                return res.status(200).json({
+                  hd: hdUrl,
+                  sd: sdUrl,
+                  title: media?.edge_media_to_caption?.edges?.[0]?.node?.text?.slice(0, 80) || 'Instagram Reel',
+                  author: media?.owner?.username || 'instagram',
+                  source: 'IG GraphQL Direct'
+                });
+              }
+            }
+          } catch (e) {}
+        }
+
+        // METODA 2: Instagram Embed Page Deep Unescape (Kap video_url brenda contextJSON të fshehur)
+        const embedUrls = [
+          `https://www.instagram.com/p/${shortcode}/embed/captioned/`,
+          `https://www.instagram.com/reel/${shortcode}/embed/captioned/`,
+          `https://www.instagram.com/p/${shortcode}/embed/`
+        ];
+
+        for (const embUrl of embedUrls) {
+          try {
+            const embRes = await fetch(embUrl, {
+              headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.9'
+              }
+            });
+            const html = await embRes.text();
+
+            // Kërkojmë video_url edhe kur është e koduar me \\"video_url\\":\\"https:...\\"
+            const patterns = [
+              /\\*"video_url\\*"\s*:\s*\\*"([^"\\]+(?:\\.[^"\\]+)*)\\*"/i,
+              /"video_url"\s*:\s*"([^"]+)"/i,
+              /class="EmbeddedMediaVideo"[^>]+src="([^"]+)"/i,
+              /property="og:video:secure_url"\s+content="([^"]+)"/i,
+              /property="og:video"\s+content="([^"]+)"/i
+            ];
+
+            for (const reg of patterns) {
+              const m = html.match(reg);
+              if (m && m[1]) {
+                const decoded = cleanUrl(m[1]);
+                if (decoded) {
+                  return res.status(200).json({
+                    hd: decoded,
+                    sd: decoded,
+                    title: 'Instagram Reel',
+                    author: 'instagram',
+                    source: 'IG Embed Engine'
+                  });
+                }
+              }
+            }
+          } catch (e) {}
+        }
+      }
+
+      // METODA 3: Multi-API JSON + Deep Regex Search
+      const encIg = encodeURIComponent(cleanIgUrl);
+      const externalIgApis = [
+        `https://api.ryzendesu.vip/api/downloader/igdl?url=${encIg}`,
+        `https://api.siputzx.my.id/api/d/igdl?url=${encIg}`,
+        `https://api.agatz.xyz/api/instagram?url=${encIg}`,
+        `https://bk9.fun/download/instagram?url=${encIg}`,
+        `https://vkrdownloader.xyz/server?vkr=${encIg}`,
+        `https://api.tiklydown.eu.org/api/download/v2?url=${encIg}`
       ];
 
-      // 7. Shtojmë edhe leximin direkt të Embed-it nëse kemi shortcode
-      if (shortcode) {
-        igTasks.push(
-          fetch(`https://www.instagram.com/p/${shortcode}/embed/captioned/`, {
-            headers: { 'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)' }
-          }).then(r => r.text()).then(html => {
-            const m = html.match(/"video_url"\s*:\s*"([^"]+)"/) || html.match(/\\?"video_url\\?"\s*:\s*\\?"([^"\\]+)\\?"/);
-            const u = cleanUrl(m?.[1]);
-            if (!u) throw 0;
-            return { hd: u, sd: u, source: 'IG Direct Embed' };
-          })
-        );
+      for (const api of externalIgApis) {
+        try {
+          const r = await fetch(api, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+          if (!r.ok) continue;
+          const text = await r.text();
+
+          // Kontrollojmë çdo fushë url brenda përgjigjes JSON
+          let foundUrl = null;
+          try {
+            const j = JSON.parse(text);
+            const strJ = JSON.stringify(j);
+            const urlMatches = strJ.match(/https?:\\?\/\\?\/[^"'\s\\]+/gi) || [];
+            for (const candidate of urlMatches) {
+              const cl = cleanUrl(candidate);
+              if (cl && !cl.includes('instagram.com/p/') && !cl.includes('instagram.com/reel/') && !cl.includes('avatar')) {
+                if (cl.includes('.mp4') || cl.includes('cdninstagram') || cl.includes('fbcdn') || cl.includes('rapidcdn') || cl.includes('snapinsta') || cl.includes('token=')) {
+                  foundUrl = cl;
+                  break;
+                }
+              }
+            }
+          } catch (e) {}
+
+          if (foundUrl) {
+            return res.status(200).json({
+              hd: foundUrl,
+              sd: foundUrl,
+              title: 'Instagram Reel',
+              author: 'instagram',
+              source: new URL(api).hostname.replace('api.', '')
+            });
+          }
+        } catch (e) {}
       }
 
-      try {
-        const winner = await Promise.any(igTasks);
-        return res.status(200).json({
-          hd: winner.hd,
-          sd: winner.sd,
-          title: 'Instagram Reel',
-          author: 'Instagram',
-          source: winner.source
-        });
-      } catch (e) {
-        return res.status(404).json({ error: 'Serverët e Instagramit nuk u përgjigjën. Provo përsëri.' });
-      }
+      return res.status(404).json({ error: 'Instagram nuk lejoi nxjerrjen e kësaj videoje. Provo me një link tjetër Reel.' });
     }
 
     // =========================================================================
