@@ -7,3 +7,5 @@ package.json
 package-lock.json
 _routes.json
 .assetsignore
+worker.js
+wrangler.toml
