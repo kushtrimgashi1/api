@@ -1,0 +1,9 @@
+.git
+.opencode
+api
+functions
+node_modules
+package.json
+package-lock.json
+_routes.json
+.assetsignore
