@@ -84,52 +84,6 @@ export default async function handler(req, res) {
 
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  // =========================================================================
-  // 1. TUNELI PËR SHKARKIM DIREKT NË DOWNLOADS SI SKEDAR .MP4 (I PAPREKUR)
-  // =========================================================================
-  if (req.query.proxy === '1' && req.query.url) {
-    const targetVideoUrl = req.query.url;
-    try {
-      const urlObj = new URL(targetVideoUrl);
-      let referer = `${urlObj.protocol}//${urlObj.hostname}/`;
-      if (targetVideoUrl.includes('fbcdn.net') || targetVideoUrl.includes('facebook.com')) {
-        referer = 'https://www.facebook.com/';
-      } else if (targetVideoUrl.includes('cdninstagram.com') || targetVideoUrl.includes('instagram.com')) {
-        referer = 'https://www.instagram.com/';
-      } else if (targetVideoUrl.includes('tiktok')) {
-        referer = 'https://www.tiktok.com/';
-      }
-
-      const vRes = await fetch(targetVideoUrl, {
-        method: 'GET',
-        redirect: 'follow',
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
-          'Accept': '*/*',
-          'Referer': referer
-        }
-      });
-
-      if (!vRes.ok) throw new Error(`CDN HTTP ${vRes.status}`);
-
-      const filename = `savevid_${Date.now()}.mp4`;
-      res.setHeader('Content-Type', 'video/mp4');
-      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-      res.setHeader('Cache-Control', 'no-store');
-
-      const contentLength = vRes.headers.get('content-length');
-      if (contentLength) {
-        res.setHeader('Content-Length', contentLength);
-      }
-
-      const arrayBuffer = await vRes.arrayBuffer();
-      return res.status(200).send(Buffer.from(arrayBuffer));
-    } catch (e) {
-      const dlUrl = targetVideoUrl.includes('?') ? `${targetVideoUrl}&dl=1` : `${targetVideoUrl}?dl=1`;
-      return res.redirect(302, dlUrl);
-    }
-  }
-
   const rawUrl = req.query.url;
   if (!rawUrl) return res.status(400).json({ error: 'Mungon linku' });
 

@@ -301,23 +301,27 @@
       progressStatus.textContent = `Po shkarkohet skedari MP4 (${qualityLabel})...`;
 
       const filename = `savevid_${qualityLabel}_${Date.now()}.mp4`;
-      const vercelProxyUrl = `/api/extract?proxy=1&url=${encodeURIComponent(videoUrl)}`;
 
+      const saveBlob = (blob) => {
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 20000);
+      };
+
+      // 1. SHKARKIM DIREKT NGA CDN — browseri e tërheq vetë (IG/TikTok/FB lejojnë CORS)
       try {
-        const res = await fetchWithTimeout(vercelProxyUrl, {}, 12000);
+        const res = await fetch(videoUrl, { mode: 'cors', credentials: 'omit', referrerPolicy: 'no-referrer' });
         if (res.ok) {
           const contentType = res.headers.get('content-type') || '';
-          if (!contentType.includes('text/html') && !contentType.includes('application/json')) {
+          if (!contentType.includes('text/html')) {
             const blob = await res.blob();
-            if (blob.size > 15000) {
-              const blobUrl = URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = blobUrl;
-              a.download = filename;
-              document.body.appendChild(a);
-              a.click();
-              document.body.removeChild(a);
-              setTimeout(() => URL.revokeObjectURL(blobUrl), 20000);
+            if (blob.size > 10000) {
+              saveBlob(blob);
               btnElement.textContent = `✓ U Shkarkua ${qualityLabel}!`;
               progressStatus.textContent = `✓ U Shkarkua (${qualityLabel})!`;
               setTimeout(() => { btnElement.textContent = origText; btnElement.disabled = false; }, 3500);
@@ -327,37 +331,19 @@
         }
       } catch (e) {}
 
-      try {
-        const headCheck = await fetchWithTimeout(vercelProxyUrl, { method: 'HEAD' }, 4000);
-        if (headCheck.ok) {
-          hiddenDownloader.src = vercelProxyUrl;
-          btnElement.textContent = `✓ Shkarkimi nisi!`;
-          progressStatus.textContent = `✓ Shkarkimi nisi!`;
-          setTimeout(() => { btnElement.textContent = origText; btnElement.disabled = false; }, 3500);
-          return;
-        }
-      } catch (e) {}
-
+      // 2. FALLBACK: proxy publik (vetëm nëse CDN bllokon CORS)
       const blobProxies = [
-        videoUrl,
         `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(videoUrl)}`,
         `https://corsproxy.io/?url=${encodeURIComponent(videoUrl)}`
       ];
 
       for (const pUrl of blobProxies) {
         try {
-          const res = await fetchWithTimeout(pUrl, {}, 10000);
+          const res = await fetchWithTimeout(pUrl, {}, 15000);
           if (res.ok) {
             const blob = await res.blob();
-            if (blob.size > 15000) {
-              const blobUrl = URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = blobUrl;
-              a.download = filename;
-              document.body.appendChild(a);
-              a.click();
-              document.body.removeChild(a);
-              setTimeout(() => URL.revokeObjectURL(blobUrl), 20000);
+            if (blob.size > 10000) {
+              saveBlob(blob);
               btnElement.textContent = `✓ U Shkarkua ${qualityLabel}!`;
               progressStatus.textContent = `✓ U Shkarkua!`;
               setTimeout(() => { btnElement.textContent = origText; btnElement.disabled = false; }, 3500);
@@ -367,8 +353,14 @@
         } catch (e) {}
       }
 
-      const fbForceDl = videoUrl.includes('?') ? `${videoUrl}&dl=1` : `${videoUrl}?dl=1`;
-      window.location.href = fbForceDl;
+      // 3. FUNDIT: hape direkt (browseri e riprodhon ose e shkarkon)
+      const a = document.createElement('a');
+      a.href = videoUrl;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
       btnElement.textContent = origText;
       btnElement.disabled = false;
     }
