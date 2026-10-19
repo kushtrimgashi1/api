@@ -449,7 +449,12 @@ async function extract(rawUrl) {
     if (/tiktok\.com|vm\.tiktok|vt\.tiktok/i.test(workingUrl)) {
       const ttRes = await fetch('https://www.tikwm.com/api/', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'User-Agent': UA,
+          'Referer': 'https://www.tikwm.com/',
+          'Origin': 'https://www.tikwm.com'
+        },
         body: `url=${encodeURIComponent(workingUrl)}&hd=1`
       });
       const ttJson = await ttRes.json();
