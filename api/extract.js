@@ -350,17 +350,13 @@ export default async function handler(req, res) {
       let fbId = fbIdFromUrl(workingUrl);
 
       // Dy raunde x 3 User-Agents: Cloudflare/DC IP-të ndonjëherë marrin login/consent
-      for (let round = 0; round < 2 && !fbId; round++) {
+      for (let round = 0; round < 3 && !fbId; round++) {
         for (const ua of userAgents) {
           try {
             const r = await fetch(workingUrl, {
               method: 'GET',
               redirect: 'follow',
-              headers: {
-                'User-Agent': ua,
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                'Accept-Language': 'en-US,en;q=0.9'
-              }
+              headers: { 'User-Agent': ua }
             });
             const html = await r.text();
 
