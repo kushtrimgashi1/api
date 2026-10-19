@@ -328,69 +328,71 @@ async function extract(rawUrl) {
         'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'
       ];
 
-      for (const ua of userAgents) {
-        try {
-          const r = await fetch(workingUrl, {
-            method: 'GET',
-            redirect: 'follow',
-            headers: {
-              'User-Agent': ua,
-              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-              'Accept-Language': 'en-US,en;q=0.9'
-            }
-          });
+      const fbIdFromUrl = (u) => {
+        if (!u) return null;
+        const m = u.match(/\/(?:reel|videos)\/(\d{8,25})/) ||
+                  u.match(/reel%2F(\d{8,25})/i) ||
+                  u.match(/[?&]v=(\d{8,25})/) ||
+                  u.match(/story_fbid=(\d{8,25})/);
+        return m ? m[1] : null;
+      };
+      const fbIdFromHtml = (html) => {
+        if (!html) return null;
+        const m = html.match(/\/reel\/(\d{8,25})/) ||
+                  html.match(/\/videos\/(\d{8,25})/) ||
+                  html.match(/"video_id"\s*:\s*"(\d{8,25})"/) ||
+                  html.match(/story_fbid=(\d{8,25})/) ||
+                  html.match(/reel%2F(\d{8,25})/i);
+        return m ? m[1] : null;
+      };
 
-          if (r.url && !r.url.includes('/login') && !r.url.includes('/share/')) {
-            workingUrl = r.url;
-          }
+      let fbId = fbIdFromUrl(workingUrl);
 
-          const html = await r.text();
-
-          const hdMatch = html.match(/"playable_url_quality_hd"\s*:\s*"([^"]+)"/) ||
-                          html.match(/"browser_native_hd_url"\s*:\s*"([^"]+)"/) ||
-                          html.match(/"hd_src_no_ratelimit"\s*:\s*"([^"]+)"/) ||
-                          html.match(/"hd_src"\s*:\s*"([^"]+)"/);
-          const sdMatch = html.match(/"playable_url"\s*:\s*"([^"]+)"/) ||
-                          html.match(/"browser_native_sd_url"\s*:\s*"([^"]+)"/) ||
-                          html.match(/"sd_src"\s*:\s*"([^"]+)"/) ||
-                          html.match(/property="og:video:secure_url"\s+content="([^"]+)"/) ||
-                          html.match(/property="og:video"\s+content="([^"]+)"/);
-
-          const directMp4 = cleanUrl(hdMatch?.[1] || sdMatch?.[1]);
-          const sdMp4 = cleanUrl(sdMatch?.[1]) || directMp4;
-          if (directMp4 && (directMp4.includes('.mp4') || directMp4.includes('fbcdn.net'))) {
-            return json({
-              hd: directMp4,
-              sd: sdMp4,
-              title: 'Facebook Reel / Video',
-              author: 'Facebook',
-              source: 'FB Direct Stream'
+      // Dy raunde x 3 User-Agents: Cloudflare/DC IP-të ndonjëherë marrin login/consent
+      for (let round = 0; round < 2 && !fbId; round++) {
+        for (const ua of userAgents) {
+          try {
+            const r = await fetch(workingUrl, {
+              method: 'GET',
+              redirect: 'follow',
+              headers: {
+                'User-Agent': ua,
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.9'
+              }
             });
-          }
+            const html = await r.text();
 
-          const ogUrl = html.match(/property="og:url"\s+content="([^"]+)"/) ||
-                        html.match(/rel="canonical"\s+href="([^"]+)"/);
-          if (ogUrl?.[1] && !ogUrl[1].includes('/login') && !ogUrl[1].includes('/share/')) {
-            workingUrl = cleanUrl(ogUrl[1]) || workingUrl;
-          } else {
-            const vidId = html.match(/\/reel\/(\d{8,25})/) ||
-                          html.match(/\/videos\/(\d{8,25})/) ||
-                          html.match(/"video_id"\s*:\s*"(\d{8,25})"/) ||
-                          html.match(/story_fbid=(\d{8,25})/);
-            if (vidId?.[1]) {
-              workingUrl = `https://www.facebook.com/reel/${vidId[1]}`;
+            const hdMatch = html.match(/"playable_url_quality_hd"\s*:\s*"([^"]+)"/) ||
+                            html.match(/"browser_native_hd_url"\s*:\s*"([^"]+)"/) ||
+                            html.match(/"hd_src_no_ratelimit"\s*:\s*"([^"]+)"/) ||
+                            html.match(/"hd_src"\s*:\s*"([^"]+)"/);
+            const sdMatch = html.match(/"playable_url"\s*:\s*"([^"]+)"/) ||
+                            html.match(/"browser_native_sd_url"\s*:\s*"([^"]+)"/) ||
+                            html.match(/"sd_src"\s*:\s*"([^"]+)"/) ||
+                            html.match(/property="og:video:secure_url"\s+content="([^"]+)"/) ||
+                            html.match(/property="og:video"\s+content="([^"]+)"/);
+
+            const directMp4 = cleanUrl(hdMatch?.[1] || sdMatch?.[1]);
+            const sdMp4 = cleanUrl(sdMatch?.[1]) || directMp4;
+            if (directMp4 && (directMp4.includes('.mp4') || directMp4.includes('fbcdn.net'))) {
+              return json({
+                hd: directMp4,
+                sd: sdMp4,
+                title: 'Facebook Reel / Video',
+                author: 'Facebook',
+                source: 'FB Direct Stream'
+              });
             }
-          }
 
-          if (!workingUrl.includes('/share/')) break;
-        } catch (e) {}
+            fbId = fbIdFromUrl(r.url) || fbIdFromHtml(html) || fbIdFromUrl(workingUrl);
+            if (fbId) break;
+          } catch (e) {}
+        }
       }
 
-      // A2. Normalizo URL-në (heq query/share_url) që Embed Plugin të punojë
-      const fbIdMatch = workingUrl.match(/\/(?:reel|videos)\/(\d{8,25})/) ||
-                        workingUrl.match(/[?&]v=(\d{8,25})/) ||
-                        workingUrl.match(/story_fbid=(\d{8,25})/);
-      if (fbIdMatch) workingUrl = `https://www.facebook.com/reel/${fbIdMatch[1]}`;
+      // Normalizo në reel/<id> të pastër (heq query/share_url) që Embed Plugin të punojë
+      if (fbId) workingUrl = `https://www.facebook.com/reel/${fbId}`;
 
       // B. FACEBOOK EMBED PLAYER BYPASS
       try {
