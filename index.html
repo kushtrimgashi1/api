@@ -15,8 +15,8 @@
       --border: #e9e8e2;
       --card: #ffffff;
       --soft: #f4f3ee;
-      --accent: #5b5bd6;
-      --accent-2: #a855f7;
+      --accent: #e11d24;
+      --accent-2: #b20b0f;
       --shadow: 0 24px 60px -30px rgba(16, 16, 24, 0.45);
     }
     @media (prefers-color-scheme: dark) {
@@ -27,8 +27,8 @@
         --border: #222226;
         --card: #131316;
         --soft: #1b1b1f;
-        --accent: #818cf8;
-        --accent-2: #c084fc;
+        --accent: #f87171;
+        --accent-2: #ef4444;
       }
     }
     html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; overflow-x: hidden; }
@@ -43,9 +43,9 @@
       overflow-x: hidden;
     }
     h1, h2, h3, .serif {
-      font-family: "Instrument Serif", Georgia, "Times New Roman", serif;
-      letter-spacing: -0.02em;
-      font-weight: 400;
+      font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+      letter-spacing: -0.03em;
+      font-weight: 800;
     }
     .grad {
       background: linear-gradient(100deg, var(--accent), var(--accent-2));
@@ -97,9 +97,11 @@
   <!-- NAV -->
   <header class="sticky top-0 z-40 backdrop-blur bg-[var(--bg)]/85 border-b border-[var(--border)]">
     <div class="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
-      <a href="#" class="flex items-baseline gap-2">
-        <span class="serif text-[24px] leading-none">SaveVid</span>
-        <span class="text-[10px] px-2 py-[3px] rounded-full bg-[var(--fg)] text-[var(--bg)] tracking-widest uppercase">V41+</span>
+      <a href="#" class="flex items-center gap-2">
+        <span class="h-8 w-8 rounded-[9px] grid place-items-center" style="background:var(--accent)">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M4 20h16"/></svg>
+        </span>
+        <span class="serif text-[20px] leading-none">SaveVid</span>
       </a>
       <nav class="hidden md:flex items-center gap-7 text-[11px] uppercase tracking-widest text-[var(--muted)]">
         <a href="#platforms" class="hover:text-[var(--fg)]">Platformat</a>
@@ -118,14 +120,14 @@
     <!-- HERO -->
     <section class="grid-bg border-b border-[var(--border)]">
       <div class="max-w-3xl mx-auto px-5 pt-14 pb-14 text-center">
-        <span class="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.22em] text-[var(--muted)] mb-5 px-3.5 py-1.5 rounded-full border border-[var(--border)] bg-[var(--card)]">
-          <span class="h-1.5 w-1.5 rounded-full bg-[var(--accent)]"></span>Shkarkues video • HD &amp; SD • Pa watermark
+        <span class="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.22em] text-[var(--accent)] mb-5 px-3.5 py-1.5 rounded-full border" style="border-color:color-mix(in srgb, var(--accent) 28%, transparent);background:color-mix(in srgb, var(--accent) 7%, transparent)">
+          <span class="h-1.5 w-1.5 rounded-full bg-[var(--accent)]"></span>Falas • Pa watermark • Pa login
         </span>
-        <h1 class="serif text-balance text-[40px] sm:text-[68px] leading-[0.94] tracking-[-0.03em] mb-4" style="overflow-wrap:anywhere">
-          Shkarko <span class="italic grad">video &amp; reels</span><br>pa watermark.
+        <h1 class="serif text-balance text-[42px] sm:text-[64px] leading-[0.98] mb-4" style="overflow-wrap:anywhere">
+          Shkarko çdo video<br>në sekonda
         </h1>
         <p class="text-[13px] leading-[1.6] text-[var(--muted)] max-w-xl mx-auto mb-8">
-          Ngjit linkun nga TikTok, Facebook ose Instagram dhe shkarko videon në HD ose SD — direkt në pajisje, falas dhe pa regjistrim.
+          TikTok, Facebook ose Instagram — HD &amp; SD, direkt në pajisje.
         </p>
 
         <!-- INPUT CARD -->
@@ -142,7 +144,8 @@
             <button id="clearBtn" class="absolute right-[6px] top-[6px] bottom-[6px] w-[44px] rounded-[10px] bg-[var(--card)] border border-[var(--border)] grid place-items-center text-[12px]">✕</button>
           </div>
 
-          <button id="downloadBtn" class="mt-3 w-full h-[54px] rounded-[13px] bg-[var(--fg)] text-[var(--bg)] text-[13px] uppercase tracking-[0.16em] font-medium hover:opacity-[0.9] active:scale-[0.99] transition-all">
+          <button id="downloadBtn" class="mt-3 w-full h-[54px] rounded-[13px] text-white text-[13px] uppercase tracking-[0.16em] hover:opacity-[0.95] active:scale-[0.99] transition-all inline-flex items-center justify-center gap-2">
+            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>
             Gjej videon
           </button>
         </div>
@@ -239,24 +242,24 @@
     <!-- HOW -->
     <section id="how" class="max-w-6xl mx-auto px-5 py-16 border-b border-[var(--border)]">
       <div class="mb-8">
-        <p class="text-[10px] uppercase tracking-[0.25em] text-[var(--accent)] font-semibold mb-2">Proces i thjeshtë</p>
-        <h2 class="serif text-[32px] sm:text-[40px] tracking-[-0.02em]">Si shkarkohet në 3 hapa.</h2>
+        <p class="text-[10px] uppercase tracking-[0.25em] text-[var(--accent)] font-semibold mb-2">Si funksionon</p>
+        <h2 class="serif text-[32px] sm:text-[40px] tracking-[-0.03em]">Si shkarkohet në 3 hapa.</h2>
       </div>
       <div class="grid sm:grid-cols-3 gap-8">
         <div>
-          <span class="serif text-[52px] text-[var(--muted)] leading-none">01</span>
-          <h3 class="serif text-[24px] mt-2 mb-1">Kopjo linkun</h3>
-          <p class="text-[12px] leading-[1.6] text-[var(--muted)]">Hap videon në aplikacion dhe shtyp <span class="text-[var(--fg)]">Share → Copy link</span>.</p>
+          <span class="h-11 w-11 rounded-full grid place-items-center text-[16px] font-extrabold text-[var(--accent)]" style="background:color-mix(in srgb, var(--accent) 12%, transparent)">1</span>
+          <h3 class="text-[20px] mt-3 mb-1">Kopjo linkun</h3>
+          <p class="text-[12px] leading-[1.6] text-[var(--muted)]">Hap videon dhe shtyp <span class="text-[var(--fg)]">Share → Copy link</span>.</p>
         </div>
         <div>
-          <span class="serif text-[52px] text-[var(--muted)] leading-none">02</span>
-          <h3 class="serif text-[24px] mt-2 mb-1">Ngjit linkun</h3>
-          <p class="text-[12px] leading-[1.6] text-[var(--muted)]">Vendose në kutinë lart dhe shtyp <span class="text-[var(--fg)]">Gjej videon</span>.</p>
+          <span class="h-11 w-11 rounded-full grid place-items-center text-[16px] font-extrabold text-[var(--accent)]" style="background:color-mix(in srgb, var(--accent) 12%, transparent)">2</span>
+          <h3 class="text-[20px] mt-3 mb-1">Ngjit dhe kërko</h3>
+          <p class="text-[12px] leading-[1.6] text-[var(--muted)]">Vendos linkun dhe shtyp <span class="text-[var(--fg)]">"Gjej videon"</span>.</p>
         </div>
         <div>
-          <span class="serif text-[52px] text-[var(--muted)] leading-none">03</span>
-          <h3 class="serif text-[24px] mt-2 mb-1">Shkarko</h3>
-          <p class="text-[12px] leading-[1.6] text-[var(--muted)]">Zgjidh <span class="text-[var(--fg)]">HD</span> ose <span class="text-[var(--fg)]">SD</span> dhe ruaje direkt në pajisje.</p>
+          <span class="h-11 w-11 rounded-full grid place-items-center text-[16px] font-extrabold text-[var(--accent)]" style="background:color-mix(in srgb, var(--accent) 12%, transparent)">3</span>
+          <h3 class="text-[20px] mt-3 mb-1">Shkarko direkt</h3>
+          <p class="text-[12px] leading-[1.6] text-[var(--muted)]">Zgjidh <span class="text-[var(--fg)]">HD</span> ose <span class="text-[var(--fg)]">SD</span> — ruhet në pajisje.</p>
         </div>
       </div>
     </section>
@@ -267,30 +270,34 @@
         <p class="text-[10px] uppercase tracking-[0.25em] text-[var(--accent)] font-semibold mb-2">Pse SaveVid</p>
         <h2 class="serif text-[32px] sm:text-[40px] tracking-[-0.02em]">I shpejtë, i thjeshtë, falas.</h2>
       </div>
-      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div class="grid sm:grid-cols-2 gap-4">
         <div class="bg-[var(--card)] border border-[var(--border)] rounded-[16px] p-6">
-          <h3 class="serif text-[22px] mb-1">Pa watermark</h3>
-          <p class="text-[12px] leading-[1.6] text-[var(--muted)]">Video pa logo të mbivendosur kur platforma e lejon.</p>
+          <span class="h-10 w-10 rounded-[11px] grid place-items-center mb-4" style="background:color-mix(in srgb, var(--accent) 10%, transparent)">
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="2.6"/><path d="m3 3 18 18"/></svg>
+          </span>
+          <h3 class="text-[18px] mb-1">Pa watermark</h3>
+          <p class="text-[12px] leading-[1.6] text-[var(--muted)]">Video të pastra pa logo.</p>
         </div>
         <div class="bg-[var(--card)] border border-[var(--border)] rounded-[16px] p-6">
-          <h3 class="serif text-[22px] mb-1">HD & SD</h3>
-          <p class="text-[12px] leading-[1.6] text-[var(--muted)]">Zgjidh cilësinë më të lartë të disponueshme ose më të lehtë.</p>
+          <span class="h-10 w-10 rounded-[11px] grid place-items-center mb-4" style="background:color-mix(in srgb, var(--accent) 10%, transparent)">
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="16" rx="3"/><path d="m10 9 5 3-5 3V9Z" fill="var(--accent)" stroke="none"/></svg>
+          </span>
+          <h3 class="text-[18px] mb-1">HD &amp; SD</h3>
+          <p class="text-[12px] leading-[1.6] text-[var(--muted)]">Cilësia më e lartë e disponueshme.</p>
         </div>
         <div class="bg-[var(--card)] border border-[var(--border)] rounded-[16px] p-6">
-          <h3 class="serif text-[22px] mb-1">Telefon & PC</h3>
-          <p class="text-[12px] leading-[1.6] text-[var(--muted)]">Punon në Android, iPhone dhe desktop — pa aplikacion.</p>
+          <span class="h-10 w-10 rounded-[11px] grid place-items-center mb-4" style="background:color-mix(in srgb, var(--accent) 10%, transparent)">
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M11 18.5h2"/></svg>
+          </span>
+          <h3 class="text-[18px] mb-1">Çdo pajisje</h3>
+          <p class="text-[12px] leading-[1.6] text-[var(--muted)]">Android, iPhone dhe desktop.</p>
         </div>
         <div class="bg-[var(--card)] border border-[var(--border)] rounded-[16px] p-6">
-          <h3 class="serif text-[22px] mb-1">Pa login</h3>
-          <p class="text-[12px] leading-[1.6] text-[var(--muted)]">Nuk kërkohet llogari, email apo instalim.</p>
-        </div>
-        <div class="bg-[var(--card)] border border-[var(--border)] rounded-[16px] p-6">
-          <h3 class="serif text-[22px] mb-1">Privatësi</h3>
-          <p class="text-[12px] leading-[1.6] text-[var(--muted)]">Nuk ruajmë skedarët e tua në server.</p>
-        </div>
-        <div class="bg-[var(--card)] border border-[var(--border)] rounded-[16px] p-6">
-          <h3 class="serif text-[22px] mb-1">100% Falas</h3>
-          <p class="text-[12px] leading-[1.6] text-[var(--muted)]">Pa abonim dhe pa pagesa të fshehura.</p>
+          <span class="h-10 w-10 rounded-[11px] grid place-items-center mb-4" style="background:color-mix(in srgb, var(--accent) 10%, transparent)">
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v6c0 4.5 3 7.5 7 9 4-1.5 7-4.5 7-9V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg>
+          </span>
+          <h3 class="text-[18px] mb-1">Privatësi</h3>
+          <p class="text-[12px] leading-[1.6] text-[var(--muted)]">Nuk ruajmë asgjë në server.</p>
         </div>
       </div>
     </section>
