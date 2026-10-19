@@ -386,6 +386,12 @@ async function extract(rawUrl) {
         } catch (e) {}
       }
 
+      // A2. Normalizo URL-në (heq query/share_url) që Embed Plugin të punojë
+      const fbIdMatch = workingUrl.match(/\/(?:reel|videos)\/(\d{8,25})/) ||
+                        workingUrl.match(/[?&]v=(\d{8,25})/) ||
+                        workingUrl.match(/story_fbid=(\d{8,25})/);
+      if (fbIdMatch) workingUrl = `https://www.facebook.com/reel/${fbIdMatch[1]}`;
+
       // B. FACEBOOK EMBED PLAYER BYPASS
       try {
         const embRes = await fetch(`https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(workingUrl)}&show_text=false`, {
