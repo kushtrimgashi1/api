@@ -150,6 +150,35 @@ async function proxyDownload(targetVideoUrl) {
   }
 }
 
+const fbShareCache = new Map();
+
+async function fbResolveShareId(shareUrl) {
+  if (!shareUrl || !/\/share\//i.test(shareUrl)) return null;
+  const cached = fbShareCache.get(shareUrl);
+  if (cached && Date.now() - cached.ts < 6 * 60 * 60 * 1000) return cached.id;
+  try {
+    const r = await fetch(`https://api.redirect-checker.net/?url=${encodeURIComponent(shareUrl)}&timeout=20&maxhops=10`, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+    if (r.ok) {
+      const j = await r.json();
+      const urls = [];
+      for (const step of (j.data || [])) {
+        const info = (step && step.response && step.response.info) || {};
+        const headers = (step && step.response && step.response.headers) || {};
+        if (info.url) urls.push(info.url);
+        if (info.redirect_url) urls.push(info.redirect_url);
+        if (headers.location) urls.push(headers.location);
+      }
+      for (const u of urls) {
+        const m = String(u).match(/\/(?:reel|videos)\/(\d{8,25})/) ||
+                  String(u).match(/[?&]v=(\d{8,25})/) ||
+                  String(u).match(/story_fbid=(\d{8,25})/);
+        if (m) { fbShareCache.set(shareUrl, { id: m[1], ts: Date.now() }); return m[1]; }
+      }
+    }
+  } catch (e) {}
+  return null;
+}
+
 async function extract(rawUrl) {
   try {
     let workingUrl = rawUrl.trim();
@@ -385,6 +414,11 @@ async function extract(rawUrl) {
             if (fbId) break;
           } catch (e) {}
         }
+      }
+
+      // Nëse s'u zgjidh me fetch direkt (CF ndonjëherë merr login), përdor shërbim resolver
+      if (!fbId && /\/share\//i.test(workingUrl)) {
+        fbId = await fbResolveShareId(workingUrl);
       }
 
       // Normalizo në reel/<id> të pastër (heq query/share_url) që Embed Plugin të punojë
