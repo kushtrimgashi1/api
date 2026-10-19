@@ -484,6 +484,21 @@ export async function onRequest(context) {
   }
 
   const target = url.searchParams.get('url');
+  if (url.searchParams.get('debug') === '1' && target) {
+    const ua = 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)';
+    const out = {};
+    try {
+      const r1 = await fetch(target, { redirect: 'manual', headers: { 'User-Agent': ua } });
+      out.manualStatus = r1.status;
+      out.manualLocation = r1.headers.get('location');
+    } catch (e) { out.manualError = e.message; }
+    try {
+      const r2 = await fetch(target, { redirect: 'follow', headers: { 'User-Agent': ua } });
+      out.followStatus = r2.status;
+      out.followUrl = r2.url;
+    } catch (e) { out.followError = e.message; }
+    return json(out);
+  }
   if (url.searchParams.get('proxy') === '1' && target) {
     return proxyDownload(target);
   }
