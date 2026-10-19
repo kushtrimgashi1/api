@@ -570,29 +570,39 @@
       }
     }
 
-    async function fetchBlobWithProgress(url, options = {}) {
-      const res = await fetch(url, { mode: 'cors', credentials: 'omit', referrerPolicy: 'no-referrer', ...options });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const ct = (res.headers.get('content-type') || '').toLowerCase();
-      if (ct.includes('text/html') || ct.includes('application/json')) throw new Error('Jo-video');
-      const total = Number(res.headers.get('content-length') || 0);
-      if (!res.body || !res.body.getReader) {
-        const blob = await res.blob();
-        setDlProgress(blob.size, blob.size);
-        return blob;
+    async function fetchBlobWithProgress(url, options = {}, timeoutMs = 15000) {
+      const controller = new AbortController();
+      let timer = null;
+      const arm = () => { clearTimeout(timer); timer = setTimeout(() => controller.abort(), timeoutMs); };
+      const disarm = () => clearTimeout(timer);
+      arm();
+      try {
+        const res = await fetch(url, { mode: 'cors', credentials: 'omit', referrerPolicy: 'no-referrer', signal: controller.signal, ...options });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const ct = (res.headers.get('content-type') || '').toLowerCase();
+        if (ct.includes('text/html') || ct.includes('application/json')) throw new Error('Jo-video');
+        const total = Number(res.headers.get('content-length') || 0);
+        if (!res.body || !res.body.getReader) {
+          const blob = await res.blob();
+          setDlProgress(blob.size, blob.size);
+          return blob;
+        }
+        const reader = res.body.getReader();
+        const chunks = [];
+        let received = 0;
+        while (true) {
+          arm();
+          const { done, value } = await reader.read();
+          if (done) break;
+          chunks.push(value);
+          received += value.length;
+          setDlProgress(received, total);
+        }
+        if (received < 10000) throw new Error('Skedar bosh');
+        return new Blob(chunks, { type: ct.includes('mp4') || !ct ? 'video/mp4' : ct });
+      } finally {
+        disarm();
       }
-      const reader = res.body.getReader();
-      const chunks = [];
-      let received = 0;
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        chunks.push(value);
-        received += value.length;
-        setDlProgress(received, total);
-      }
-      if (received < 10000) throw new Error('Skedar bosh');
-      return new Blob(chunks, { type: ct.includes('mp4') || !ct ? 'video/mp4' : ct });
     }
 
     async function triggerDirectDownload(videoUrl, btnElement, qualityLabel) {
@@ -627,7 +637,7 @@
       // 1. DIREKT NGA CDN (më i shpejtë — pa server)
       try {
         dlProgressText.textContent = 'Duke u lidhur drejt CDN...';
-        const blob = await fetchBlobWithProgress(videoUrl);
+        const blob = await fetchBlobWithProgress(videoUrl, {}, 12000);
         saveBlob(blob);
         done('direkt');
         return;
@@ -637,7 +647,7 @@
       try {
         dlProgressText.textContent = 'Duke u lidhur përmes serverit...';
         const proxyUrl = `/api/extract?proxy=1&url=${encodeURIComponent(videoUrl)}`;
-        const blob = await fetchBlobWithProgress(proxyUrl);
+        const blob = await fetchBlobWithProgress(proxyUrl, {}, 45000);
         saveBlob(blob);
         done('server');
         return;
