@@ -486,6 +486,37 @@ export async function onRequest(context) {
   }
 
   const target = url.searchParams.get('url');
+  if (url.searchParams.get('debug') === '1' && target) {
+    const uas = {
+      crawler: 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)',
+      googlebot: 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
+    };
+    const res = {};
+    for (const [name, ua] of Object.entries(uas)) {
+      const full = {};
+      try {
+        const r = await fetch(target, { redirect: 'follow', headers: { 'User-Agent': ua, 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-Language': 'en-US,en;q=0.9' } });
+        const html = await r.text();
+        full.status = r.status;
+        full.url = r.url;
+        full.idFromUrl = (r.url.match(/\/(?:reel|videos)\/(\d{8,25})/) || r.url.match(/reel%2F(\d{8,25})/i) || [])[1] || null;
+        full.idFromHtml = (html.match(/\/reel\/(\d{8,25})/) || html.match(/"video_id"\s*:\s*"(\d{8,25})"/) || [])[1] || null;
+        full.len = html.length;
+      } catch (e) { full.error = e.message; }
+      const bare = {};
+      try {
+        const r2 = await fetch(target, { redirect: 'follow', headers: { 'User-Agent': ua } });
+        const h2 = await r2.text();
+        bare.status = r2.status;
+        bare.url = r2.url;
+        bare.idFromUrl = (r2.url.match(/\/(?:reel|videos)\/(\d{8,25})/) || r2.url.match(/reel%2F(\d{8,25})/i) || [])[1] || null;
+        bare.idFromHtml = (h2.match(/\/reel\/(\d{8,25})/) || h2.match(/"video_id"\s*:\s*"(\d{8,25})"/) || [])[1] || null;
+        bare.len = h2.length;
+      } catch (e) { bare.error = e.message; }
+      res[name] = { full, bare };
+    }
+    return json(res);
+  }
   if (url.searchParams.get('proxy') === '1' && target) {
     return proxyDownload(target);
   }
