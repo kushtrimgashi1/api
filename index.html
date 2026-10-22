@@ -968,6 +968,7 @@
 
       } catch (err) {
         progressStatus.textContent = 'Gabim';
+        progressBox.classList.add('hidden');
         errorText.textContent = err.message;
         errorBox.classList.remove('hidden');
       } finally {
