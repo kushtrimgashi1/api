@@ -6,6 +6,7 @@
   <title>SaveVid — Shkarko video & reels pa watermark (TikTok, Facebook, Instagram)</title>
   <meta name="description" content="Shkarko video, reels dhe postime nga TikTok, Facebook dhe Instagram në HD & SD. Falas, pa login, pa watermark.">
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -150,14 +151,15 @@
           </button>
         </div>
 
-        <!-- PROGRESS BOX -->
-        <div id="progressBox" class="hidden text-left mt-6 border border-[var(--border)] rounded-[16px] bg-[var(--card)] p-4">
-          <div class="flex items-center justify-between mb-3">
-            <span class="text-[10px] uppercase tracking-[0.14em] text-[var(--muted)]">Progresi</span>
-            <span id="progressStatus" class="text-[10px] text-[var(--muted)] animate-pulse">Duke kërkuar...</span>
+        <!-- LOADING / CONVERSION -->
+        <div id="progressBox" class="hidden mt-6">
+          <div class="flex flex-col items-center gap-2">
+            <div class="flex items-center gap-2.5">
+              <span class="h-4 w-4 rounded-full border-2 border-[var(--accent)] border-t-transparent animate-spin"></span>
+              <span id="progressStatus" class="text-[12px] text-[var(--muted)]">Duke analizuar linkun...</span>
+            </div>
+            <div id="resolvedBox" class="hidden text-[10px] text-[var(--muted)] truncate max-w-full"></div>
           </div>
-          <div id="stepsList" class="space-y-2"></div>
-          <div id="resolvedBox" class="hidden mt-2.5 pt-2 border-t border-[var(--border)] text-[10px] text-[var(--muted)] truncate"></div>
         </div>
 
         <!-- ERROR BOX -->
@@ -199,6 +201,14 @@
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4 10 14"/><path d="M19 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4"/></svg>
             </button>
           </div>
+
+          <button id="dlMp3Btn" class="mt-2 w-full h-[44px] rounded-[12px] inline-flex items-center justify-center gap-2 text-[12px] uppercase tracking-[0.1em] font-bold border border-[var(--accent)] text-[var(--accent)] bg-transparent active:scale-[0.98] transition">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+            Shkarko MP3 (Audio)
+          </button>
+          <button id="newVideoBtn" class="mt-2 w-full h-[38px] rounded-[10px] text-[11px] uppercase tracking-[0.12em] text-[var(--muted)] hover:text-[var(--fg)] transition">
+            ↺ Shkarko një video tjetër
+          </button>
 
           <div id="dlProgressWrap" class="hidden mt-3">
             <div class="h-[6px] w-full rounded-full bg-[var(--border)] overflow-hidden">
@@ -374,7 +384,6 @@
 
   <script>
     const urlInput = document.getElementById('urlInput');
-    const stepsList = document.getElementById('stepsList');
     const progressBox = document.getElementById('progressBox');
     const progressStatus = document.getElementById('progressStatus');
     const resolvedBox = document.getElementById('resolvedBox');
@@ -408,15 +417,10 @@
       progressBox.classList.add('hidden');
     };
 
-    function renderSteps(steps) {
-      stepsList.innerHTML = steps.map(s => `
-        <div class="flex items-center justify-between text-[11px]">
-          <span class="${s.status === 'pending' ? 'text-[var(--muted)]' : ''}">${s.name}</span>
-          <span class="text-[10px] uppercase font-medium ${s.status === 'success' || s.status.startsWith('OK') ? 'text-[#00a651]' : s.status === 'fail' ? 'text-[#ff4d4d]' : 'text-[var(--muted)]'}">
-            ${s.status === 'trying' ? 'duke provuar...' : s.status}
-          </span>
-        </div>
-      `).join('');
+    const stageText = ['Duke analizuar linkun...', 'Duke nxjerrë videon...', 'Duke provuar servera...', 'Duke përgatitur videon...'];
+    function setStep(idx, status) {
+      if (status === 'trying') progressStatus.textContent = stageText[idx] || 'Duke punuar...';
+      else if (status === 'fail') progressStatus.textContent = `Hapi ${idx + 1} dështoi, po provoj tjetër...`;
     }
 
     async function fetchWithTimeout(resource, options = {}, timeout = 8000) {
@@ -605,6 +609,101 @@
       }
     }
 
+    function saveBlobAs(blob, filename) {
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 20000);
+    }
+
+    function floatTo16(f32) {
+      const out = new Int16Array(f32.length);
+      for (let i = 0; i < f32.length; i++) {
+        const s = Math.max(-1, Math.min(1, f32[i]));
+        out[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+      }
+      return out;
+    }
+
+    function encodeMp3(audioBuffer, onProgress) {
+      const channels = Math.min(2, audioBuffer.numberOfChannels);
+      const enc = new lamejs.Mp3Encoder(channels, audioBuffer.sampleRate, 192);
+      const left = floatTo16(audioBuffer.getChannelData(0));
+      const right = channels > 1 ? floatTo16(audioBuffer.getChannelData(1)) : null;
+      const block = 1152;
+      const chunks = [];
+      const total = left.length;
+      for (let i = 0; i < total; i += block) {
+        const l = left.subarray(i, i + block);
+        const buf = channels > 1 ? enc.encodeBuffer(l, right.subarray(i, i + block)) : enc.encodeBuffer(l);
+        if (buf.length > 0) chunks.push(new Int8Array(buf));
+        if (onProgress && i % (block * 200) === 0) onProgress(Math.min(100, Math.round((i / total) * 100)));
+      }
+      const end = enc.flush();
+      if (end.length > 0) chunks.push(new Int8Array(end));
+      return new Blob(chunks, { type: 'audio/mpeg' });
+    }
+
+    async function getVideoBlob(videoUrl) {
+      try {
+        dlProgressText.textContent = 'Duke u lidhur drejt CDN...';
+        return await fetchBlobWithProgress(videoUrl, {}, 15000);
+      } catch (e) {
+        dlProgressText.textContent = 'Duke u lidhur përmes serverit...';
+        const proxyUrl = `/api/extract?proxy=1&url=${encodeURIComponent(videoUrl)}`;
+        return await fetchBlobWithProgress(proxyUrl, {}, 60000);
+      }
+    }
+
+    async function downloadMp3(videoUrl, btn) {
+      const orig = btn.innerHTML;
+      btn.disabled = true;
+      btn.textContent = 'Duke konvertuar në MP3...';
+      dlProgressWrap.classList.remove('hidden');
+      dlProgressBar.style.width = '0%';
+      dlProgressText.textContent = 'Duke shkarkuar audion...';
+      try {
+        if (!window.lamejs) throw new Error('Libraria MP3 nuk u ngarkua. Provo përsëri.');
+        const mp4Blob = await getVideoBlob(videoUrl);
+        dlProgressText.textContent = 'Duke nxjerrë audion dhe duke konvertuar në MP3...';
+        dlProgressBar.style.width = '40%';
+        await new Promise(r => setTimeout(r, 60));
+        const arrayBuffer = await mp4Blob.arrayBuffer();
+        const AC = window.AudioContext || window.webkitAudioContext;
+        const ctx = new AC();
+        if (ctx.state === 'suspended' && ctx.resume) { try { await ctx.resume(); } catch (e) {} }
+        let audioBuffer;
+        try {
+          audioBuffer = await Promise.race([
+            ctx.decodeAudioData(arrayBuffer),
+            new Promise((_, rej) => setTimeout(() => rej(new Error('Dekodimi i audios zgjati shumë.')), 25000))
+          ]);
+        } finally {
+          if (ctx.close) ctx.close();
+        }
+        dlProgressBar.style.width = '55%';
+        const mp3Blob = encodeMp3(audioBuffer, (p) => {
+          dlProgressBar.style.width = (55 + Math.round(p * 0.45)) + '%';
+          dlProgressText.textContent = `Duke konvertuar në MP3... ${p}%`;
+        });
+        saveBlobAs(mp3Blob, `savevid_audio_${Date.now()}.mp3`);
+        dlProgressBar.style.width = '100%';
+        dlProgressText.textContent = 'MP3 u shkarkua me sukses!';
+        btn.textContent = '✓ MP3 u shkarkua!';
+        setTimeout(() => { btn.innerHTML = orig; btn.disabled = false; hideDlProgress(); }, 3500);
+      } catch (e) {
+        btn.innerHTML = orig;
+        btn.disabled = false;
+        hideDlProgress();
+        errorText.textContent = 'Konvertimi në MP3 dështoi: ' + (e.message || 'provoni një video tjetër.');
+        errorBox.classList.remove('hidden');
+      }
+    }
+
     async function triggerDirectDownload(videoUrl, btnElement, qualityLabel) {
       const origText = `Shkarko ${qualityLabel}`;
       btnElement.textContent = `Duke shkarkuar ${qualityLabel}...`;
@@ -615,16 +714,7 @@
 
       const filename = `savevid_${qualityLabel}_${Date.now()}.mp4`;
 
-      const saveBlob = (blob) => {
-        const blobUrl = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = blobUrl;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(blobUrl), 20000);
-      };
+      const saveBlob = (blob) => saveBlobAs(blob, filename);
 
       const done = (via) => {
         btnElement.textContent = `✓ U Shkarkua ${qualityLabel}!`;
@@ -688,17 +778,7 @@
         }
       }
 
-      const steps = [
-        { name: '1. Vercel / Share & IG Resolver', status: 'pending' },
-        { name: '2. Direct Social Engine (TikWM / Agatz)', status: 'pending' },
-        { name: '3. Multi-Cloud API (Siputzx / Ryzen / Vkr)', status: 'pending' },
-        { name: '4. Embed & Proxy Fallback', status: 'pending' }
-      ];
-      renderSteps(steps);
-
-      const setStep = (idx, status) => {
-        if (steps[idx]) { steps[idx].status = status; renderSteps(steps); }
-      };
+      progressStatus.textContent = 'Duke analizuar linkun...';
 
       try {
         let data = null;
@@ -877,7 +957,7 @@
         }
 
         currentVideoData = data;
-        progressStatus.textContent = '✓ Video u gjet! Zgjidh HD ose SD më poshtë:';
+        progressBox.classList.add('hidden');
         videoPreview.src = data.hd;
         videoTitle.textContent = data.title;
         videoAuthor.textContent = `@${data.author} • ${data.source}`;
@@ -910,12 +990,35 @@
     };
 
     previewBtn.onclick = () => {
-      if (videoPreview.paused) { videoPreview.muted = false; videoPreview.play().catch(() => {}); }
-      else { videoPreview.pause(); }
+      if (!currentVideoData?.hd) return;
+      const params = new URLSearchParams({
+        u: currentVideoData.hd,
+        sd: currentVideoData.sd || currentVideoData.hd,
+        t: currentVideoData.title || 'Video',
+        a: currentVideoData.author || '',
+        p: platformBadge.textContent || '',
+        s: currentVideoData.source || ''
+      });
+      window.open('watch.html?' + params.toString(), '_blank', 'noopener');
     };
-    videoPreview.addEventListener('play', () => previewPlay.classList.add('hidden'));
-    videoPreview.addEventListener('pause', () => previewPlay.classList.remove('hidden'));
-    videoPreview.addEventListener('ended', () => previewPlay.classList.remove('hidden'));
+
+    document.getElementById('dlMp3Btn').onclick = () => {
+      const src = currentVideoData?.hd || currentVideoData?.sd;
+      if (src) downloadMp3(src, document.getElementById('dlMp3Btn'));
+    };
+
+    document.getElementById('newVideoBtn').onclick = () => {
+      urlInput.value = '';
+      urlInput.focus();
+      currentVideoData = null;
+      resultBox.classList.add('hidden');
+      errorBox.classList.add('hidden');
+      progressBox.classList.add('hidden');
+      hideDlProgress();
+      videoPreview.removeAttribute('src');
+      videoPreview.load();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
   </script>
 </body>
 </html>
