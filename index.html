@@ -1000,7 +1000,7 @@
         p: platformBadge.textContent || '',
         s: currentVideoData.source || ''
       });
-      window.open('watch.html?' + params.toString(), '_blank', 'noopener');
+      window.location.href = 'watch.html?' + params.toString();
     };
 
     document.getElementById('dlMp3Btn').onclick = () => {
