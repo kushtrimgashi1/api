@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SaveVid — Shiko videon</title>
+<title>VidRidge — Shiko videon</title>
 <style>
   :root{--bg:#f7f5f1;--card:#fff;--fg:#14110e;--muted:#8a857d;--border:#e7e2d8;--accent:#e11d24;--soft:#f1ede4}
   @media (prefers-color-scheme:dark){:root{--bg:#0e0d0b;--card:#171512;--fg:#f5f2ea;--muted:#9b958a;--border:#2a271f;--accent:#f87171;--soft:#1f1c17}}
@@ -41,7 +41,7 @@
 <body>
 <div class="wrap">
   <header>
-    <a class="logo" href="index.html"><span class="mark">&#8615;</span> SaveVid</a>
+    <a class="logo" href="index.html"><span class="mark">&#8615;</span> VidRidge</a>
     <a class="back" href="index.html">&larr; Kthehu</a>
   </header>
 
@@ -160,7 +160,7 @@
     showProgress(true);
     try {
       const blob = await getBlob(url);
-      saveBlobAs(blob, 'savevid_' + label + '_' + Date.now() + '.mp4');
+      saveBlobAs(blob, 'vidridge_' + label + '_' + Date.now() + '.mp4');
       bar.style.width = '100%';
       ptxt.textContent = 'Përfundoi';
       btn.textContent = '✓ U shkarkua ' + label + '!';
@@ -231,7 +231,7 @@
         bar.style.width = (55 + Math.round(p * 0.45)) + '%';
         ptxt.textContent = 'Duke konvertuar në MP3... ' + p + '%';
       });
-      saveBlobAs(mp3Blob, 'savevid_audio_' + Date.now() + '.mp3');
+      saveBlobAs(mp3Blob, 'vidridge_audio_' + Date.now() + '.mp3');
       bar.style.width = '100%';
       ptxt.textContent = 'MP3 u shkarkua me sukses!';
       mp3Btn.textContent = '✓ MP3 u shkarkua!';

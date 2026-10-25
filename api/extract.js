@@ -140,7 +140,7 @@ export default async function handler(req, res) {
       if (!vRes.ok) throw new Error(`CDN HTTP ${vRes.status}`);
 
       res.setHeader('Content-Type', vRes.headers.get('content-type') || 'video/mp4');
-      res.setHeader('Content-Disposition', `attachment; filename="savevid_${Date.now()}.mp4"`);
+      res.setHeader('Content-Disposition', `attachment; filename="vidridge_${Date.now()}.mp4"`);
       res.setHeader('Cache-Control', 'no-store');
       const contentLength = vRes.headers.get('content-length');
       if (contentLength) res.setHeader('Content-Length', contentLength);

@@ -138,7 +138,7 @@ async function proxyDownload(targetVideoUrl) {
 
     const headers = new Headers(CORS);
     headers.set('Content-Type', vRes.headers.get('content-type') || 'video/mp4');
-    headers.set('Content-Disposition', `attachment; filename="savevid_${Date.now()}.mp4"`);
+    headers.set('Content-Disposition', `attachment; filename="vidridge_${Date.now()}.mp4"`);
     headers.set('Cache-Control', 'no-store');
     const contentLength = vRes.headers.get('content-length');
     if (contentLength) headers.set('Content-Length', contentLength);

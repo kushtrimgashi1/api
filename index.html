@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>SaveVid — Shkarko video & reels pa watermark (TikTok, Facebook, Instagram)</title>
+  <title>VidRidge — Shkarko video & reels pa watermark (TikTok, Facebook, Instagram)</title>
   <meta name="description" content="Shkarko video, reels dhe postime nga TikTok, Facebook dhe Instagram në HD & SD. Falas, pa login, pa watermark.">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
@@ -102,12 +102,12 @@
         <span class="h-8 w-8 rounded-[9px] grid place-items-center" style="background:var(--accent)">
           <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M4 20h16"/></svg>
         </span>
-        <span class="serif text-[20px] leading-none">SaveVid</span>
+        <span class="serif text-[20px] leading-none">VidRidge</span>
       </a>
       <nav class="hidden md:flex items-center gap-7 text-[11px] uppercase tracking-widest text-[var(--muted)]">
         <a href="#platforms" class="hover:text-[var(--fg)]">Platformat</a>
         <a href="#how" class="hover:text-[var(--fg)]">Si funksionon</a>
-        <a href="#why" class="hover:text-[var(--fg)]">Pse SaveVid</a>
+        <a href="#why" class="hover:text-[var(--fg)]">Pse VidRidge</a>
         <a href="#faq" class="hover:text-[var(--fg)]">FAQ</a>
       </nav>
       <div class="flex items-center gap-2">
@@ -267,7 +267,7 @@
     <!-- WHY -->
     <section id="why" class="max-w-6xl mx-auto px-5 py-16 border-b border-[var(--border)]">
       <div class="mb-8">
-        <p class="text-[10px] uppercase tracking-[0.25em] text-[var(--accent)] font-semibold mb-2">Pse SaveVid</p>
+        <p class="text-[10px] uppercase tracking-[0.25em] text-[var(--accent)] font-semibold mb-2">Pse VidRidge</p>
         <h2 class="serif text-[32px] sm:text-[40px] tracking-[-0.02em]">I shpejtë, i thjeshtë, falas.</h2>
       </div>
       <div class="grid sm:grid-cols-2 gap-4">
@@ -311,7 +311,7 @@
       <div class="space-y-3">
         <details class="bg-[var(--card)] border border-[var(--border)] rounded-[14px] px-5 py-4">
           <summary class="flex items-center justify-between cursor-pointer list-none">
-            <span class="text-[13px]">A është falas SaveVid?</span>
+            <span class="text-[13px]">A është falas VidRidge?</span>
             <span class="faq-icon text-[18px] text-[var(--muted)] transition-transform">+</span>
           </summary>
           <p class="text-[12px] leading-[1.6] text-[var(--muted)] mt-3">Po, plotësisht falas dhe pa limit pagese. Nuk kërkohet regjistrim.</p>
@@ -353,7 +353,7 @@
     <div class="max-w-6xl mx-auto px-5 py-12 grid sm:grid-cols-3 gap-8">
       <div>
         <div class="flex items-baseline gap-2 mb-3">
-          <span class="serif text-[22px]">SaveVid</span>
+          <span class="serif text-[22px]">VidRidge</span>
           <span class="text-[10px] px-2 py-[2px] rounded-full bg-[var(--fg)] text-[var(--bg)] tracking-widest uppercase">V41+</span>
         </div>
         <p class="text-[11px] leading-[1.6] text-[var(--muted)]">Shkarkues video falas për TikTok, Facebook dhe Instagram — në HD & SD, pa watermark.</p>
@@ -363,7 +363,7 @@
         <div class="flex flex-col gap-2 text-[12px]">
           <a href="#platforms" class="hover:underline">Platformat</a>
           <a href="#how" class="hover:underline">Si funksionon</a>
-          <a href="#why" class="hover:underline">Pse SaveVid</a>
+          <a href="#why" class="hover:underline">Pse VidRidge</a>
           <a href="#faq" class="hover:underline">FAQ</a>
         </div>
       </div>
@@ -374,7 +374,7 @@
     </div>
     <div class="border-t border-[var(--border)]">
       <div class="max-w-6xl mx-auto px-5 py-5 text-[10px] uppercase tracking-widest text-[var(--muted)] flex flex-wrap items-center justify-between gap-2">
-        <span>© 2026 SaveVid</span>
+        <span>© 2026 VidRidge</span>
         <span>Bërë për arshivim personal</span>
       </div>
     </div>
@@ -690,7 +690,7 @@
           dlProgressBar.style.width = (55 + Math.round(p * 0.45)) + '%';
           dlProgressText.textContent = `Duke konvertuar në MP3... ${p}%`;
         });
-        saveBlobAs(mp3Blob, `savevid_audio_${Date.now()}.mp3`);
+        saveBlobAs(mp3Blob, `vidridge_audio_${Date.now()}.mp3`);
         dlProgressBar.style.width = '100%';
         dlProgressText.textContent = 'MP3 u shkarkua me sukses!';
         btn.textContent = '✓ MP3 u shkarkua!';
@@ -712,7 +712,7 @@
       hideDlProgress();
       dlProgressWrap.classList.remove('hidden');
 
-      const filename = `savevid_${qualityLabel}_${Date.now()}.mp4`;
+      const filename = `vidridge_${qualityLabel}_${Date.now()}.mp4`;
 
       const saveBlob = (blob) => saveBlobAs(blob, filename);
 
