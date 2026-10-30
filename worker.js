@@ -4,6 +4,10 @@ const LANGS = ['en', 'sq', 'it', 'de', 'fr', 'es', 'pt', 'tr', 'ar'];
 const RTL = ['ar'];
 const CANONICAL_HOST = 'vidridge.com';
 
+// IndexNow (Bing / Yandex / DuckDuckGo): key file is served at /<KEY>.txt
+const INDEXNOW_KEY = '084e6597c5a3d36a699c36eee83504ba';
+const INDEXNOW_FALLBACK_TOKEN = '9fd89838d7207dd62002f52294ce5d179988';
+
 const META = {
   en: { watch: 'Watch video', title: 'VidRidge — Download videos & reels without watermark (TikTok, Facebook, Instagram)', desc: 'Download videos, reels and posts from TikTok, Facebook and Instagram in HD & SD. Free, no login, no watermark.' },
   sq: { watch: 'Shiko videon', title: 'VidRidge — Shkarko video & reels pa watermark (TikTok, Facebook, Instagram)', desc: 'Shkarko video, reels dhe postime nga TikTok, Facebook dhe Instagram në HD & SD. Falas, pa login, pa watermark.' },
@@ -111,6 +115,35 @@ function redirect(location, status = 302) {
   });
 }
 
+function siteUrls() {
+  return LANGS.map(l => `https://${CANONICAL_HOST}/${l}/`);
+}
+
+async function submitIndexNow(urls) {
+  const body = {
+    host: CANONICAL_HOST,
+    key: INDEXNOW_KEY,
+    keyLocation: `https://${CANONICAL_HOST}/${INDEXNOW_KEY}.txt`,
+    urlList: urls
+  };
+  const endpoints = ['https://api.indexnow.org/indexnow', 'https://www.bing.com/indexnow'];
+  const results = [];
+  for (const endpoint of endpoints) {
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json; charset=utf-8' },
+        body: JSON.stringify(body)
+      });
+      results.push({ endpoint, status: res.status });
+      if (res.status === 200 || res.status === 202) break;
+    } catch (e) {
+      results.push({ endpoint, status: 0, error: String(e && e.message || e) });
+    }
+  }
+  return results;
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -138,6 +171,39 @@ export default {
     if (pathname === '/sitemap.xml') {
       return new Response(sitemap(origin), {
         headers: { 'content-type': 'application/xml; charset=utf-8', 'cache-control': 'public, max-age=3600' }
+      });
+    }
+
+    if (pathname === '/' + INDEXNOW_KEY + '.txt') {
+      return new Response(INDEXNOW_KEY, {
+        headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'public, max-age=86400' }
+      });
+    }
+
+    if (pathname === '/api/indexnow') {
+      const token = url.searchParams.get('token') || request.headers.get('x-indexnow-token') || '';
+      const expected = (env && env.INDEXNOW_TOKEN) || INDEXNOW_FALLBACK_TOKEN;
+      if (token !== expected) {
+        return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }), {
+          status: 401,
+          headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' }
+        });
+      }
+      let urls = siteUrls();
+      if (request.method === 'POST') {
+        try {
+          const payload = await request.json();
+          if (payload && Array.isArray(payload.urls) && payload.urls.length) {
+            urls = payload.urls.filter(u => typeof u === 'string' && u.startsWith('https://' + CANONICAL_HOST + '/'));
+          }
+        } catch (e) {}
+      } else if (url.searchParams.get('urls')) {
+        urls = url.searchParams.get('urls').split(',').map(s => s.trim())
+          .filter(u => u.startsWith('https://' + CANONICAL_HOST + '/'));
+      }
+      const results = await submitIndexNow(urls);
+      return new Response(JSON.stringify({ ok: true, submitted: urls.length, urls, results }, null, 2), {
+        headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' }
       });
     }
 
