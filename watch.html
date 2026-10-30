@@ -1,9 +1,11 @@
 <!DOCTYPE html>
-<html lang="sq">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VidRidge — Shiko videon</title>
+<title>VidRidge — Watch video</title>
+<meta name="robots" content="noindex,follow">
+<script src="/i18n.js"></script>
 <style>
   :root{--bg:#f7f5f1;--card:#fff;--fg:#14110e;--muted:#8a857d;--border:#e7e2d8;--accent:#e11d24;--soft:#f1ede4}
   @media (prefers-color-scheme:dark){:root{--bg:#0e0d0b;--card:#171512;--fg:#f5f2ea;--muted:#9b958a;--border:#2a271f;--accent:#f87171;--soft:#1f1c17}}
@@ -15,6 +17,7 @@
   .logo .mark{width:30px;height:30px;border-radius:9px;background:var(--accent);display:grid;place-items:center;color:#fff;font-size:15px;font-weight:800}
   .back{font-size:13px;color:var(--muted);text-decoration:none;border:1px solid var(--border);padding:8px 12px;border-radius:10px;transition:color .15s}
   .back:hover{color:var(--fg)}
+  .lang{border:1px solid var(--border);background:transparent;color:var(--muted);border-radius:10px;padding:8px;font-size:12px;font-family:inherit;max-width:110px}
   .player{position:relative;width:100%;aspect-ratio:9/16;max-height:68vh;background:#000;border-radius:18px;overflow:hidden;border:1px solid var(--border)}
   .player video{width:100%;height:100%;object-fit:contain;background:#000;display:block}
   .card{margin-top:18px;background:var(--card);border:1px solid var(--border);border-radius:18px;padding:16px}
@@ -38,11 +41,14 @@
   .msg{font-size:12px;color:var(--accent);margin-top:10px;display:none}
 </style>
 </head>
-<body>
+<body data-page="watch">
 <div class="wrap">
   <header>
-    <a class="logo" href="index.html"><span class="mark">&#8615;</span> VidRidge</a>
-    <a class="back" href="index.html">&larr; Kthehu</a>
+    <a class="logo" href="/en/"><span class="mark">&#8615;</span> VidRidge</a>
+    <div style="display:flex;align-items:center;gap:8px">
+      <select id="langSelect" class="lang" aria-label="Language" data-i18n-aria="nav.lang"></select>
+      <a class="back" id="backHome" href="/en/" data-i18n="watch.back">&larr; Back</a>
+    </div>
   </header>
 
   <div class="player">
@@ -55,12 +61,12 @@
     <p id="sub" class="sub"></p>
 
     <div class="actions">
-      <button id="hd" class="btn btn-primary">&#8615; Shkarko HD</button>
+      <button id="hd" class="btn btn-primary">&#8615; <span data-i18n="watch.hd">Download HD</span></button>
       <button id="sd" class="btn btn-ghost">SD</button>
-      <button id="open" class="btn btn-icon" title="Hap burimin">&#8599;</button>
+      <button id="open" class="btn btn-icon" title="Open source" data-i18n-aria="watch.open" data-i18n-title="watch.open">&#8599;</button>
     </div>
-    <button id="mp3" class="btn btn-mp3">&#9834; Shkarko MP3 (Audio)</button>
-    <a href="index.html" class="btn btn-new">&#8634; Shkarko nj&euml; video tjet&euml;r</a>
+    <button id="mp3" class="btn btn-mp3">&#9834; <span data-i18n="watch.mp3">Download MP3 (Audio)</span></button>
+    <a href="/en/" id="newVideo" class="btn btn-new" data-i18n="watch.another">&#8634; Download another video</a>
 
     <div id="prog" class="progress">
       <div class="bar"><i id="bar"></i></div>
@@ -72,6 +78,11 @@
 
 <script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
 <script>
+  const t = (k, v) => (window.VRI18N ? window.VRI18N.t(k, v) : k);
+  const base = '/' + ((window.VRI18N && window.VRI18N.lang) || 'en');
+  document.getElementById('backHome').href = base + '/';
+  document.getElementById('newVideo').href = base + '/';
+
   const q = new URLSearchParams(location.search);
   const hdUrl = q.get('u') || '';
   const sdUrl = q.get('sd') || hdUrl;
@@ -118,7 +129,7 @@
     const res = await fetch(url, { mode: 'cors', credentials: 'omit', referrerPolicy: 'no-referrer' });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const ct = (res.headers.get('content-type') || '').toLowerCase();
-    if (ct.includes('text/html') || ct.includes('application/json')) throw new Error('Jo-video');
+    if (ct.includes('text/html') || ct.includes('application/json')) throw new Error('Not a video');
     const total = Number(res.headers.get('content-length') || 0);
     if (!res.body) return await res.blob();
     const reader = res.body.getReader();
@@ -132,10 +143,10 @@
       if (total > 0) {
         const pct = Math.min(100, Math.round((received / total) * 100));
         bar.style.width = pct + '%';
-        ptxt.textContent = 'Duke shkarkuar... ' + pct + '% (' + (received / 1048576).toFixed(1) + ' / ' + (total / 1048576).toFixed(1) + ' MB)';
+        ptxt.textContent = t('js.dlPct', { pct: pct, mb: (received / 1048576).toFixed(1), total: (total / 1048576).toFixed(1) });
       } else {
         bar.style.width = '90%';
-        ptxt.textContent = 'Duke shkarkuar... ' + (received / 1048576).toFixed(1) + ' MB';
+        ptxt.textContent = t('js.dlMb', { mb: (received / 1048576).toFixed(1) });
       }
     }
     return new Blob(chunks, { type: ct.includes('mp4') || !ct ? 'video/mp4' : ct });
@@ -143,10 +154,10 @@
 
   async function getBlob(url) {
     try {
-      ptxt.textContent = 'Duke u lidhur drejt CDN...';
+      ptxt.textContent = t('js.cdn');
       return await fetchBlob(url);
     } catch (e) {
-      ptxt.textContent = 'Duke u lidhur përmes serverit...';
+      ptxt.textContent = t('js.viaServer');
       return await fetchBlob('/api/extract?proxy=1&url=' + encodeURIComponent(url));
     }
   }
@@ -155,21 +166,21 @@
     if (!url) return;
     const orig = btn.innerHTML;
     btn.disabled = true;
-    btn.textContent = 'Duke shkarkuar ' + label + '...';
+    btn.textContent = t('js.dling', { q: label });
     showMsg('');
     showProgress(true);
     try {
       const blob = await getBlob(url);
       saveBlobAs(blob, 'vidridge_' + label + '_' + Date.now() + '.mp4');
       bar.style.width = '100%';
-      ptxt.textContent = 'Përfundoi';
-      btn.textContent = '✓ U shkarkua ' + label + '!';
+      ptxt.textContent = t('js.done');
+      btn.textContent = t('js.doneQ', { q: label });
       setTimeout(() => { btn.innerHTML = orig; btn.disabled = false; showProgress(false); }, 3000);
     } catch (e) {
       btn.innerHTML = orig;
       btn.disabled = false;
       showProgress(false);
-      showMsg('Shkarkimi dështoi. Provo butonin ↗ për ta hapur direkt.');
+      showMsg(t('js.dlFail'));
     }
   }
 
@@ -205,15 +216,15 @@
     if (!hdUrl) return;
     const orig = mp3Btn.innerHTML;
     mp3Btn.disabled = true;
-    mp3Btn.textContent = 'Duke konvertuar në MP3...';
+    mp3Btn.textContent = t('js.convMp3');
     showMsg('');
     showProgress(true);
     bar.style.width = '0%';
-    ptxt.textContent = 'Duke shkarkuar audion...';
+    ptxt.textContent = t('js.dlAudio');
     try {
-      if (!window.lamejs) throw new Error('Libraria MP3 nuk u ngarkua.');
+      if (!window.lamejs) throw new Error(t('js.mp3LibShort'));
       const mp4Blob = await getBlob(hdUrl);
-      ptxt.textContent = 'Duke nxjerrë audion dhe duke konvertuar në MP3...';
+      ptxt.textContent = t('js.extractAudio');
       bar.style.width = '40%';
       await new Promise(r => setTimeout(r, 60));
       const arrayBuffer = await mp4Blob.arrayBuffer();
@@ -223,24 +234,24 @@
       let audioBuffer;
       try { audioBuffer = await Promise.race([
         ctx.decodeAudioData(arrayBuffer),
-        new Promise((_, rej) => setTimeout(() => rej(new Error('Dekodimi i audios zgjati shumë.')), 25000))
+        new Promise((_, rej) => setTimeout(() => rej(new Error(t('js.decodeSlow'))), 25000))
       ]); }
       finally { if (ctx.close) ctx.close(); }
       bar.style.width = '55%';
       const mp3Blob = encodeMp3(audioBuffer, (p) => {
         bar.style.width = (55 + Math.round(p * 0.45)) + '%';
-        ptxt.textContent = 'Duke konvertuar në MP3... ' + p + '%';
+        ptxt.textContent = t('js.convPct', { p: p });
       });
       saveBlobAs(mp3Blob, 'vidridge_audio_' + Date.now() + '.mp3');
       bar.style.width = '100%';
-      ptxt.textContent = 'MP3 u shkarkua me sukses!';
-      mp3Btn.textContent = '✓ MP3 u shkarkua!';
+      ptxt.textContent = t('js.mp3Ok');
+      mp3Btn.textContent = t('js.mp3Done');
       setTimeout(() => { mp3Btn.innerHTML = orig; mp3Btn.disabled = false; showProgress(false); }, 3000);
     } catch (e) {
       mp3Btn.innerHTML = orig;
       mp3Btn.disabled = false;
       showProgress(false);
-      showMsg('Konvertimi në MP3 dështoi: ' + (e.message || 'provo një video tjetër.'));
+      showMsg(t('js.mp3Fail') + (e.message || t('js.tryAnother')));
     }
   };
 
@@ -249,7 +260,7 @@
   document.getElementById('open').onclick = () => { if (hdUrl) window.open(hdUrl, '_blank', 'noopener'); };
 
   if (!hdUrl) {
-    showMsg('Nuk u gjet video. Kthehu dhe provo një link tjetër.');
+    showMsg(t('js.noVideo'));
     vid.style.display = 'none';
   }
 </script>
