@@ -2,6 +2,7 @@ import { onRequest } from './functions/api/extract.js';
 
 const LANGS = ['en', 'sq', 'it', 'de', 'fr', 'es', 'pt', 'tr', 'ar'];
 const RTL = ['ar'];
+const CANONICAL_HOST = 'vidridge.com';
 
 const META = {
   en: { watch: 'Watch video', title: 'VidRidge — Download videos & reels without watermark (TikTok, Facebook, Instagram)', desc: 'Download videos, reels and posts from TikTok, Facebook and Instagram in HD & SD. Free, no login, no watermark.' },
@@ -115,6 +116,20 @@ export default {
     const url = new URL(request.url);
     const pathname = url.pathname;
     const origin = url.origin;
+
+    // Canonical host: force HTTPS and one hostname (www / *.workers.dev -> apex)
+    if (url.protocol === 'http:') {
+      return redirect('https://' + url.host + pathname + url.search, 301);
+    }
+    const host = url.hostname.toLowerCase();
+    if (!pathname.startsWith('/api/') && host !== 'localhost' && !/^[\d.]+$/.test(host)) {
+      if (host.startsWith('www.') && host.slice(4) !== host) {
+        return redirect('https://' + host.slice(4) + pathname + url.search, 301);
+      }
+      if (host.endsWith('.workers.dev') && host !== CANONICAL_HOST) {
+        return redirect('https://' + CANONICAL_HOST + pathname + url.search, 301);
+      }
+    }
 
     if (pathname === '/api/extract' || pathname === '/api/extract/') {
       return onRequest({ request, env, ctx });
