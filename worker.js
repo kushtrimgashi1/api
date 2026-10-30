@@ -136,7 +136,8 @@ async function submitIndexNow(urls) {
         body: JSON.stringify(body)
       });
       results.push({ endpoint, status: res.status });
-      if (res.status === 200 || res.status === 202) break;
+      // 200/202 = accepted. 429 = shared-IP quota hit, retrying the other endpoint won't help.
+      if (res.status === 200 || res.status === 202 || res.status === 429) break;
     } catch (e) {
       results.push({ endpoint, status: 0, error: String(e && e.message || e) });
     }
