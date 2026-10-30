@@ -1,6 +1,5 @@
 import { onRequest } from './functions/api/extract.js';
 
-const SITE = 'https://api.kushtrimgashi90.workers.dev';
 const LANGS = ['en', 'sq', 'it', 'de', 'fr', 'es', 'pt', 'tr', 'ar'];
 const RTL = ['ar'];
 
@@ -41,19 +40,19 @@ function esc(s) {
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-function seoLinks(lang, isWatch) {
+function seoLinks(lang, isWatch, origin) {
   const meta = META[lang] || META.en;
   if (isWatch) {
-    return `<link rel="canonical" href="${SITE}/${lang}/watch">`;
+    return `<link rel="canonical" href="${origin}/${lang}/watch">`;
   }
-  const links = LANGS.map(l => `<link rel="alternate" hreflang="${l}" href="${SITE}/${l}/">`);
-  links.push(`<link rel="alternate" hreflang="x-default" href="${SITE}/en/">`);
-  links.push(`<link rel="canonical" href="${SITE}/${lang}/">`);
+  const links = LANGS.map(l => `<link rel="alternate" hreflang="${l}" href="${origin}/${l}/">`);
+  links.push(`<link rel="alternate" hreflang="x-default" href="${origin}/en/">`);
+  links.push(`<link rel="canonical" href="${origin}/${lang}/">`);
   links.push(`<meta property="og:type" content="website">`);
   links.push(`<meta property="og:site_name" content="VidRidge">`);
   links.push(`<meta property="og:title" content="${esc(meta.title)}">`);
   links.push(`<meta property="og:description" content="${esc(meta.desc)}">`);
-  links.push(`<meta property="og:url" content="${SITE}/${lang}/">`);
+  links.push(`<meta property="og:url" content="${origin}/${lang}/">`);
   links.push(`<meta property="og:locale" content="${lang}">`);
   links.push(`<meta name="twitter:card" content="summary_large_image">`);
   links.push(`<meta name="twitter:title" content="${esc(meta.title)}">`);
@@ -61,7 +60,7 @@ function seoLinks(lang, isWatch) {
   return links.join('\n  ');
 }
 
-function inject(html, lang, isWatch) {
+function inject(html, lang, isWatch, origin) {
   const meta = META[lang] || META.en;
   const dir = RTL.includes(lang) ? 'rtl' : 'ltr';
   html = html.replace('<html lang="en">', `<html lang="${lang}" dir="${dir}">`);
@@ -70,18 +69,18 @@ function inject(html, lang, isWatch) {
   if (!isWatch) {
     html = html.replace(/<meta name="description" content="[^"]*">/, `<meta name="description" content="${esc(meta.desc)}">`);
   }
-  const links = seoLinks(lang, isWatch);
+  const links = seoLinks(lang, isWatch, origin);
   if (html.includes('<!--SEO-->')) html = html.replace('<!--SEO-->', links);
   else html = html.replace('</head>', '  ' + links + '\n</head>');
   return html;
 }
 
-async function serveHtml(request, env, assetPath, lang) {
+async function serveHtml(request, env, assetPath, lang, origin) {
   const assetUrl = new URL(request.url);
   assetUrl.pathname = assetPath;
   const res = await env.ASSETS.fetch(new Request(assetUrl.toString(), { headers: request.headers }));
   const html = await res.text();
-  return new Response(inject(html, lang, assetPath === '/watch.html'), {
+  return new Response(inject(html, lang, assetPath === '/watch.html', origin), {
     status: 200,
     headers: {
       'content-type': 'text/html; charset=utf-8',
@@ -92,16 +91,16 @@ async function serveHtml(request, env, assetPath, lang) {
   });
 }
 
-function sitemap() {
+function sitemap(origin) {
   const urls = LANGS.map(l => {
-    const alts = LANGS.map(a => `    <xhtml:link rel="alternate" hreflang="${a}" href="${SITE}/${a}/"/>`).join('\n');
-    return `  <url>\n    <loc>${SITE}/${l}/</loc>\n${alts}\n    <xhtml:link rel="alternate" hreflang="x-default" href="${SITE}/en/"/>\n    <changefreq>weekly</changefreq>\n    <priority>1.0</priority>\n  </url>`;
+    const alts = LANGS.map(a => `    <xhtml:link rel="alternate" hreflang="${a}" href="${origin}/${a}/"/>`).join('\n');
+    return `  <url>\n    <loc>${origin}/${l}/</loc>\n${alts}\n    <xhtml:link rel="alternate" hreflang="x-default" href="${origin}/en/"/>\n    <changefreq>weekly</changefreq>\n    <priority>1.0</priority>\n  </url>`;
   }).join('\n');
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${urls}\n</urlset>\n`;
 }
 
-function robots() {
-  return `User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /watch\nDisallow: /*/watch\n\nSitemap: ${SITE}/sitemap.xml\n`;
+function robots(origin) {
+  return `User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /watch\nDisallow: /*/watch\n\nSitemap: ${origin}/sitemap.xml\n`;
 }
 
 function redirect(location, status = 302) {
@@ -115,41 +114,42 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const pathname = url.pathname;
+    const origin = url.origin;
 
     if (pathname === '/api/extract' || pathname === '/api/extract/') {
       return onRequest({ request, env, ctx });
     }
 
     if (pathname === '/sitemap.xml') {
-      return new Response(sitemap(), {
+      return new Response(sitemap(origin), {
         headers: { 'content-type': 'application/xml; charset=utf-8', 'cache-control': 'public, max-age=3600' }
       });
     }
 
     if (pathname === '/robots.txt') {
-      return new Response(robots(), {
+      return new Response(robots(origin), {
         headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'public, max-age=3600' }
       });
     }
 
     if (pathname === '/' || pathname === '/index.html') {
-      return redirect(SITE + '/' + pickLang(request, url) + '/');
+      return redirect(origin + '/' + pickLang(request, url) + '/');
     }
 
     const m = pathname.match(/^\/([a-z]{2})(\/.*)?$/);
     if (m && LANGS.includes(m[1])) {
       const lang = m[1];
       const rest = m[2] || '';
-      if (rest === '') return redirect(SITE + '/' + lang + '/', 301);
-      if (rest === '/' || rest === '/index.html') return serveHtml(request, env, '/index.html', lang);
+      if (rest === '') return redirect(origin + '/' + lang + '/', 301);
+      if (rest === '/' || rest === '/index.html') return serveHtml(request, env, '/index.html', lang, origin);
       if (rest === '/watch' || rest === '/watch/' || rest === '/watch.html') {
-        if (rest === '/watch/' || rest === '/watch.html') return redirect(SITE + '/' + lang + '/watch' + url.search, 301);
-        return serveHtml(request, env, '/watch.html', lang);
+        if (rest === '/watch/' || rest === '/watch.html') return redirect(origin + '/' + lang + '/watch' + url.search, 301);
+        return serveHtml(request, env, '/watch.html', lang, origin);
       }
     }
 
     if (pathname === '/watch' || pathname === '/watch.html') {
-      return redirect(SITE + '/' + pickLang(request, url) + '/watch' + url.search);
+      return redirect(origin + '/' + pickLang(request, url) + '/watch' + url.search);
     }
 
     return env.ASSETS.fetch(request);
