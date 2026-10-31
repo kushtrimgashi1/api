@@ -17,7 +17,7 @@ jobs:
           set -e
           URLS=""
           for lang in en sq it de fr es pt tr ar; do
-            for page in "" "/about" "/privacy" "/terms"; do
+            for page in "" "/about" "/privacy" "/terms" "/contact"; do
               if [ -z "$URLS" ]; then URLS="\"https://vidridge.com/$lang$page\""; else URLS="$URLS,\"https://vidridge.com/$lang$page\""; fi
             done
           done

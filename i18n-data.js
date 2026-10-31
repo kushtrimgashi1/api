@@ -65,7 +65,22 @@
     "terms.s2d",
     "terms.s3t",
     "terms.s3d",
-    "page.contact"
+    "page.contact",
+    "nav.contact",
+    "contact.title",
+    "contact.h1",
+    "contact.lead",
+    "contact.name",
+    "contact.email",
+    "contact.message",
+    "contact.send",
+    "contact.sending",
+    "contact.ok",
+    "contact.err",
+    "contact.fallback",
+    "contact.direct",
+    "contact.phEmail",
+    "contact.phMessage"
   ];
 
   const EN = [
@@ -108,7 +123,22 @@
     "Do not use VidRidge for private content, illegal material, bulk scraping or reselling the service. Respect creators and platform rules.",
     "No warranty",
     "The service is provided as is, without guarantees. It may change or stop at any time and we are not liable for how you use the files.",
-    "Questions? Write to hello@vidridge.com."
+    "Questions? Write to hello@vidridge.com.",
+    "Contact",
+    "Contact",
+    "Contact us",
+    "Found a bug, a video that will not download, or want another platform supported? Write to us — we read every message.",
+    "Your name",
+    "Your email",
+    "Message",
+    "Send message",
+    "Sending...",
+    "Message sent. We usually reply within 1–2 days.",
+    "Could not send the message. Please try again or email us directly.",
+    "The form is temporarily unavailable.",
+    "Or email us directly:",
+    "you@example.com",
+    "Tell us what happened..."
   ];
 
   export const LOCALES = { en: EN };
@@ -152,7 +182,22 @@
     "Mos e përdor VidRidge për përmbajtje private, materiale të paligjshme, skrapim masiv ose rishitje të shërbimit. Respekto krijuesit dhe rregullat e platformave.",
     "Pa garanci",
     "Shërbimi ofrohet ashtu si është, pa garanci. Mund të ndryshojë ose të ndalet në çdo moment dhe nuk mbajmë përgjegjësi për mënyrën si i përdor skedarët.",
-    "Pyetje? Shkruaj në hello@vidridge.com."
+    "Pyetje? Shkruaj në hello@vidridge.com.",
+    "Kontakt",
+    "Kontakt",
+    "Na shkruaj",
+    "Gjete një problem, një video që nuk shkarkohet, ose do një platformë tjetër? Na shkruaj — i lexojmë të gjitha mesazhet.",
+    "Emri yt",
+    "Emaili yt",
+    "Mesazhi",
+    "Dërgo mesazhin",
+    "Duke dërguar...",
+    "Mesazhi u dërgua. Zakonisht përgjigjemi brenda 1–2 ditësh.",
+    "Nuk u dërgua dot. Provo përsëri ose na shkruaj direkt.",
+    "Formulari është përkohësisht i padisponueshëm.",
+    "Ose na shkruaj direkt:",
+    "ti@shembull.com",
+    "Na trego çfarë ndodhi..."
   ];
   LOCALES.it = [
     'Piattaforme','Come funziona','Perché VidRidge','FAQ','Lingua','Gratis • Nessun login',
@@ -194,7 +239,22 @@
     "Non usare VidRidge per contenuti privati, materiale illegale, scraping massivo o rivendita del servizio. Rispetta i creator e le regole delle piattaforme.",
     "Nessuna garanzia",
     "Il servizio è fornito così com'è, senza garanzie. Può cambiare o interrompersi in qualsiasi momento e non siamo responsabili dell'uso che fai dei file.",
-    "Domande? Scrivi a hello@vidridge.com."
+    "Domande? Scrivi a hello@vidridge.com.",
+    "Contatti",
+    "Contatti",
+    "Scrivici",
+    "Hai trovato un bug, un video che non si scarica o vuoi un'altra piattaforma? Scrivici: leggiamo ogni messaggio.",
+    "Il tuo nome",
+    "La tua email",
+    "Messaggio",
+    "Invia messaggio",
+    "Invio...",
+    "Messaggio inviato. Di solito rispondiamo entro 1–2 giorni.",
+    "Invio non riuscito. Riprova o scrivici direttamente.",
+    "Il modulo non è disponibile al momento.",
+    "Oppure scrivici direttamente:",
+    "tu@esempio.com",
+    "Raccontaci cosa è successo..."
   ];
   LOCALES.de = [
     'Plattformen','So funktioniert\'s','Warum VidRidge','FAQ','Sprache','Kostenlos • Ohne Login',
@@ -236,7 +296,22 @@
     "VidRidge nicht für private Inhalte, illegales Material, massenhaftes Scraping oder den Weiterverkauf des Dienstes nutzen. Respektiere Creator und Plattformregeln.",
     "Keine Gewährleistung",
     "Der Dienst wird ohne Gewähr bereitgestellt. Er kann sich jederzeit ändern oder eingestellt werden; wir haften nicht für die Verwendung der Dateien.",
-    "Fragen? Schreib an hello@vidridge.com."
+    "Fragen? Schreib an hello@vidridge.com.",
+    "Kontakt",
+    "Kontakt",
+    "Schreib uns",
+    "Bug gefunden, ein Video lässt sich nicht laden oder du willst eine weitere Plattform? Schreib uns — wir lesen jede Nachricht.",
+    "Dein Name",
+    "Deine E-Mail",
+    "Nachricht",
+    "Nachricht senden",
+    "Wird gesendet...",
+    "Nachricht gesendet. Wir antworten meist innerhalb von 1–2 Tagen.",
+    "Senden fehlgeschlagen. Bitte erneut versuchen oder direkt schreiben.",
+    "Das Formular ist vorübergehend nicht verfügbar.",
+    "Oder schreib uns direkt:",
+    "du@beispiel.de",
+    "Beschreibe, was passiert ist..."
   ];
   LOCALES.fr = [
     'Plateformes','Comment ça marche','Pourquoi VidRidge','FAQ','Langue','Gratuit • Sans connexion',
@@ -278,7 +353,22 @@
     "Ne pas utiliser VidRidge pour des contenus privés, du matériel illégal, du scraping massif ou la revente du service. Respectez les créateurs et les règles des plateformes.",
     "Aucune garantie",
     "Le service est fourni tel quel, sans garantie. Il peut changer ou s'arrêter à tout moment et nous ne sommes pas responsables de l'usage des fichiers.",
-    "Une question ? Écrivez à hello@vidridge.com."
+    "Une question ? Écrivez à hello@vidridge.com.",
+    "Contact",
+    "Contact",
+    "Écrivez-nous",
+    "Un bug, une vidéo qui ne se télécharge pas, ou une plateforme à ajouter ? Écrivez-nous — nous lisons chaque message.",
+    "Votre nom",
+    "Votre e-mail",
+    "Message",
+    "Envoyer le message",
+    "Envoi...",
+    "Message envoyé. Nous répondons généralement sous 1 à 2 jours.",
+    "Envoi impossible. Réessayez ou écrivez-nous directement.",
+    "Le formulaire est momentanément indisponible.",
+    "Ou écrivez-nous directement :",
+    "vous@exemple.com",
+    "Décrivez ce qui s'est passé..."
   ];
   LOCALES.es = [
     'Plataformas','Cómo funciona','Por qué VidRidge','FAQ','Idioma','Gratis • Sin registro',
@@ -320,7 +410,22 @@
     "No uses VidRidge para contenido privado, material ilegal, scraping masivo ni para revender el servicio. Respeta a los creadores y las reglas de las plataformas.",
     "Sin garantías",
     "El servicio se ofrece tal cual, sin garantías. Puede cambiar o cesar en cualquier momento y no somos responsables del uso que hagas de los archivos.",
-    "¿Preguntas? Escribe a hello@vidridge.com."
+    "¿Preguntas? Escribe a hello@vidridge.com.",
+    "Contacto",
+    "Contacto",
+    "Escríbenos",
+    "¿Un error, un video que no se descarga o quieres otra plataforma? Escríbenos: leemos todos los mensajes.",
+    "Tu nombre",
+    "Tu correo",
+    "Mensaje",
+    "Enviar mensaje",
+    "Enviando...",
+    "Mensaje enviado. Solemos responder en 1–2 días.",
+    "No se pudo enviar. Inténtalo de nuevo o escríbenos directamente.",
+    "El formulario no está disponible por el momento.",
+    "O escríbenos directamente:",
+    "tu@ejemplo.com",
+    "Cuéntanos qué pasó..."
   ];
   LOCALES.pt = [
     'Plataformas','Como funciona','Por que VidRidge','FAQ','Idioma','Grátis • Sem login',
@@ -362,7 +467,22 @@
     "Não use o VidRidge para conteúdo privado, material ilegal, recolha massiva ou revenda do serviço. Respeite os criadores e as regras das plataformas.",
     "Sem garantias",
     "O serviço é fornecido tal como está, sem garantias. Pode mudar ou terminar a qualquer momento e não somos responsáveis pela forma como usa os ficheiros.",
-    "Dúvidas? Escreva para hello@vidridge.com."
+    "Dúvidas? Escreva para hello@vidridge.com.",
+    "Contacto",
+    "Contacto",
+    "Fale connosco",
+    "Encontrou um erro, um vídeo que não descarrega ou quer outra plataforma? Escreva-nos — lemos todas as mensagens.",
+    "O seu nome",
+    "O seu email",
+    "Mensagem",
+    "Enviar mensagem",
+    "A enviar...",
+    "Mensagem enviada. Normalmente respondemos em 1–2 dias.",
+    "Não foi possível enviar. Tente novamente ou escreva diretamente.",
+    "O formulário está temporariamente indisponível.",
+    "Ou escreva diretamente:",
+    "voce@exemplo.com",
+    "Conte-nos o que aconteceu..."
   ];
   LOCALES.tr = [
     'Platformlar','Nasıl çalışır','Neden VidRidge','SSS','Dil','Ücretsiz • Giriş yok',
@@ -404,7 +524,22 @@
     "VidRidge'i özel içerikler, yasa dışı materyal, toplu kazıma veya hizmeti yeniden satmak için kullanmayın. İçerik üreticilerine ve platform kurallarına saygı gösterin.",
     "Garanti yok",
     "Hizmet olduğu gibi, garanti verilmeden sunulur. Her an değişebilir veya durabilir; dosyaları nasıl kullandığınızdan sorumlu değiliz.",
-    "Sorularınız mı var? hello@vidridge.com adresine yazın."
+    "Sorularınız mı var? hello@vidridge.com adresine yazın.",
+    "İletişim",
+    "İletişim",
+    "Bize yazın",
+    "Hata mı buldunuz, indirilemeyen bir video mu var, yoksa yeni bir platform mu istiyorsunuz? Yazın — her mesajı okuyoruz.",
+    "Adınız",
+    "E-postanız",
+    "Mesaj",
+    "Mesaj gönder",
+    "Gönderiliyor...",
+    "Mesaj gönderildi. Genellikle 1–2 gün içinde yanıt veriyoruz.",
+    "Gönderilemedi. Lütfen tekrar deneyin veya doğrudan yazın.",
+    "Form şu anda kullanılamıyor.",
+    "Ya da doğrudan yazın:",
+    "siz@ornek.com",
+    "Ne olduğunu anlatın..."
   ];
   LOCALES.ar = [
     'المنصات','كيف يعمل','لماذا VidRidge','الأسئلة الشائعة','اللغة','مجاني • بدون تسجيل',
@@ -446,6 +581,21 @@
     "لا تستخدم VidRidge لمحتوى خاص أو مواد غير قانونية أو كشطاً جماعياً أو إعادة بيع الخدمة. احترم المنشئين وقواعد المنصات.",
     "لا ضمان",
     "تُقدَّم الخدمة كما هي وبدون ضمانات. قد تتغير أو تتوقف في أي وقت، ولا نتحمل مسؤولية طريقة استخدامك للملفات.",
-    "أسئلة؟ اكتب إلى hello@vidridge.com."
+    "أسئلة؟ اكتب إلى hello@vidridge.com.",
+    "اتصل بنا",
+    "اتصل بنا",
+    "راسلنا",
+    "وجدت خطأً أو فيديو لا يُنزَّل أو تريد منصة أخرى؟ راسلنا — نقرأ كل رسالة.",
+    "اسمك",
+    "بريدك الإلكتروني",
+    "الرسالة",
+    "إرسال الرسالة",
+    "جارٍ الإرسال...",
+    "تم إرسال الرسالة. نرد عادة خلال يوم إلى يومين.",
+    "تعذّر الإرسال. حاول مرة أخرى أو راسلنا مباشرة.",
+    "النموذج غير متاح مؤقتاً.",
+    "أو راسلنا مباشرة:",
+    "you@example.com",
+    "أخبرنا بما حدث..."
   ];
   /* @@LANGUAGES@@ */

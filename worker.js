@@ -7,9 +7,10 @@ const RTL = ['ar'];
 const CANONICAL_HOST = 'vidridge.com';
 
 const DOC_PAGES = {
-  about: { title: '0.6' },
-  privacy: { title: '0.3' },
-  terms: { title: '0.3' }
+  about: { priority: '0.6' },
+  privacy: { priority: '0.3' },
+  terms: { priority: '0.3' },
+  contact: { priority: '0.4' }
 };
 
 // IndexNow (Bing / Yandex / DuckDuckGo): key file is served at /<KEY>.txt
@@ -163,7 +164,8 @@ async function serveHtml(request, env, assetPath, lang, origin, slug) {
 }
 
 function sitemap(origin) {
-  const pages = [{ path: '/', priority: '1.0' }, { path: '/about', priority: '0.6' }, { path: '/privacy', priority: '0.3' }, { path: '/terms', priority: '0.3' }];
+  const pages = [{ path: '/', priority: '1.0' }];
+  for (const [slug, cfg] of Object.entries(DOC_PAGES)) pages.push({ path: '/' + slug, priority: cfg.priority });
   const urls = [];
   for (const page of pages) {
     for (const l of LANGS) {
@@ -182,6 +184,76 @@ function redirect(location, status = 302) {
   return new Response(null, {
     status,
     headers: { location, 'cache-control': 'no-store' }
+  });
+}
+
+function json(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' }
+  });
+}
+
+const CONTACT_TO = 'hello@vidridge.com';
+const CONTACT_FROM = 'noreply@vidridge.com';
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i;
+
+async function handleContact(request, env) {
+  if (request.method !== 'POST') {
+    return json({ ok: false, error: 'method_not_allowed' }, 405);
+  }
+  let body;
+  try {
+    body = await request.json();
+  } catch (e) {
+    return json({ ok: false, error: 'bad_request' }, 400);
+  }
+  const name = String(body && body.name || '').trim().slice(0, 80);
+  const email = String(body && body.email || '').trim().slice(0, 120);
+  const message = String(body && body.message || '').trim().slice(0, 2000);
+  const honey = String(body && body.website || '').trim();
+
+  // Honeypot: pretend success so bots do not learn the rule.
+  if (honey) return json({ ok: true });
+
+  if (!name || !email || !message || !EMAIL_RE.test(email)) {
+    return json({ ok: false, error: 'invalid' }, 400);
+  }
+
+  const binding = env && env.CONTACT_EMAIL;
+  if (!binding || typeof binding.send !== 'function') {
+    return json({ ok: false, error: 'not_configured' }, 503);
+  }
+
+  const text = `From: ${name} <${email}>\n\n${message}\n\n---\nSent from vidridge.com contact form`;
+  try {
+    await binding.send({
+      to: (env && env.CONTACT_TO) || CONTACT_TO,
+      from: { email: (env && env.CONTACT_FROM) || CONTACT_FROM, name: 'VidRidge' },
+      replyTo: email,
+      subject: `VidRidge contact — ${name}`.slice(0, 120),
+      text
+    });
+  } catch (e) {
+    return json({ ok: false, error: 'send_failed' }, 502);
+  }
+  return json({ ok: true });
+}
+
+// HSTS + nosniff on every response (including curl/asset responses).
+const SECURITY_HEADERS = {
+  'strict-transport-security': 'max-age=31536000; includeSubDomains',
+  'x-content-type-options': 'nosniff',
+  'referrer-policy': 'strict-origin-when-cross-origin'
+};
+
+function secure(res) {
+  const headers = new Headers(res.headers);
+  for (const [k, v] of Object.entries(SECURITY_HEADERS)) headers.set(k, v);
+  return new Response(res.body, {
+    status: res.status,
+    statusText: res.statusText,
+    headers
   });
 }
 
@@ -220,8 +292,7 @@ async function submitIndexNow(urls) {
   return results;
 }
 
-export default {
-  async fetch(request, env, ctx) {
+async function handle(request, env, ctx) {
     const url = new URL(request.url);
     const pathname = url.pathname;
     const origin = url.origin;
@@ -242,6 +313,10 @@ export default {
 
     if (pathname === '/api/extract' || pathname === '/api/extract/') {
       return onRequest({ request, env, ctx });
+    }
+
+    if (pathname === '/api/contact' || pathname === '/api/contact/') {
+      return handleContact(request, env);
     }
 
     if (pathname === '/sitemap.xml') {
@@ -307,7 +382,7 @@ export default {
         if (rest === '/watch/' || rest === '/watch.html') return redirect(origin + '/' + lang + '/watch' + url.search, 301);
         return serveHtml(request, env, '/watch.html', lang, origin);
       }
-      const doc = rest.match(/^\/(about|privacy|terms)(\/|\.html)?$/);
+      const doc = rest.match(/^\/(about|privacy|terms|contact)(\/|\.html)?$/);
       if (doc) {
         if (rest.endsWith('/') || rest.endsWith('.html')) {
           return redirect(origin + '/' + lang + '/' + doc[1] + url.search, 301);
@@ -320,11 +395,17 @@ export default {
       return redirect(origin + '/' + pickLang(request, url) + '/watch' + url.search);
     }
 
-    const topDoc = pathname.match(/^\/(about|privacy|terms)(\/|\.html)?$/);
+    const topDoc = pathname.match(/^\/(about|privacy|terms|contact)(\/|\.html)?$/);
     if (topDoc) {
       return redirect(origin + '/' + pickLang(request, url) + '/' + topDoc[1]);
     }
 
     return env.ASSETS.fetch(request);
+}
+
+export default {
+  async fetch(request, env, ctx) {
+    const res = await handle(request, env, ctx);
+    return secure(res);
   }
 };
