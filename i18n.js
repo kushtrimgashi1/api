@@ -119,8 +119,11 @@ import { LANGS, META, KEYS, LOCALES } from './i18n-data.js';
   function switchTo(code) {
     if (!dict[code]) return;
     document.cookie = 'lang=' + code + '; path=/; max-age=31536000; SameSite=Lax';
-    var isWatch = /\/watch\/?$/.test(location.pathname) || /watch\.html$/.test(location.pathname);
-    location.href = '/' + code + (isWatch ? '/watch' : '/') + location.search + location.hash;
+    var m = location.pathname.match(/^\/([a-z]{2})(\/.*)?$/);
+    var rest = (m && m[2]) ? m[2] : '/';
+    if (rest === '/' || rest === '/index.html') rest = '/';
+    if (rest === '/watch.html') rest = '/watch';
+    location.href = '/' + code + rest + location.search + location.hash;
   }
 
   function bind() {

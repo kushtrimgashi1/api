@@ -283,6 +283,10 @@ export default {
       });
     }
 
+    if (pathname === '/favicon.ico') {
+      return redirect(origin + '/favicon.svg', 301);
+    }
+
     if (pathname === '/robots.txt') {
       return new Response(robots(origin), {
         headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'public, max-age=3600' }
