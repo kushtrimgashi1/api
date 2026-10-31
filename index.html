@@ -6,7 +6,7 @@
   <title>VidRidge — Download videos & reels without watermark (TikTok, Facebook, Instagram)</title>
   <meta name="description" content="Download videos, reels and posts from TikTok, Facebook and Instagram in HD & SD. Free, no login, no watermark.">
   <!--SEO-->
-  <script src="/i18n.js"></script>
+  <script type="module" src="/i18n.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -369,6 +369,9 @@
           <a href="#how" class="hover:underline" data-i18n="nav.how">How it works</a>
           <a href="#why" class="hover:underline" data-i18n="nav.why">Why VidRidge</a>
           <a href="#faq" class="hover:underline" data-i18n="nav.faq">FAQ</a>
+          <a href="/__LANG__/about" class="hover:underline" data-i18n="nav.about">About</a>
+          <a href="/__LANG__/privacy" class="hover:underline" data-i18n="nav.privacy">Privacy</a>
+          <a href="/__LANG__/terms" class="hover:underline" data-i18n="nav.terms">Terms</a>
         </div>
         <p class="text-[10px] uppercase tracking-widest text-[var(--muted)] mt-5 mb-2" data-i18n="footer.lang">Language</p>
         <div id="langLinks" class="flex flex-wrap gap-x-3 gap-y-1 text-[12px]"></div>
@@ -424,9 +427,9 @@
       progressBox.classList.add('hidden');
     };
 
-    const stageText = [t('js.stage1'), t('js.stage2'), t('js.stage3'), t('js.stage4')];
+    const stageText = () => [t('js.stage1'), t('js.stage2'), t('js.stage3'), t('js.stage4')];
     function setStep(idx, status) {
-      if (status === 'trying') progressStatus.textContent = stageText[idx] || t('js.working');
+      if (status === 'trying') progressStatus.textContent = stageText()[idx] || t('js.working');
       else if (status === 'fail') progressStatus.textContent = t('js.stepFail', { n: idx + 1 });
     }
 

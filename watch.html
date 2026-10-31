@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VidRidge — Watch video</title>
 <meta name="robots" content="noindex,follow">
-<script src="/i18n.js"></script>
+<script type="module" src="/i18n.js"></script>
 <style>
   :root{--bg:#f7f5f1;--card:#fff;--fg:#14110e;--muted:#8a857d;--border:#e7e2d8;--accent:#e11d24;--soft:#f1ede4}
   @media (prefers-color-scheme:dark){:root{--bg:#0e0d0b;--card:#171512;--fg:#f5f2ea;--muted:#9b958a;--border:#2a271f;--accent:#f87171;--soft:#1f1c17}}
@@ -79,7 +79,8 @@
 <script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
 <script>
   const t = (k, v) => (window.VRI18N ? window.VRI18N.t(k, v) : k);
-  const base = '/' + ((window.VRI18N && window.VRI18N.lang) || 'en');
+  const langMatch = location.pathname.match(/^\/([a-z]{2})(?:\/|$)/);
+  const base = '/' + (langMatch ? langMatch[1] : 'en');
   document.getElementById('backHome').href = base + '/';
   document.getElementById('newVideo').href = base + '/';
 
@@ -260,8 +261,10 @@
   document.getElementById('open').onclick = () => { if (hdUrl) window.open(hdUrl, '_blank', 'noopener'); };
 
   if (!hdUrl) {
-    showMsg(t('js.noVideo'));
-    vid.style.display = 'none';
+    window.addEventListener('DOMContentLoaded', () => {
+      showMsg(t('js.noVideo'));
+      vid.style.display = 'none';
+    });
   }
 </script>
 </body>

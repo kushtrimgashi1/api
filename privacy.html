@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy — VidRidge</title>
+<meta name="description" content="Short version: no accounts, no stored videos, and only the minimum technical data needed to keep the service running.">
+<script type="module" src="/i18n.js"></script>
+<style>
+  :root{--bg:#f7f5f1;--card:#fff;--fg:#14110e;--muted:#8a857d;--border:#e7e2d8;--accent:#e11d24;--soft:#f1ede4}
+  @media (prefers-color-scheme:dark){:root{--bg:#0e0d0b;--card:#171512;--fg:#f5f2ea;--muted:#9b958a;--border:#2a271f;--accent:#f87171;--soft:#1f1c17}}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font-family:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.65}
+  .wrap{max-width:720px;margin:0 auto;padding:18px 18px 56px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0 22px;flex-wrap:wrap}
+  .logo{display:flex;align-items:center;gap:9px;font-weight:800;font-size:18px;letter-spacing:-.02em;text-decoration:none;color:var(--fg)}
+  .logo .mark{width:30px;height:30px;border-radius:9px;background:var(--accent);display:grid;place-items:center;color:#fff;font-size:15px;font-weight:800}
+  .nav{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .nav a{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-decoration:none;font-weight:700}
+  .nav a:hover,.nav a[aria-current]{color:var(--fg)}
+  select{border:1px solid var(--border);background:transparent;color:var(--muted);border-radius:10px;padding:7px;font-size:12px;font-family:inherit;max-width:120px}
+  h1{font-size:30px;line-height:1.15;letter-spacing:-.03em;margin:8px 0 14px;font-weight:800}
+  .lead{font-size:15px;color:var(--muted);margin:0 0 26px}
+  h2{font-size:16px;margin:26px 0 6px;font-weight:800;letter-spacing:-.01em}
+  p{margin:0 0 12px;font-size:14px}
+  .contact{margin-top:30px;padding-top:18px;border-top:1px solid var(--border);font-size:13px;color:var(--muted)}
+  footer{margin-top:34px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+  footer a{color:var(--muted);text-decoration:none}
+  footer a:hover{color:var(--fg)}
+  [dir=rtl] .nav a,[dir=rtl] h1,[dir=rtl] h2{letter-spacing:0}
+</style>
+</head>
+<body data-page="doc">
+<div class="wrap">
+  <header>
+    <a class="logo" href="/__LANG__/"><span class="mark">&#8615;</span> VidRidge</a>
+    <div class="nav">
+      <a href="/__LANG__/about" data-i18n="nav.about">About</a>
+      <a aria-current="page" href="/__LANG__/privacy" data-i18n="nav.privacy">Privacy</a>
+      <a href="/__LANG__/terms" data-i18n="nav.terms">Terms</a>
+      <select id="langSelect" aria-label="Language" data-i18n-aria="nav.lang"></select>
+    </div>
+  </header>
+  <main>
+    <h1 data-i18n="privacy.h1">Privacy Policy</h1>
+    <p class="lead" data-i18n="privacy.lead">Short version: no accounts, no stored videos, and only the minimum technical data needed to keep the service running.</p>
+    <section>
+      <h2 data-i18n="privacy.s1t">No accounts, no personal profiles</h2>
+      <p data-i18n="privacy.s1d">You can use VidRidge without signing up. We never ask for your name, email or phone number, and we do not build profiles about you.</p>
+    </section>
+    <section>
+      <h2 data-i18n="privacy.s2t">Your videos are not stored</h2>
+      <p data-i18n="privacy.s2d">Downloads are processed in transit and delivered straight to your device. We do not keep the videos or the links you submit.</p>
+    </section>
+    <section>
+      <h2 data-i18n="privacy.s3t">Cookies and technical data</h2>
+      <p data-i18n="privacy.s3d">We set one cookie to remember your language. Our host Cloudflare processes technical data such as IP address and browser type to keep the service fast and safe. We set no advertising or tracking cookies.</p>
+    </section>
+    <p class="contact" data-i18n="page.contact">Questions? Write to hello@vidridge.com.</p>
+  </main>
+  <footer>
+    <a href="/__LANG__/" data-i18n="watch.back">&larr; Back</a>
+    <span>VidRidge &middot; vidridge.com</span>
+  </footer>
+</div>
+</body>
+</html>

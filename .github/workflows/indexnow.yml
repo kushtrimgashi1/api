@@ -12,10 +12,17 @@ jobs:
       - name: Wait for the Cloudflare deploy
         run: sleep 120
 
-      - name: Submit all language URLs to IndexNow (Bing, Yandex, DuckDuckGo)
+      - name: Submit all URLs to IndexNow (Bing, Yandex, DuckDuckGo)
         run: |
           set -e
-          PAYLOAD='{"host":"vidridge.com","key":"084e6597c5a3d36a699c36eee83504ba","keyLocation":"https://vidridge.com/084e6597c5a3d36a699c36eee83504ba.txt","urlList":["https://vidridge.com/en/","https://vidridge.com/sq/","https://vidridge.com/it/","https://vidridge.com/de/","https://vidridge.com/fr/","https://vidridge.com/es/","https://vidridge.com/pt/","https://vidridge.com/tr/","https://vidridge.com/ar/"]}'
+          URLS=""
+          for lang in en sq it de fr es pt tr ar; do
+            for page in "" "/about" "/privacy" "/terms"; do
+              if [ -z "$URLS" ]; then URLS="\"https://vidridge.com/$lang$page\""; else URLS="$URLS,\"https://vidridge.com/$lang$page\""; fi
+            done
+          done
+          PAYLOAD="{\"host\":\"vidridge.com\",\"key\":\"084e6597c5a3d36a699c36eee83504ba\",\"keyLocation\":\"https://vidridge.com/084e6597c5a3d36a699c36eee83504ba.txt\",\"urlList\":[$URLS]}"
+          echo "Submitting: $(echo "$PAYLOAD" | grep -o 'https://' | wc -l) URLs"
           for url in https://api.indexnow.org/indexnow https://www.bing.com/indexnow; do
             code=$(curl -sS -o /tmp/out.txt -w "%{http_code}" -X POST "$url" \
               -H "Content-Type: application/json; charset=utf-8" \
