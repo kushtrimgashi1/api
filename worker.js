@@ -151,17 +151,17 @@ export default {
     const pathname = url.pathname;
     const origin = url.origin;
 
-    // Canonical host: force HTTPS and one hostname (www / *.workers.dev -> apex)
-    if (url.protocol === 'http:') {
-      return redirect('https://' + url.host + pathname + url.search, 301);
-    }
+    // Canonical host: HTTPS + apex only (single redirect for http://www -> https://apex)
     const host = url.hostname.toLowerCase();
-    if (!pathname.startsWith('/api/') && host !== 'localhost' && !/^[\d.]+$/.test(host)) {
-      if (host.startsWith('www.') && host.slice(4) !== host) {
-        return redirect('https://' + host.slice(4) + pathname + url.search, 301);
+    const isLocalOrIp = host === 'localhost' || /^[\d.]+$/.test(host);
+    if (!isLocalOrIp) {
+      let target = host;
+      if (host.startsWith('www.')) target = host.slice(4);
+      if (!pathname.startsWith('/api/') && host.endsWith('.workers.dev') && !CANONICAL_HOST.endsWith('.workers.dev')) {
+        target = CANONICAL_HOST;
       }
-      if (host.endsWith('.workers.dev') && host !== CANONICAL_HOST) {
-        return redirect('https://' + CANONICAL_HOST + pathname + url.search, 301);
+      if (url.protocol === 'http:' || target !== host) {
+        return redirect('https://' + target + pathname + url.search, 301);
       }
     }
 
