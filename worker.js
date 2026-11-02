@@ -235,7 +235,9 @@ async function handleContact(request, env) {
       text
     });
   } catch (e) {
-    return json({ ok: false, error: 'send_failed' }, 502);
+    // Surface the Cloudflare error code so the owner can see why it failed
+    // (E_SENDER_DOMAIN_NOT_AVAILABLE, E_RECIPIENT_NOT_ALLOWED, ...).
+    return json({ ok: false, error: 'send_failed', code: (e && e.code) || null }, 502);
   }
   return json({ ok: true });
 }
