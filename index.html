@@ -2,8 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#e11d24">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="VidRidge">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<style>@supports(padding:env(safe-area-inset-top)){body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}}</style>
   <title>VidRidge — Download videos & reels without watermark (TikTok, Facebook, Instagram)</title>
   <meta name="description" content="Download videos, reels and posts from TikTok, Facebook and Instagram in HD & SD. Free, no login, no watermark.">
   <!--SEO-->
@@ -418,6 +426,17 @@
     const dlProgressText = document.getElementById('dlProgressText');
 
     let currentVideoData = null;
+
+    // Link received from the OS share sheet (PWA share_target) or a ?url= param.
+    (function () {
+      const q = new URLSearchParams(location.search);
+      const shared = q.get('url') || q.get('text') || '';
+      const found = shared.match(/https?:\/\/[^\s]+/);
+      if (!found) return;
+      urlInput.value = found[0];
+      if (history.replaceState) history.replaceState(null, '', location.pathname + location.hash);
+      setTimeout(function () { urlInput.focus(); }, 300);
+    })();
 
     document.getElementById('pasteBtn').onclick = async () => {
       try { urlInput.value = await navigator.clipboard.readText(); } catch (e) { urlInput.focus(); }

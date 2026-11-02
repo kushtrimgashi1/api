@@ -144,6 +144,13 @@ import { LANGS, META, KEYS, LOCALES } from './i18n-data.js';
     init();
   }
 
+  // Installable app: register the service worker once the page is idle.
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('/sw.js').catch(function () {});
+    });
+  }
+
   window.VRI18N = {
     lang: current,
     t: t,

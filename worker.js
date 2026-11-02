@@ -432,6 +432,34 @@ async function handle(request, env, ctx) {
       return redirect(origin + '/favicon.svg', 301);
     }
 
+    // PWA manifest — must be served with a manifest content type to be valid.
+    if (pathname === '/manifest.webmanifest') {
+      const res = await env.ASSETS.fetch(request);
+      const headers = new Headers(res.headers);
+      headers.set('content-type', 'application/manifest+json; charset=utf-8');
+      headers.set('cache-control', 'public, max-age=3600');
+      return new Response(res.body, { status: res.status, headers });
+    }
+
+    // Service worker must stay revalidated, otherwise updates never ship.
+    if (pathname === '/sw.js') {
+      const res = await env.ASSETS.fetch(request);
+      const headers = new Headers(res.headers);
+      headers.set('content-type', 'text/javascript; charset=utf-8');
+      headers.set('service-worker-allowed', '/');
+      headers.set('cache-control', 'no-cache, must-revalidate');
+      return new Response(res.body, { status: res.status, headers });
+    }
+
+    // Shared from the phone's share sheet into the installed app.
+    if (pathname === '/share') {
+      const raw = url.searchParams.get('url') || url.searchParams.get('text') || '';
+      const found = raw.match(/https?:\/\/[^\s]+/);
+      const target = new URL(origin + '/' + pickLang(request, url) + '/');
+      if (found) target.searchParams.set('url', found[0]);
+      return redirect(target.toString(), 302);
+    }
+
     if (pathname === '/robots.txt') {
       return new Response(robots(origin), {
         headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'public, max-age=3600' }
