@@ -275,6 +275,38 @@ async function handleContact(request, env) {
     return json({ ok: true });
   }
 
+  // 3) Web3Forms — no domain or DNS needed, just one key. Free tier 250/month.
+  //    The destination is whatever address the key was created with.
+  const web3Key = env && env.WEB3FORMS_KEY;
+  if (web3Key) {
+    let res, payload;
+    try {
+      res = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', accept: 'application/json' },
+        body: JSON.stringify({
+          access_key: web3Key,
+          subject,
+          from_name: 'VidRidge contact',
+          email,
+          replyto: email,
+          message: text
+        })
+      });
+      payload = await res.json().catch(() => ({}));
+    } catch (e) {
+      return json({ ok: false, error: 'send_failed', code: 'network' }, 502);
+    }
+    if (!res.ok || !payload || payload.success !== true) {
+      return json({
+        ok: false,
+        error: 'send_failed',
+        code: (payload && payload.message) || ('http_' + res.status)
+      }, 502);
+    }
+    return json({ ok: true });
+  }
+
   return json({ ok: false, error: 'not_configured' }, 503);
 }
 
