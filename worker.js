@@ -220,26 +220,62 @@ async function handleContact(request, env) {
     return json({ ok: false, error: 'invalid' }, 400);
   }
 
+  const text = `From: ${name} <${email}>\n\n${message}\n\n---\nSent from vidridge.com contact form`;
+  const subject = `VidRidge contact — ${name}`.slice(0, 120);
+  const to = (env && env.CONTACT_TO) || CONTACT_TO;
+  const from = (env && env.CONTACT_FROM) || CONTACT_FROM;
+
+  // 1) Cloudflare Email Service binding (requires Workers Paid).
   const binding = env && env.CONTACT_EMAIL;
-  if (!binding || typeof binding.send !== 'function') {
-    return json({ ok: false, error: 'not_configured' }, 503);
+  if (binding && typeof binding.send === 'function') {
+    try {
+      await binding.send({
+        to,
+        from: { email: from, name: 'VidRidge' },
+        replyTo: email,
+        subject,
+        text
+      });
+    } catch (e) {
+      return json({ ok: false, error: 'send_failed', code: (e && e.code) || null }, 502);
+    }
+    return json({ ok: true });
   }
 
-  const text = `From: ${name} <${email}>\n\n${message}\n\n---\nSent from vidridge.com contact form`;
-  try {
-    await binding.send({
-      to: (env && env.CONTACT_TO) || CONTACT_TO,
-      from: { email: (env && env.CONTACT_FROM) || CONTACT_FROM, name: 'VidRidge' },
-      replyTo: email,
-      subject: `VidRidge contact — ${name}`.slice(0, 120),
-      text
-    });
-  } catch (e) {
-    // Surface the Cloudflare error code so the owner can see why it failed
-    // (E_SENDER_DOMAIN_NOT_AVAILABLE, E_RECIPIENT_NOT_ALLOWED, ...).
-    return json({ ok: false, error: 'send_failed', code: (e && e.code) || null }, 502);
+  // 2) Resend HTTP API — works on the free Workers plan (3,000 emails/month).
+  const resendKey = env && env.RESEND_API_KEY;
+  if (resendKey) {
+    let res, payload;
+    try {
+      res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          authorization: 'Bearer ' + resendKey,
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          from: `VidRidge <${from}>`,
+          to: [to],
+          subject,
+          text,
+          reply_to: email
+        })
+      });
+      payload = await res.json().catch(() => ({}));
+    } catch (e) {
+      return json({ ok: false, error: 'send_failed', code: 'network' }, 502);
+    }
+    if (!res.ok) {
+      return json({
+        ok: false,
+        error: 'send_failed',
+        code: (payload && (payload.name || payload.message)) || ('http_' + res.status)
+      }, 502);
+    }
+    return json({ ok: true });
   }
-  return json({ ok: true });
+
+  return json({ ok: false, error: 'not_configured' }, 503);
 }
 
 // HSTS + nosniff on every response (including curl/asset responses).

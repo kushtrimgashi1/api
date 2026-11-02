@@ -34,6 +34,7 @@
   .msg{margin:14px 0 0;font-size:13px;min-height:1.2em}
   .msg.ok{color:var(--ok)}
   .msg.err{color:var(--err)}
+  .msg a{color:inherit;font-weight:700}
   .direct{margin-top:22px;font-size:13px;color:var(--muted)}
   .direct a{color:var(--fg);font-weight:700}
   footer{margin-top:34px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
@@ -129,17 +130,34 @@
       if (res.ok && body && body.ok) {
         say('contact.ok', 'ok');
         form.reset();
-      } else if (body && body.error === 'not_configured') {
-        say('contact.fallback', 'err');
       } else {
-        say('contact.err', 'err');
+        if (body && body.error === 'not_configured') say('contact.fallback', 'err');
+        else say('contact.err', 'err');
+        offerMailto(data);
       }
     } catch (err) {
       say('contact.err', 'err');
+      offerMailto(data);
     } finally {
       btn.disabled = false;
     }
   });
+
+  // The form always stays usable: if delivery is not wired up, hand the
+  // message to the visitor's own mail app instead of losing it.
+  function offerMailto(data) {
+    if (document.getElementById('cMailto')) return;
+    var href = 'mailto:hello@vidridge.com'
+      + '?subject=' + encodeURIComponent('VidRidge contact — ' + (data.name || ''))
+      + '&body=' + encodeURIComponent((data.message || '') + '\n\n— ' + (data.name || '') + ' <' + (data.email || '') + '>');
+    var a = document.createElement('a');
+    a.id = 'cMailto';
+    a.href = href;
+    a.className = 'mailto';
+    a.textContent = 'hello@vidridge.com';
+    out.appendChild(document.createTextNode(' '));
+    out.appendChild(a);
+  }
 })();
 </script>
 </body>
