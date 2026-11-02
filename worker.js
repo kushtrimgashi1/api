@@ -432,6 +432,20 @@ async function handle(request, env, ctx) {
       return redirect(origin + '/favicon.svg', 301);
     }
 
+    // Android APK (sideload, no Play Store needed)
+    if (pathname === '/download' || pathname === '/download/' || pathname === '/app') {
+      return redirect(origin + '/app/vidridge.apk', 302);
+    }
+
+    if (pathname === '/app/vidridge.apk') {
+      const res = await env.ASSETS.fetch(request);
+      const headers = new Headers(res.headers);
+      headers.set('content-type', 'application/vnd.android.package-archive');
+      headers.set('content-disposition', 'attachment; filename="vidridge.apk"');
+      headers.set('cache-control', 'public, max-age=3600');
+      return new Response(res.body, { status: res.status, headers });
+    }
+
     // PWA manifest — must be served with a manifest content type to be valid.
     if (pathname === '/manifest.webmanifest') {
       const res = await env.ASSETS.fetch(request);

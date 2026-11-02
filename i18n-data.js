@@ -80,7 +80,8 @@
     "contact.fallback",
     "contact.direct",
     "contact.phEmail",
-    "contact.phMessage"
+    "contact.phMessage",
+    "nav.app"
   ];
 
   const EN = [
@@ -138,7 +139,8 @@
     "The form is temporarily unavailable.",
     "Or email us directly:",
     "you@example.com",
-    "Tell us what happened..."
+    "Tell us what happened...",
+    "Android app (APK)"
   ];
 
   export const LOCALES = { en: EN };
@@ -197,7 +199,8 @@
     "Formulari është përkohësisht i padisponueshëm.",
     "Ose na shkruaj direkt:",
     "ti@shembull.com",
-    "Na trego çfarë ndodhi..."
+    "Na trego çfarë ndodhi...",
+    "Aplikacioni Android (APK)"
   ];
   LOCALES.it = [
     'Piattaforme','Come funziona','Perché VidRidge','FAQ','Lingua','Gratis • Nessun login',
@@ -254,7 +257,8 @@
     "Il modulo non è disponibile al momento.",
     "Oppure scrivici direttamente:",
     "tu@esempio.com",
-    "Raccontaci cosa è successo..."
+    "Raccontaci cosa è successo...",
+    "App Android (APK)"
   ];
   LOCALES.de = [
     'Plattformen','So funktioniert\'s','Warum VidRidge','FAQ','Sprache','Kostenlos • Ohne Login',
@@ -311,7 +315,8 @@
     "Das Formular ist vorübergehend nicht verfügbar.",
     "Oder schreib uns direkt:",
     "du@beispiel.de",
-    "Beschreibe, was passiert ist..."
+    "Beschreibe, was passiert ist...",
+    "Android-App (APK)"
   ];
   LOCALES.fr = [
     'Plateformes','Comment ça marche','Pourquoi VidRidge','FAQ','Langue','Gratuit • Sans connexion',
@@ -368,7 +373,8 @@
     "Le formulaire est momentanément indisponible.",
     "Ou écrivez-nous directement :",
     "vous@exemple.com",
-    "Décrivez ce qui s'est passé..."
+    "Décrivez ce qui s'est passé...",
+    "App Android (APK)"
   ];
   LOCALES.es = [
     'Plataformas','Cómo funciona','Por qué VidRidge','FAQ','Idioma','Gratis • Sin registro',
@@ -425,7 +431,8 @@
     "El formulario no está disponible por el momento.",
     "O escríbenos directamente:",
     "tu@ejemplo.com",
-    "Cuéntanos qué pasó..."
+    "Cuéntanos qué pasó...",
+    "App Android (APK)"
   ];
   LOCALES.pt = [
     'Plataformas','Como funciona','Por que VidRidge','FAQ','Idioma','Grátis • Sem login',
@@ -482,7 +489,8 @@
     "O formulário está temporariamente indisponível.",
     "Ou escreva diretamente:",
     "voce@exemplo.com",
-    "Conte-nos o que aconteceu..."
+    "Conte-nos o que aconteceu...",
+    "App Android (APK)"
   ];
   LOCALES.tr = [
     'Platformlar','Nasıl çalışır','Neden VidRidge','SSS','Dil','Ücretsiz • Giriş yok',
@@ -539,7 +547,8 @@
     "Form şu anda kullanılamıyor.",
     "Ya da doğrudan yazın:",
     "siz@ornek.com",
-    "Ne olduğunu anlatın..."
+    "Ne olduğunu anlatın...",
+    "Android uygulaması (APK)"
   ];
   LOCALES.ar = [
     'المنصات','كيف يعمل','لماذا VidRidge','الأسئلة الشائعة','اللغة','مجاني • بدون تسجيل',
@@ -596,6 +605,7 @@
     "النموذج غير متاح مؤقتاً.",
     "أو راسلنا مباشرة:",
     "you@example.com",
-    "أخبرنا بما حدث..."
+    "أخبرنا بما حدث...",
+    "تطبيق أندرويد (APK)"
   ];
   /* @@LANGUAGES@@ */
