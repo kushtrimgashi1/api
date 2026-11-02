@@ -642,6 +642,17 @@
     }
 
     function saveBlobAs(blob, filename) {
+      // Inside the Android app the bytes are handed to the native download manager.
+      if (window.AndroidBridge && window.AndroidBridge.saveFile) {
+        const reader = new FileReader();
+        reader.onloadend = function () {
+          const s = String(reader.result || '');
+          const comma = s.indexOf(',');
+          if (comma > 0) window.AndroidBridge.saveFile(filename, blob.type || 'application/octet-stream', s.slice(comma + 1));
+        };
+        reader.readAsDataURL(blob);
+        return;
+      }
       const blobUrl = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = blobUrl;

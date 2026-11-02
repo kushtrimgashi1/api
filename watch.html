@@ -128,6 +128,16 @@
     msg.style.display = 'block';
   }
   function saveBlobAs(blob, filename) {
+    if (window.AndroidBridge && window.AndroidBridge.saveFile) {
+      const reader = new FileReader();
+      reader.onloadend = function () {
+        const s = String(reader.result || '');
+        const comma = s.indexOf(',');
+        if (comma > 0) window.AndroidBridge.saveFile(filename, blob.type || 'application/octet-stream', s.slice(comma + 1));
+      };
+      reader.readAsDataURL(blob);
+      return;
+    }
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url; a.download = filename;
