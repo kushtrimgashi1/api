@@ -10,8 +10,15 @@ const DOC_PAGES = {
   about: { priority: '0.6' },
   privacy: { priority: '0.3' },
   terms: { priority: '0.3' },
-  contact: { priority: '0.4' }
+  contact: { priority: '0.4' },
+  download: { priority: '0.8', slug: 'dl' }
 };
+
+// Page slug (URL) -> i18n key prefix (title/lead live under `dl.`)
+function docSlug(slug) {
+  const cfg = DOC_PAGES[slug];
+  return (cfg && cfg.slug) || slug;
+}
 
 // IndexNow (Bing / Yandex / DuckDuckGo): key file is served at /<KEY>.txt
 const INDEXNOW_KEY = '084e6597c5a3d36a699c36eee83504ba';
@@ -103,8 +110,9 @@ function seoLinks(lang, kind, origin, slug) {
 
   let title, desc;
   if (kind === 'doc') {
-    title = `VidRidge — ${t(lang, slug + '.title')}`;
-    desc = t(lang, slug + '.lead');
+    const k = docSlug(slug);
+    title = `VidRidge — ${t(lang, k + '.title')}`;
+    desc = t(lang, k + '.lead');
   } else {
     title = META[lang].title;
     desc = META[lang].desc;
@@ -130,8 +138,9 @@ function inject(html, lang, kind, origin, slug) {
   if (kind === 'watch') {
     title = `VidRidge — ${META[lang].watch}`;
   } else if (kind === 'doc') {
-    title = `VidRidge — ${t(lang, slug + '.title')}`;
-    desc = t(lang, slug + '.lead');
+    const k = docSlug(slug);
+    title = `VidRidge — ${t(lang, k + '.title')}`;
+    desc = t(lang, k + '.lead');
   }
   html = html.replace(/<title>[^<]*<\/title>/, `<title>${esc(title)}</title>`);
   if (kind !== 'watch') {
@@ -151,6 +160,10 @@ async function serveHtml(request, env, assetPath, lang, origin, slug) {
   let html = await res.text();
   const kind = assetPath === '/watch.html' ? 'watch' : (slug ? 'doc' : 'index');
   html = localize(html, lang);
+  // Only the Albanian page ships screenshots in its own language.
+  if (slug === 'download' && lang === 'sq') {
+    html = html.split('/img/app-').join('/img/sq/app-');
+  }
   html = inject(html, lang, kind, origin, slug);
   return new Response(html, {
     status: 200,
@@ -433,7 +446,7 @@ async function handle(request, env, ctx) {
     }
 
     // Android APK (sideload, no Play Store needed)
-    if (pathname === '/download' || pathname === '/download/' || pathname === '/app') {
+    if (pathname === '/app' || pathname === '/app/') {
       return redirect(origin + '/app/vidridge.apk', 302);
     }
 
@@ -494,7 +507,7 @@ async function handle(request, env, ctx) {
         if (rest === '/watch/' || rest === '/watch.html') return redirect(origin + '/' + lang + '/watch' + url.search, 301);
         return serveHtml(request, env, '/watch.html', lang, origin);
       }
-      const doc = rest.match(/^\/(about|privacy|terms|contact)(\/|\.html)?$/);
+      const doc = rest.match(/^\/(about|privacy|terms|contact|download)(\/|\.html)?$/);
       if (doc) {
         if (rest.endsWith('/') || rest.endsWith('.html')) {
           return redirect(origin + '/' + lang + '/' + doc[1] + url.search, 301);
@@ -507,7 +520,7 @@ async function handle(request, env, ctx) {
       return redirect(origin + '/' + pickLang(request, url) + '/watch' + url.search);
     }
 
-    const topDoc = pathname.match(/^\/(about|privacy|terms|contact)(\/|\.html)?$/);
+    const topDoc = pathname.match(/^\/(about|privacy|terms|contact|download)(\/|\.html)?$/);
     if (topDoc) {
       return redirect(origin + '/' + pickLang(request, url) + '/' + topDoc[1]);
     }

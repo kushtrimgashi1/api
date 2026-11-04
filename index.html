@@ -249,6 +249,19 @@
             </span> Instagram
           </span>
         </div>
+
+        <!-- APP INSTALL BANNER (Android, never inside the app) -->
+        <div id="appBanner" class="hidden relative text-left mt-6 mx-auto max-w-md rounded-[16px] border border-[var(--border)] bg-[var(--card)] p-3 pr-2.5 items-center gap-3">
+          <span class="h-10 w-10 shrink-0 rounded-[11px] grid place-items-center text-white" style="background:var(--accent)">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="#ffffff" aria-hidden="true"><path d="M17.6 9.48l1.84-3.18a.4.4 0 0 0-.69-.4l-1.86 3.22A11.4 11.4 0 0 0 12 8.1c-1.77 0-3.44.4-4.89 1.02L5.25 5.9a.4.4 0 0 0-.69.4L6.4 9.48A10 10 0 0 0 2 17.5h20a10 10 0 0 0-4.4-8.02M7 15.25a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5m10 0a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5"/></svg>
+          </span>
+          <div class="flex-1 min-w-0">
+            <p class="text-[12px] font-bold leading-tight" data-i18n="app.title">VidRidge app</p>
+            <p class="text-[11px] leading-[1.4] text-[var(--muted)] mt-0.5" data-i18n="app.text">One tap to open.</p>
+          </div>
+          <a id="appBannerBtn" href="/__LANG__/download" class="shrink-0 h-9 px-3 rounded-[10px] text-[10px] font-bold uppercase tracking-wider text-white grid place-items-center" style="background:var(--accent)" data-i18n="app.install">Install app</a>
+          <button id="appBannerClose" class="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-[var(--card)] border border-[var(--border)] text-[11px] leading-none grid place-items-center text-[var(--muted)]" aria-label="Not now" data-i18n-aria="app.later">✕</button>
+        </div>
       </div>
     </section>
 
@@ -382,7 +395,7 @@
           <a href="/__LANG__/privacy" class="hover:underline" data-i18n="nav.privacy">Privacy</a>
           <a href="/__LANG__/terms" class="hover:underline" data-i18n="nav.terms">Terms</a>
           <a href="/__LANG__/contact" class="hover:underline" data-i18n="nav.contact">Contact</a>
-          <a href="/app/vidridge.apk" class="hover:underline" download data-i18n="nav.app">Android app (APK)</a>
+          <a href="/__LANG__/download" class="hover:underline" data-i18n="nav.app">Android app (APK)</a>
         </div>
         <p class="text-[10px] uppercase tracking-widest text-[var(--muted)] mt-5 mb-2" data-i18n="footer.lang">Language</p>
         <div id="langLinks" class="flex flex-wrap gap-x-3 gap-y-1 text-[12px]"></div>
@@ -401,6 +414,26 @@
   </footer>
 
   <iframe id="hiddenDownloader" style="display:none;"></iframe>
+
+  <!-- POST-DOWNLOAD APP PROMPT -->
+  <div id="appSheet" class="hidden fixed inset-x-0 bottom-0 z-50 px-3 pt-3" style="padding-bottom:calc(12px + env(safe-area-inset-bottom))">
+    <div class="max-w-md mx-auto rounded-[18px] border border-[var(--border)] bg-[var(--card)] p-4 shadow-[0_-12px_40px_-16px_rgba(0,0,0,0.45)]">
+      <div class="flex items-start gap-3">
+        <span class="h-10 w-10 shrink-0 rounded-[11px] grid place-items-center text-white" style="background:var(--accent)">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="#ffffff" aria-hidden="true"><path d="M17.6 9.48l1.84-3.18a.4.4 0 0 0-.69-.4l-1.86 3.22A11.4 11.4 0 0 0 12 8.1c-1.77 0-3.44.4-4.89 1.02L5.25 5.9a.4.4 0 0 0-.69.4L6.4 9.48A10 10 0 0 0 2 17.5h20a10 10 0 0 0-4.4-8.02M7 15.25a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5m10 0a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5"/></svg>
+        </span>
+        <div class="flex-1 min-w-0">
+          <p class="text-[13px] font-bold leading-tight" data-i18n="app.afterTitle">Video saved</p>
+          <p class="text-[11.5px] leading-[1.45] text-[var(--muted)] mt-1" data-i18n="app.afterText">Next time use the app.</p>
+          <div class="flex items-center gap-2 mt-2.5">
+            <a id="appSheetBtn" href="/__LANG__/download" class="h-9 px-3.5 rounded-[10px] text-[10px] font-bold uppercase tracking-wider text-white grid place-items-center" style="background:var(--accent)" data-i18n="app.install">Install app</a>
+            <button id="appSheetClose" class="h-9 px-3 rounded-[10px] text-[10px] font-bold uppercase tracking-wider text-[var(--muted)] border border-[var(--border)]" data-i18n="app.later">Not now</button>
+          </div>
+        </div>
+        <button id="appSheetX" class="text-[var(--muted)] text-[13px] leading-none" aria-label="Close" data-i18n-aria="app.later">✕</button>
+      </div>
+    </div>
+  </div>
 
   <script>
     const t = (k, v) => (window.VRI18N ? window.VRI18N.t(k, v) : k);
@@ -661,6 +694,7 @@
       a.click();
       document.body.removeChild(a);
       setTimeout(() => URL.revokeObjectURL(blobUrl), 20000);
+      showAppSheet();
     }
 
     function floatTo16(f32) {
@@ -1062,6 +1096,81 @@
       videoPreview.load();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
+
+    // ---------- install-the-app prompts ----------
+    const APP_DISMISS_KEY = 'vr_app_dismiss';
+    const APP_HINT_KEY = 'vr_app_hint';
+    let deferredInstall = null;
+
+    function inApp() { return !!(window.AndroidBridge && window.AndroidBridge.saveFile); }
+    function isAndroid() { return /Android/i.test(navigator.userAgent); }
+    function daysSince(key) {
+      const v = Number(localStorage.getItem(key) || 0);
+      return v ? (Date.now() - v) / 86400000 : Infinity;
+    }
+    function remember(key) { try { localStorage.setItem(key, String(Date.now())); } catch (e) {} }
+
+    function showAppBanner() {
+      const el = document.getElementById('appBanner');
+      if (!el || inApp()) return;
+      el.classList.remove('hidden');
+      el.classList.add('flex');
+    }
+
+    function hideAppBanner() {
+      const el = document.getElementById('appBanner');
+      if (!el) return;
+      el.classList.add('hidden');
+      el.classList.remove('flex');
+    }
+
+    // A real PWA install prompt beats a link to the APK page.
+    function installApp(ev) {
+      if (!deferredInstall) return;
+      ev.preventDefault();
+      deferredInstall.prompt();
+      const done = () => { deferredInstall = null; };
+      if (deferredInstall.userChoice) deferredInstall.userChoice.then(done, done);
+      else done();
+    }
+
+    function showAppSheet() {
+      if (inApp() || daysSince(APP_HINT_KEY) < 7) return;
+      const el = document.getElementById('appSheet');
+      if (!el) return;
+      hideAppBanner();
+      el.classList.remove('hidden');
+      remember(APP_HINT_KEY);
+      clearTimeout(showAppSheet.timer);
+      showAppSheet.timer = setTimeout(hideAppSheet, 14000);
+    }
+
+    function hideAppSheet() {
+      const el = document.getElementById('appSheet');
+      if (el) el.classList.add('hidden');
+      clearTimeout(showAppSheet.timer);
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredInstall = e;
+      if (daysSince(APP_DISMISS_KEY) > 30) showAppBanner();
+    });
+
+    (function bindAppPrompts() {
+      const banner = document.getElementById('appBanner');
+      const close = document.getElementById('appBannerClose');
+      if (close) close.onclick = () => { remember(APP_DISMISS_KEY); hideAppBanner(); };
+      const btn = document.getElementById('appBannerBtn');
+      if (btn) btn.addEventListener('click', installApp);
+      const sheetBtn = document.getElementById('appSheetBtn');
+      if (sheetBtn) sheetBtn.addEventListener('click', installApp);
+      const x = document.getElementById('appSheetX');
+      if (x) x.onclick = hideAppSheet;
+      const later = document.getElementById('appSheetClose');
+      if (later) later.onclick = hideAppSheet;
+      if (banner && isAndroid() && daysSince(APP_DISMISS_KEY) > 30) showAppBanner();
+    })();
   </script>
 </body>
 </html>

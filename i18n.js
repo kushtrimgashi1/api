@@ -119,6 +119,10 @@ import { LANGS, META, KEYS, LOCALES } from './i18n-data.js';
   function switchTo(code) {
     if (!dict[code]) return;
     document.cookie = 'lang=' + code + '; path=/; max-age=31536000; SameSite=Lax';
+    // Inside the Android app: remember the choice natively as well.
+    if (window.AndroidBridge && window.AndroidBridge.setLanguage) {
+      try { window.AndroidBridge.setLanguage(code); } catch (e) {}
+    }
     var m = location.pathname.match(/^\/([a-z]{2})(\/.*)?$/);
     var rest = (m && m[2]) ? m[2] : '/';
     if (rest === '/' || rest === '/index.html') rest = '/';
