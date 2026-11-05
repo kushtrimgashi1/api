@@ -108,7 +108,7 @@ import { LANGS, META, KEYS, LOCALES } from './i18n-data.js';
     document.documentElement.lang = current;
     document.documentElement.dir = (META[current] && META[current].dir) || 'ltr';
 
-    if (document.body && document.body.getAttribute('data-page') !== 'watch' && META[current]) {
+    if (document.body && !document.body.getAttribute('data-page') && META[current]) {
       document.title = META[current].title;
       var d = document.querySelector('meta[name="description"]');
       if (d) d.setAttribute('content', META[current].desc);
