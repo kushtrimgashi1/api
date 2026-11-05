@@ -124,7 +124,14 @@
     "dl.q2",
     "dl.a2",
     "dl.q3",
-    "dl.a3"
+    "dl.a3",
+    "seo.how",
+    "seo.more",
+    "seo.free",
+    "seo.try",
+    "seo.navTiktok",
+    "seo.navInstagram",
+    "seo.navFacebook"
   ];
 
   const EN = [
@@ -226,7 +233,14 @@
     "Is it safe to install an APK outside the Play Store?",
     "Yes. This APK is built from vidridge.com's own code and signed with our key. It asks only for internet access, and Android's warning about unknown sources is standard for any app installed outside the Play Store.",
     "Which Android versions are supported?",
-    "Android 10 or newer, on phones and tablets. The download is about 38 KB, so it installs in seconds."
+    "Android 10 or newer, on phones and tablets. The download is about 38 KB, so it installs in seconds.",
+    "How to download",
+    "More downloaders",
+    "Free · No login · No watermark",
+    "Download now",
+    "TikTok downloader",
+    "Instagram downloader",
+    "Facebook downloader"
   ];
 
   export const LOCALES = { en: EN };
@@ -329,7 +343,14 @@
     "A është i sigurt instalimi i një APK-je jashtë Play Store?",
     "Po. Kjo APK ndërtohet nga kodi i vidridge.com dhe nënshkruhet me çelësin tonë. Kërkon vetëm akses në internet, dhe paralajmërimi i Android-it për burime të panjohura është standard për çdo app që instalohet jashtë Play Store.",
     "Cilat versione të Android-it mbështeten?",
-    "Android 10 ose më i ri, në telefona dhe tableta. Shkarkimi është rreth 38 KB, ndaj instalohet brenda sekondave."
+    "Android 10 ose më i ri, në telefona dhe tableta. Shkarkimi është rreth 38 KB, ndaj instalohet brenda sekondave.",
+    "Si të shkarkosh",
+    "Shkarkues të tjerë",
+    "Falas · Pa login · Pa watermark",
+    "Shkarko tani",
+    "Shkarkues TikTok",
+    "Shkarkues Instagram",
+    "Shkarkues Facebook"
   ];
   LOCALES.it = [
     'Piattaforme','Come funziona','Perché VidRidge','FAQ','Lingua','Gratis • Nessun login',
@@ -430,7 +451,14 @@
     "È sicuro installare un APK fuori dal Play Store?",
     "Sì. Questo APK è compilato dal codice di vidridge.com e firmato con la nostra chiave. Chiede solo l'accesso a internet; l'avviso di Android sulle origini sconosciute è normale per qualsiasi app installata fuori dal Play Store.",
     "Quali versioni di Android sono supportate?",
-    "Android 10 o successivo, su telefoni e tablet. Il download è di circa 38 KB, quindi si installa in pochi secondi."
+    "Android 10 o successivo, su telefoni e tablet. Il download è di circa 38 KB, quindi si installa in pochi secondi.",
+    "Come scaricare",
+    "Altri downloader",
+    "Gratis · Senza login · Senza watermark",
+    "Scarica ora",
+    "Downloader TikTok",
+    "Downloader Instagram",
+    "Downloader Facebook"
   ];
   LOCALES.de = [
     'Plattformen','So funktioniert\'s','Warum VidRidge','FAQ','Sprache','Kostenlos • Ohne Login',
@@ -531,7 +559,14 @@
     "Ist es sicher, eine APK außerhalb des Play Store zu installieren?",
     "Ja. Diese APK wird aus dem Code von vidridge.com gebaut und mit unserem Schlüssel signiert. Sie braucht nur Internetzugriff; Androids Warnung zu unbekannten Quellen ist bei jeder App außerhalb des Play Store normal.",
     "Welche Android-Versionen werden unterstützt?",
-    "Android 10 oder neuer, auf Handys und Tablets. Der Download ist rund 38 KB groß und in Sekunden installiert."
+    "Android 10 oder neuer, auf Handys und Tablets. Der Download ist rund 38 KB groß und in Sekunden installiert.",
+    "So wird heruntergeladen",
+    "Weitere Downloader",
+    "Kostenlos · Ohne Login · Ohne Wasserzeichen",
+    "Jetzt herunterladen",
+    "TikTok-Downloader",
+    "Instagram-Downloader",
+    "Facebook-Downloader"
   ];
   LOCALES.fr = [
     'Plateformes','Comment ça marche','Pourquoi VidRidge','FAQ','Langue','Gratuit • Sans connexion',
@@ -632,7 +667,14 @@
     "Est-il sûr d'installer un APK hors du Play Store ?",
     "Oui. Cet APK est compilé à partir du code de vidridge.com et signé avec notre clé. Il ne demande que l'accès à Internet ; l'avertissement d'Android sur les sources inconnues est normal pour toute app installée hors du Play Store.",
     "Quelles versions d'Android sont prises en charge ?",
-    "Android 10 ou plus récent, sur téléphones et tablettes. Le téléchargement fait environ 38 Ko, l'installation prend quelques secondes."
+    "Android 10 ou plus récent, sur téléphones et tablettes. Le téléchargement fait environ 38 Ko, l'installation prend quelques secondes.",
+    "Comment télécharger",
+    "Autres téléchargeurs",
+    "Gratuit · Sans connexion · Sans filigrane",
+    "Télécharger maintenant",
+    "Téléchargeur TikTok",
+    "Téléchargeur Instagram",
+    "Téléchargeur Facebook"
   ];
   LOCALES.es = [
     'Plataformas','Cómo funciona','Por qué VidRidge','FAQ','Idioma','Gratis • Sin registro',
@@ -733,7 +775,14 @@
     "¿Es seguro instalar un APK fuera de Play Store?",
     "Sí. Este APK se compila con el código de vidridge.com y se firma con nuestra clave. Solo pide acceso a internet; el aviso de Android sobre orígenes desconocidos es normal en cualquier app instalada fuera de Play Store.",
     "¿Qué versiones de Android son compatibles?",
-    "Android 10 o superior, en teléfonos y tablets. La descarga ocupa unos 38 KB, así que se instala en segundos."
+    "Android 10 o superior, en teléfonos y tablets. La descarga ocupa unos 38 KB, así que se instala en segundos.",
+    "Cómo descargar",
+    "Más descargadores",
+    "Gratis · Sin registro · Sin marca de agua",
+    "Descargar ahora",
+    "Descargador TikTok",
+    "Descargador Instagram",
+    "Descargador Facebook"
   ];
   LOCALES.pt = [
     'Plataformas','Como funciona','Por que VidRidge','FAQ','Idioma','Grátis • Sem login',
@@ -834,7 +883,14 @@
     "É seguro instalar um APK fora da Play Store?",
     "Sim. Este APK é compilado a partir do código do vidridge.com e assinado com a nossa chave. Pede apenas acesso à internet; o aviso do Android sobre fontes desconhecidas é normal em qualquer app instalado fora da Play Store.",
     "Quais versões do Android são compatíveis?",
-    "Android 10 ou mais recente, em telefones e tablets. O download tem cerca de 38 KB, por isso instala em segundos."
+    "Android 10 ou mais recente, em telefones e tablets. O download tem cerca de 38 KB, por isso instala em segundos.",
+    "Como baixar",
+    "Mais baixadores",
+    "Grátis · Sem login · Sem marca d'água",
+    "Baixar agora",
+    "Baixador TikTok",
+    "Baixador Instagram",
+    "Baixador Facebook"
   ];
   LOCALES.tr = [
     'Platformlar','Nasıl çalışır','Neden VidRidge','SSS','Dil','Ücretsiz • Giriş yok',
@@ -935,7 +991,14 @@
     "Play Store dışından APK kurmak güvenli mi?",
     "Evet. Bu APK vidridge.com'un kendi kodundan derlenir ve bizim anahtarımızla imzalanır. Yalnızca internet erişimi ister; Android'in bilinmeyen kaynak uyarısı Play Store dışından kurulan her uygulama için normaldir.",
     "Hangi Android sürümleri destekleniyor?",
-    "Android 10 ve üzeri; telefon ve tabletlerde. İndirme yaklaşık 38 KB, saniyeler içinde kurulur."
+    "Android 10 ve üzeri; telefon ve tabletlerde. İndirme yaklaşık 38 KB, saniyeler içinde kurulur.",
+    "Nasıl indirilir",
+    "Diğer indiriciler",
+    "Ücretsiz · Giriş yok · Filigran yok",
+    "Şimdi indir",
+    "TikTok indirici",
+    "Instagram indirici",
+    "Facebook indirici"
   ];
   LOCALES.ar = [
     'المنصات','كيف يعمل','لماذا VidRidge','الأسئلة الشائعة','اللغة','مجاني • بدون تسجيل',
@@ -1036,6 +1099,13 @@
     "هل تثبيت ملف APK خارج متجر Play آمن؟",
     "نعم. يُبنى هذا الملف من كود vidridge.com ويُوقّع بمفتاحنا. لا يطلب سوى الوصول إلى الإنترنت، وتحذير أندرويد بشأن المصادر غير المعروفة أمر طبيعي لأي تطبيق يُثبَّت خارج متجر Play.",
     "ما إصدارات أندرويد المدعومة؟",
-    "أندرويد 10 أو أحدث، على الهواتف والأجهزة اللوحية. حجم التنزيل نحو 38 كيلوبايت، لذا يُثبَّت في ثوانٍ."
+    "أندرويد 10 أو أحدث، على الهواتف والأجهزة اللوحية. حجم التنزيل نحو 38 كيلوبايت، لذا يُثبَّت في ثوانٍ.",
+    "كيفية التنزيل",
+    "أدوات تنزيل أخرى",
+    "مجاني · بلا تسجيل · بلا علامة مائية",
+    "نزّل الآن",
+    "تنزيل TikTok",
+    "تنزيل Instagram",
+    "تنزيل Facebook"
   ];
   /* @@LANGUAGES@@ */

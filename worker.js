@@ -1,5 +1,6 @@
 import { onRequest } from './functions/api/extract.js';
 import { LANGS as LANGS_META, META, KEYS, LOCALES } from './i18n-data.js';
+import { PLATFORMS, PLATFORM_SLUGS, platformContent } from './seo-pages.js';
 
 const LANGS = LANGS_META.map(l => l.code);
 
@@ -24,6 +25,9 @@ function docSlug(slug) {
 const INDEXNOW_KEY = '084e6597c5a3d36a699c36eee83504ba';
 const INDEXNOW_FALLBACK_TOKEN = '9fd89838d7207dd62002f52294ce5d179988';
 const SITEMAP_LASTMOD = '2026-11-05';
+
+// /{lang}/<slug> for the three platform landing pages.
+const PLATFORM_RE = new RegExp('^/(' + PLATFORM_SLUGS.join('|') + ')(/|\\.html)?$');
 
 const DICT = {};
 for (const code of LANGS) {
@@ -133,11 +137,22 @@ function seoLinks(lang, kind, origin, slug) {
     links.push(`<meta property="og:image:height" content="630">`);
     links.push(`<meta name="twitter:image" content="${origin}/img/og-app.png">`);
   }
+  if (kind === 'doc' && PLATFORMS[slug]) {
+    const img = `${origin}/img/og-${PLATFORMS[slug].key}.png`;
+    links.push(`<meta property="og:image" content="${img}">`);
+    links.push(`<meta property="og:image:width" content="1200">`);
+    links.push(`<meta property="og:image:height" content="630">`);
+    links.push(`<meta name="twitter:image" content="${img}">`);
+  }
   return links.join('\n  ');
 }
 
 // Localized <title>/description for a document page (SEO-tuned when available).
 function docMeta(lang, slug) {
+  const pc = platformContent(lang, slug);
+  if (pc) {
+    return { title: pc.title, fullTitle: pc.title, desc: pc.desc };
+  }
   const k = docSlug(slug);
   const d = DICT[lang] || DICT.en;
   const title = d[k + '.seoTitle'] || d[k + '.title'] || META[lang].title;
@@ -213,6 +228,76 @@ function inject(html, lang, kind, origin, slug) {
       `<script type="application/ld+json">${faqJsonLd(lang)}</script>`;
     html = html.replace('</head>', '  ' + ld + '\n</head>');
   }
+
+  if (kind === 'doc' && PLATFORMS[slug]) {
+    html = html.replace('</head>', '  ' + platformJsonLd(lang, slug, origin) + '\n</head>');
+  }
+  return html;
+}
+
+// HowTo + FAQ + breadcrumbs for a platform landing page.
+function platformJsonLd(lang, slug, origin) {
+  const c = platformContent(lang, slug);
+  const p = PLATFORMS[slug];
+  const howTo = {
+    '@context': 'https://schema.org',
+    '@type': 'HowTo',
+    name: c.h1,
+    description: c.intro,
+    inLanguage: lang,
+    totalTime: 'PT1M',
+    step: c.steps.map((s, i) => ({
+      '@type': 'HowToStep',
+      position: i + 1,
+      name: s.h,
+      text: s.p
+    }))
+  };
+  const faq = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    inLanguage: lang,
+    mainEntity: c.faq.map(f => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a }
+    }))
+  };
+  const crumbs = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'VidRidge', item: origin + '/' + lang + '/' },
+      { '@type': 'ListItem', position: 2, name: p.name, item: origin + '/' + lang + '/' + slug }
+    ]
+  };
+  return [howTo, faq, crumbs]
+    .map(j => `<script type="application/ld+json">${JSON.stringify(j)}</script>`)
+    .join('\n  ');
+}
+
+// Server-rendered body content for a platform landing page.
+function fillPlatform(html, lang, slug) {
+  const p = PLATFORMS[slug];
+  const c = platformContent(lang, slug);
+  const steps = c.steps.map((s, i) =>
+    `<li><span class="n">${i + 1}</span><div><h3>${esc(s.h)}</h3><p>${esc(s.p)}</p></div></li>`).join('');
+  const faq = c.faq.map(f =>
+    `<div class="qa"><h3>${esc(f.q)}</h3><p>${esc(f.a)}</p></div>`).join('');
+  const related = PLATFORM_SLUGS.filter(s => s !== slug).map(s =>
+    `<a class="chip" href="/__LANG__/${s}"><span class="dot" style="background:${PLATFORMS[s].color}"></span>${esc(t(lang, PLATFORMS[s].navKey))}</a>`).join('');
+  const values = {
+    __PLATFORM_NAME__: p.name,
+    __PLATFORM_COLOR__: p.color,
+    __ICON__: p.icon,
+    __H1__: esc(c.h1),
+    __LEAD__: esc(c.lead),
+    __INTRO__: esc(c.intro),
+    __STEPS__: steps,
+    __FAQ__: faq,
+    __RELATED__: related
+  };
+  for (const [token, value] of Object.entries(values)) html = html.split(token).join(value);
   return html;
 }
 
@@ -222,6 +307,7 @@ async function serveHtml(request, env, assetPath, lang, origin, slug) {
   const res = await env.ASSETS.fetch(new Request(assetUrl.toString(), { headers: request.headers }));
   let html = await res.text();
   const kind = assetPath === '/watch.html' ? 'watch' : (slug ? 'doc' : 'index');
+  if (slug && PLATFORMS[slug]) html = fillPlatform(html, lang, slug);
   html = localize(html, lang);
   // Only the Albanian page ships screenshots in its own language.
   if (slug === 'download' && lang === 'sq') {
@@ -242,6 +328,7 @@ async function serveHtml(request, env, assetPath, lang, origin, slug) {
 function sitemap(origin) {
   const pages = [{ path: '/', priority: '1.0' }];
   for (const [slug, cfg] of Object.entries(DOC_PAGES)) pages.push({ path: '/' + slug, priority: cfg.priority });
+  for (const slug of PLATFORM_SLUGS) pages.push({ path: '/' + slug, priority: '0.8' });
   const urls = [];
   for (const page of pages) {
     for (const l of LANGS) {
@@ -408,6 +495,7 @@ function siteUrls() {
   for (const l of LANGS) {
     urls.push(`https://${CANONICAL_HOST}/${l}/`);
     for (const slug of Object.keys(DOC_PAGES)) urls.push(`https://${CANONICAL_HOST}/${l}/${slug}`);
+    for (const slug of PLATFORM_SLUGS) urls.push(`https://${CANONICAL_HOST}/${l}/${slug}`);
   }
   return urls;
 }
@@ -508,6 +596,11 @@ async function handle(request, env, ctx) {
       return redirect(origin + '/favicon.svg', 301);
     }
 
+    // Templates are rendered by the worker; never expose the raw file.
+    if (pathname === '/platform.html') {
+      return redirect(origin + '/' + pickLang(request, url) + '/', 302);
+    }
+
     // Android APK (sideload, no Play Store needed)
     if (pathname === '/app' || pathname === '/app/') {
       return redirect(origin + '/app/vidridge.apk', 302);
@@ -577,6 +670,14 @@ async function handle(request, env, ctx) {
         }
         return serveHtml(request, env, '/' + doc[1] + '.html', lang, origin, doc[1]);
       }
+
+      const plat = rest.match(PLATFORM_RE);
+      if (plat) {
+        if (rest.endsWith('/') || rest.endsWith('.html')) {
+          return redirect(origin + '/' + lang + '/' + plat[1] + url.search, 301);
+        }
+        return serveHtml(request, env, '/platform.html', lang, origin, plat[1]);
+      }
     }
 
     if (pathname === '/watch' || pathname === '/watch.html') {
@@ -586,6 +687,11 @@ async function handle(request, env, ctx) {
     const topDoc = pathname.match(/^\/(about|privacy|terms|contact|download)(\/|\.html)?$/);
     if (topDoc) {
       return redirect(origin + '/' + pickLang(request, url) + '/' + topDoc[1]);
+    }
+
+    const topPlat = pathname.match(PLATFORM_RE);
+    if (topPlat) {
+      return redirect(origin + '/' + pickLang(request, url) + '/' + topPlat[1]);
     }
 
     return env.ASSETS.fetch(request);

@@ -10,3 +10,7 @@ _routes.json
 .assetsignore
 worker.js
 wrangler.toml
+seo-pages.js
+seo-tiktok.js
+seo-instagram.js
+seo-facebook.js

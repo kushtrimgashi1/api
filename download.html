@@ -63,9 +63,11 @@
   .ghost{display:inline-flex;align-items:center;gap:7px;margin-top:14px;padding:10px 16px;border-radius:11px;border:1px solid var(--border);background:var(--soft);color:var(--fg);text-decoration:none;font-size:12px;font-weight:800;letter-spacing:.04em}
   .ghost:hover{border-color:var(--fg)}
   .note{font-size:12.5px;color:var(--muted);margin-top:10px}
-  footer{margin-top:38px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted);border-top:1px solid var(--border);padding-top:18px}
+  footer{margin-top:38px;display:flex;flex-direction:column;align-items:stretch;gap:12px;font-size:12px;color:var(--muted);border-top:1px solid var(--border);padding-top:18px}
+  .frow{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
   footer a{color:var(--muted);text-decoration:none}
   footer a:hover{color:var(--fg)}
+  .platlinks{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;border-top:1px solid var(--border);padding-top:12px}
   [dir=rtl] .nav a,[dir=rtl] .eyebrow,[dir=rtl] .meta,[dir=rtl] figcaption{letter-spacing:0}
   @media (min-width:620px){h1{font-size:42px}}
 </style>
@@ -159,8 +161,15 @@
     </section>
   </main>
   <footer>
-    <a href="/__LANG__/" data-i18n="watch.back">&larr; Back</a>
-    <span>VidRidge &middot; vidridge.com</span>
+    <div class="frow">
+      <a href="/__LANG__/" data-i18n="watch.back">&larr; Back</a>
+      <span>VidRidge &middot; vidridge.com</span>
+    </div>
+    <nav class="platlinks">
+      <a href="/__LANG__/tiktok-video-downloader" data-i18n="seo.navTiktok">TikTok downloader</a>
+      <a href="/__LANG__/instagram-video-downloader" data-i18n="seo.navInstagram">Instagram downloader</a>
+      <a href="/__LANG__/facebook-video-downloader" data-i18n="seo.navFacebook">Facebook downloader</a>
+    </nav>
   </footer>
 </div>
 <script>
