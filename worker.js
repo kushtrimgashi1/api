@@ -11,7 +11,7 @@ const DOC_PAGES = {
   privacy: { priority: '0.3' },
   terms: { priority: '0.3' },
   contact: { priority: '0.4' },
-  download: { priority: '0.8', slug: 'dl' }
+  download: { priority: '0.9', slug: 'dl' }
 };
 
 // Page slug (URL) -> i18n key prefix (title/lead live under `dl.`)
@@ -23,6 +23,7 @@ function docSlug(slug) {
 // IndexNow (Bing / Yandex / DuckDuckGo): key file is served at /<KEY>.txt
 const INDEXNOW_KEY = '084e6597c5a3d36a699c36eee83504ba';
 const INDEXNOW_FALLBACK_TOKEN = '9fd89838d7207dd62002f52294ce5d179988';
+const SITEMAP_LASTMOD = '2026-11-05';
 
 const DICT = {};
 for (const code of LANGS) {
@@ -110,9 +111,9 @@ function seoLinks(lang, kind, origin, slug) {
 
   let title, desc;
   if (kind === 'doc') {
-    const k = docSlug(slug);
-    title = `VidRidge — ${t(lang, k + '.title')}`;
-    desc = t(lang, k + '.lead');
+    const meta = docMeta(lang, slug);
+    title = meta.fullTitle;
+    desc = meta.desc;
   } else {
     title = META[lang].title;
     desc = META[lang].desc;
@@ -126,7 +127,48 @@ function seoLinks(lang, kind, origin, slug) {
   links.push(`<meta name="twitter:card" content="summary_large_image">`);
   links.push(`<meta name="twitter:title" content="${esc(title)}">`);
   links.push(`<meta name="twitter:description" content="${esc(desc)}">`);
+  if (kind === 'doc' && slug === 'download') {
+    links.push(`<meta property="og:image" content="${origin}/img/og-app.png">`);
+    links.push(`<meta property="og:image:width" content="1200">`);
+    links.push(`<meta property="og:image:height" content="630">`);
+    links.push(`<meta name="twitter:image" content="${origin}/img/og-app.png">`);
+  }
   return links.join('\n  ');
+}
+
+// Localized <title>/description for a document page (SEO-tuned when available).
+function docMeta(lang, slug) {
+  const k = docSlug(slug);
+  const d = DICT[lang] || DICT.en;
+  const title = d[k + '.seoTitle'] || d[k + '.title'] || META[lang].title;
+  return {
+    title,
+    // SEO titles already carry the brand: avoid "VidRidge — VidRidge APK …".
+    fullTitle: /VidRidge/i.test(title) ? title : `VidRidge — ${title}`,
+    desc: d[k + '.seoDesc'] || d[k + '.lead'] || META[lang].desc
+  };
+}
+
+// Structured data: lets Google/Bing show this as an installable app page.
+function appJsonLd(lang, origin) {
+  return JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'MobileApplication',
+    name: 'VidRidge',
+    alternateName: 'VidRidge — video downloader',
+    description: docMeta(lang, 'download').desc,
+    operatingSystem: 'Android 10+',
+    applicationCategory: 'MultimediaApplication',
+    applicationSubCategory: 'Video downloader',
+    downloadUrl: origin + '/app/vidridge.apk',
+    installUrl: origin + '/' + lang + '/download',
+    softwareVersion: '1.1',
+    fileSize: '38KB',
+    inLanguage: LANGS,
+    isAccessibleForFree: true,
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+    publisher: { '@type': 'Organization', name: 'VidRidge', url: origin + '/' }
+  });
 }
 
 function inject(html, lang, kind, origin, slug) {
@@ -138,9 +180,9 @@ function inject(html, lang, kind, origin, slug) {
   if (kind === 'watch') {
     title = `VidRidge — ${META[lang].watch}`;
   } else if (kind === 'doc') {
-    const k = docSlug(slug);
-    title = `VidRidge — ${t(lang, k + '.title')}`;
-    desc = t(lang, k + '.lead');
+    const meta = docMeta(lang, slug);
+    title = meta.fullTitle;
+    desc = meta.desc;
   }
   html = html.replace(/<title>[^<]*<\/title>/, `<title>${esc(title)}</title>`);
   if (kind !== 'watch') {
@@ -150,6 +192,11 @@ function inject(html, lang, kind, origin, slug) {
   const links = seoLinks(lang, kind, origin, slug);
   if (html.includes('<!--SEO-->')) html = html.replace('<!--SEO-->', links);
   else html = html.replace('</head>', '  ' + links + '\n</head>');
+
+  if (kind === 'doc' && slug === 'download') {
+    const ld = `<script type="application/ld+json">${appJsonLd(lang, origin)}</script>`;
+    html = html.replace('</head>', '  ' + ld + '\n</head>');
+  }
   return html;
 }
 
@@ -183,7 +230,7 @@ function sitemap(origin) {
   for (const page of pages) {
     for (const l of LANGS) {
       const alts = LANGS.map(a => `    <xhtml:link rel="alternate" hreflang="${a}" href="${origin}/${a}${page.path}"/>`).join('\n');
-      urls.push(`  <url>\n    <loc>${origin}/${l}${page.path}</loc>\n${alts}\n    <xhtml:link rel="alternate" hreflang="x-default" href="${origin}/en${page.path}"/>\n    <changefreq>weekly</changefreq>\n    <priority>${page.priority}</priority>\n  </url>`);
+      urls.push(`  <url>\n    <loc>${origin}/${l}${page.path}</loc>\n    <lastmod>${SITEMAP_LASTMOD}</lastmod>\n${alts}\n    <xhtml:link rel="alternate" hreflang="x-default" href="${origin}/en${page.path}"/>\n    <changefreq>weekly</changefreq>\n    <priority>${page.priority}</priority>\n  </url>`);
     }
   }
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${urls.join('\n')}\n</urlset>\n`;

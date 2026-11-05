@@ -115,7 +115,9 @@
     "app.afterTitle",
     "app.afterText",
     "nav.home",
-    "dl.installed"
+    "dl.installed",
+    "dl.seoTitle",
+    "dl.seoDesc"
   ];
 
   const EN = [
@@ -208,7 +210,9 @@
     "Video saved",
     "Next time, use the app: one tap and the video goes straight to Downloads.",
     "Home",
-    "Installed on this device"
+    "Installed on this device",
+    "VidRidge APK — Free Android app download",
+    "Download the VidRidge APK free for Android 10+. One-tap install, no Play Store and no account — save TikTok, Instagram and Facebook videos in HD."
   ];
 
   export const LOCALES = { en: EN };
@@ -302,7 +306,9 @@
     "Videoja u ruajt",
     "Herën tjetër përdor app-in: një prekje dhe videoja shkon direkt te Shkarkimet.",
     "Kreu",
-    "I instaluar në këtë pajisje"
+    "I instaluar në këtë pajisje",
+    "VidRidge APK — Shkarko app-in falas për Android",
+    "Shkarko APK-në e VidRidge falas për Android 10+. Instalim me një prekje, pa Play Store dhe pa llogari — video TikTok, Instagram e Facebook në HD."
   ];
   LOCALES.it = [
     'Piattaforme','Come funziona','Perché VidRidge','FAQ','Lingua','Gratis • Nessun login',
@@ -394,7 +400,9 @@
     "Video salvato",
     "La prossima volta usa l'app: un tocco e il video va dritto in Download.",
     "Home",
-    "Installato su questo dispositivo"
+    "Installato su questo dispositivo",
+    "VidRidge APK — Scarica l'app Android gratis",
+    "Scarica gratis l'APK di VidRidge per Android 10+. Installazione con un tocco, senza Play Store né account: video TikTok, Instagram e Facebook in HD."
   ];
   LOCALES.de = [
     'Plattformen','So funktioniert\'s','Warum VidRidge','FAQ','Sprache','Kostenlos • Ohne Login',
@@ -486,7 +494,9 @@
     "Video gespeichert",
     "Nutze beim nächsten Mal die App: ein Tipp und das Video landet direkt in Downloads.",
     "Start",
-    "Auf diesem Gerät installiert"
+    "Auf diesem Gerät installiert",
+    "VidRidge APK — Android-App kostenlos laden",
+    "Lade die VidRidge-APK kostenlos für Android 10+ herunter. Installation mit einem Tipp, ohne Play Store und Konto – TikTok-, Instagram- und Facebook-Videos in HD."
   ];
   LOCALES.fr = [
     'Plateformes','Comment ça marche','Pourquoi VidRidge','FAQ','Langue','Gratuit • Sans connexion',
@@ -578,7 +588,9 @@
     "Vidéo enregistrée",
     "La prochaine fois, utilisez l'app : un geste et la vidéo va directement dans Téléchargements.",
     "Accueil",
-    "Installée sur cet appareil"
+    "Installée sur cet appareil",
+    "VidRidge APK — Télécharger l'app Android",
+    "Téléchargez l'APK VidRidge gratuitement pour Android 10+. Installation en un geste, sans Play Store ni compte — vidéos TikTok, Instagram et Facebook en HD."
   ];
   LOCALES.es = [
     'Plataformas','Cómo funciona','Por qué VidRidge','FAQ','Idioma','Gratis • Sin registro',
@@ -670,7 +682,9 @@
     "Vídeo guardado",
     "La próxima vez usa la app: un toque y el vídeo va directo a Descargas.",
     "Inicio",
-    "Instalada en este dispositivo"
+    "Instalada en este dispositivo",
+    "VidRidge APK — Descargar la app Android gratis",
+    "Descarga el APK de VidRidge gratis para Android 10+. Instalación con un toque, sin Play Store ni cuenta: vídeos de TikTok, Instagram y Facebook en HD."
   ];
   LOCALES.pt = [
     'Plataformas','Como funciona','Por que VidRidge','FAQ','Idioma','Grátis • Sem login',
@@ -762,7 +776,9 @@
     "Vídeo guardado",
     "Da próxima vez use o app: um toque e o vídeo vai direto para Downloads.",
     "Início",
-    "Instalado neste dispositivo"
+    "Instalado neste dispositivo",
+    "VidRidge APK — Baixar o app Android grátis",
+    "Baixe o APK do VidRidge grátis para Android 10+. Instalação com um toque, sem Play Store nem conta — vídeos do TikTok, Instagram e Facebook em HD."
   ];
   LOCALES.tr = [
     'Platformlar','Nasıl çalışır','Neden VidRidge','SSS','Dil','Ücretsiz • Giriş yok',
@@ -854,7 +870,9 @@
     "Video kaydedildi",
     "Bir dahaki sefere uygulamayı kullan: tek dokunuş ve video doğrudan İndirilenler'e gider.",
     "Ana sayfa",
-    "Bu cihazda yüklü"
+    "Bu cihazda yüklü",
+    "VidRidge APK — Android uygulamasını indir",
+    "VidRidge APK'yı Android 10+ için ücretsiz indir. Tek dokunuşla kur, Play Store ve hesap yok — TikTok, Instagram ve Facebook videoları HD."
   ];
   LOCALES.ar = [
     'المنصات','كيف يعمل','لماذا VidRidge','الأسئلة الشائعة','اللغة','مجاني • بدون تسجيل',
@@ -946,6 +964,8 @@
     "تم حفظ الفيديو",
     "في المرة القادمة استخدم التطبيق: لمسة واحدة ويذهب الفيديو مباشرة إلى التنزيلات.",
     "الرئيسية",
-    "مثبّت على هذا الجهاز"
+    "مثبّت على هذا الجهاز",
+    "VidRidge APK — تنزيل تطبيق أندرويد مجانًا",
+    "نزّل ملف VidRidge APK مجانًا لأندرويد 10+. تثبيت بلمسة واحدة، بلا متجر Play وبلا حساب — فيديوهات TikTok وInstagram وFacebook بجودة HD."
   ];
   /* @@LANGUAGES@@ */
