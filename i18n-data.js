@@ -117,7 +117,14 @@
     "nav.home",
     "dl.installed",
     "dl.seoTitle",
-    "dl.seoDesc"
+    "dl.seoDesc",
+    "dl.faqTitle",
+    "dl.q1",
+    "dl.a1",
+    "dl.q2",
+    "dl.a2",
+    "dl.q3",
+    "dl.a3"
   ];
 
   const EN = [
@@ -212,7 +219,14 @@
     "Home",
     "Installed on this device",
     "VidRidge APK — Free Android app download",
-    "Download the VidRidge APK free for Android 10+. One-tap install, no Play Store and no account — save TikTok, Instagram and Facebook videos in HD."
+    "Download the VidRidge APK free for Android 10+. One-tap install, no Play Store and no account — save TikTok, Instagram and Facebook videos in HD.",
+    "Questions",
+    "Is the VidRidge APK free?",
+    "Yes. The app is completely free — no ads, no account and no in-app purchases.",
+    "Is it safe to install an APK outside the Play Store?",
+    "Yes. This APK is built from vidridge.com's own code and signed with our key. It asks only for internet access, and Android's warning about unknown sources is standard for any app installed outside the Play Store.",
+    "Which Android versions are supported?",
+    "Android 10 or newer, on phones and tablets. The download is about 38 KB, so it installs in seconds."
   ];
 
   export const LOCALES = { en: EN };
@@ -308,7 +322,14 @@
     "Kreu",
     "I instaluar në këtë pajisje",
     "VidRidge APK — Shkarko app-in falas për Android",
-    "Shkarko APK-në e VidRidge falas për Android 10+. Instalim me një prekje, pa Play Store dhe pa llogari — video TikTok, Instagram e Facebook në HD."
+    "Shkarko APK-në e VidRidge falas për Android 10+. Instalim me një prekje, pa Play Store dhe pa llogari — video TikTok, Instagram e Facebook në HD.",
+    "Pyetje",
+    "A është falas APK-ja e VidRidge?",
+    "Po. App-i është plotësisht falas — pa reklama, pa llogari dhe pa blerje brenda app-it.",
+    "A është i sigurt instalimi i një APK-je jashtë Play Store?",
+    "Po. Kjo APK ndërtohet nga kodi i vidridge.com dhe nënshkruhet me çelësin tonë. Kërkon vetëm akses në internet, dhe paralajmërimi i Android-it për burime të panjohura është standard për çdo app që instalohet jashtë Play Store.",
+    "Cilat versione të Android-it mbështeten?",
+    "Android 10 ose më i ri, në telefona dhe tableta. Shkarkimi është rreth 38 KB, ndaj instalohet brenda sekondave."
   ];
   LOCALES.it = [
     'Piattaforme','Come funziona','Perché VidRidge','FAQ','Lingua','Gratis • Nessun login',
@@ -402,7 +423,14 @@
     "Home",
     "Installato su questo dispositivo",
     "VidRidge APK — Scarica l'app Android gratis",
-    "Scarica gratis l'APK di VidRidge per Android 10+. Installazione con un tocco, senza Play Store né account: video TikTok, Instagram e Facebook in HD."
+    "Scarica gratis l'APK di VidRidge per Android 10+. Installazione con un tocco, senza Play Store né account: video TikTok, Instagram e Facebook in HD.",
+    "Domande",
+    "L'APK di VidRidge è gratuito?",
+    "Sì. L'app è completamente gratuita: nessuna pubblicità, nessun account e nessun acquisto in-app.",
+    "È sicuro installare un APK fuori dal Play Store?",
+    "Sì. Questo APK è compilato dal codice di vidridge.com e firmato con la nostra chiave. Chiede solo l'accesso a internet; l'avviso di Android sulle origini sconosciute è normale per qualsiasi app installata fuori dal Play Store.",
+    "Quali versioni di Android sono supportate?",
+    "Android 10 o successivo, su telefoni e tablet. Il download è di circa 38 KB, quindi si installa in pochi secondi."
   ];
   LOCALES.de = [
     'Plattformen','So funktioniert\'s','Warum VidRidge','FAQ','Sprache','Kostenlos • Ohne Login',
@@ -496,7 +524,14 @@
     "Start",
     "Auf diesem Gerät installiert",
     "VidRidge APK — Android-App kostenlos laden",
-    "Lade die VidRidge-APK kostenlos für Android 10+ herunter. Installation mit einem Tipp, ohne Play Store und Konto – TikTok-, Instagram- und Facebook-Videos in HD."
+    "Lade die VidRidge-APK kostenlos für Android 10+ herunter. Installation mit einem Tipp, ohne Play Store und Konto – TikTok-, Instagram- und Facebook-Videos in HD.",
+    "Fragen",
+    "Ist die VidRidge-APK kostenlos?",
+    "Ja. Die App ist völlig kostenlos – keine Werbung, kein Konto und keine In-App-Käufe.",
+    "Ist es sicher, eine APK außerhalb des Play Store zu installieren?",
+    "Ja. Diese APK wird aus dem Code von vidridge.com gebaut und mit unserem Schlüssel signiert. Sie braucht nur Internetzugriff; Androids Warnung zu unbekannten Quellen ist bei jeder App außerhalb des Play Store normal.",
+    "Welche Android-Versionen werden unterstützt?",
+    "Android 10 oder neuer, auf Handys und Tablets. Der Download ist rund 38 KB groß und in Sekunden installiert."
   ];
   LOCALES.fr = [
     'Plateformes','Comment ça marche','Pourquoi VidRidge','FAQ','Langue','Gratuit • Sans connexion',
@@ -590,7 +625,14 @@
     "Accueil",
     "Installée sur cet appareil",
     "VidRidge APK — Télécharger l'app Android",
-    "Téléchargez l'APK VidRidge gratuitement pour Android 10+. Installation en un geste, sans Play Store ni compte — vidéos TikTok, Instagram et Facebook en HD."
+    "Téléchargez l'APK VidRidge gratuitement pour Android 10+. Installation en un geste, sans Play Store ni compte — vidéos TikTok, Instagram et Facebook en HD.",
+    "Questions",
+    "L'APK VidRidge est-il gratuit ?",
+    "Oui. L'app est entièrement gratuite : pas de publicité, pas de compte et aucun achat intégré.",
+    "Est-il sûr d'installer un APK hors du Play Store ?",
+    "Oui. Cet APK est compilé à partir du code de vidridge.com et signé avec notre clé. Il ne demande que l'accès à Internet ; l'avertissement d'Android sur les sources inconnues est normal pour toute app installée hors du Play Store.",
+    "Quelles versions d'Android sont prises en charge ?",
+    "Android 10 ou plus récent, sur téléphones et tablettes. Le téléchargement fait environ 38 Ko, l'installation prend quelques secondes."
   ];
   LOCALES.es = [
     'Plataformas','Cómo funciona','Por qué VidRidge','FAQ','Idioma','Gratis • Sin registro',
@@ -684,7 +726,14 @@
     "Inicio",
     "Instalada en este dispositivo",
     "VidRidge APK — Descargar la app Android gratis",
-    "Descarga el APK de VidRidge gratis para Android 10+. Instalación con un toque, sin Play Store ni cuenta: vídeos de TikTok, Instagram y Facebook en HD."
+    "Descarga el APK de VidRidge gratis para Android 10+. Instalación con un toque, sin Play Store ni cuenta: vídeos de TikTok, Instagram y Facebook en HD.",
+    "Preguntas",
+    "¿El APK de VidRidge es gratis?",
+    "Sí. La app es totalmente gratuita: sin anuncios, sin cuenta y sin compras dentro de la app.",
+    "¿Es seguro instalar un APK fuera de Play Store?",
+    "Sí. Este APK se compila con el código de vidridge.com y se firma con nuestra clave. Solo pide acceso a internet; el aviso de Android sobre orígenes desconocidos es normal en cualquier app instalada fuera de Play Store.",
+    "¿Qué versiones de Android son compatibles?",
+    "Android 10 o superior, en teléfonos y tablets. La descarga ocupa unos 38 KB, así que se instala en segundos."
   ];
   LOCALES.pt = [
     'Plataformas','Como funciona','Por que VidRidge','FAQ','Idioma','Grátis • Sem login',
@@ -778,7 +827,14 @@
     "Início",
     "Instalado neste dispositivo",
     "VidRidge APK — Baixar o app Android grátis",
-    "Baixe o APK do VidRidge grátis para Android 10+. Instalação com um toque, sem Play Store nem conta — vídeos do TikTok, Instagram e Facebook em HD."
+    "Baixe o APK do VidRidge grátis para Android 10+. Instalação com um toque, sem Play Store nem conta — vídeos do TikTok, Instagram e Facebook em HD.",
+    "Perguntas",
+    "O APK do VidRidge é grátis?",
+    "Sim. O app é totalmente gratuito — sem anúncios, sem conta e sem compras dentro do app.",
+    "É seguro instalar um APK fora da Play Store?",
+    "Sim. Este APK é compilado a partir do código do vidridge.com e assinado com a nossa chave. Pede apenas acesso à internet; o aviso do Android sobre fontes desconhecidas é normal em qualquer app instalado fora da Play Store.",
+    "Quais versões do Android são compatíveis?",
+    "Android 10 ou mais recente, em telefones e tablets. O download tem cerca de 38 KB, por isso instala em segundos."
   ];
   LOCALES.tr = [
     'Platformlar','Nasıl çalışır','Neden VidRidge','SSS','Dil','Ücretsiz • Giriş yok',
@@ -872,7 +928,14 @@
     "Ana sayfa",
     "Bu cihazda yüklü",
     "VidRidge APK — Android uygulamasını indir",
-    "VidRidge APK'yı Android 10+ için ücretsiz indir. Tek dokunuşla kur, Play Store ve hesap yok — TikTok, Instagram ve Facebook videoları HD."
+    "VidRidge APK'yı Android 10+ için ücretsiz indir. Tek dokunuşla kur, Play Store ve hesap yok — TikTok, Instagram ve Facebook videoları HD.",
+    "Sorular",
+    "VidRidge APK ücretsiz mi?",
+    "Evet. Uygulama tamamen ücretsiz — reklam yok, hesap yok, uygulama içi satın alma yok.",
+    "Play Store dışından APK kurmak güvenli mi?",
+    "Evet. Bu APK vidridge.com'un kendi kodundan derlenir ve bizim anahtarımızla imzalanır. Yalnızca internet erişimi ister; Android'in bilinmeyen kaynak uyarısı Play Store dışından kurulan her uygulama için normaldir.",
+    "Hangi Android sürümleri destekleniyor?",
+    "Android 10 ve üzeri; telefon ve tabletlerde. İndirme yaklaşık 38 KB, saniyeler içinde kurulur."
   ];
   LOCALES.ar = [
     'المنصات','كيف يعمل','لماذا VidRidge','الأسئلة الشائعة','اللغة','مجاني • بدون تسجيل',
@@ -966,6 +1029,13 @@
     "الرئيسية",
     "مثبّت على هذا الجهاز",
     "VidRidge APK — تنزيل تطبيق أندرويد مجانًا",
-    "نزّل ملف VidRidge APK مجانًا لأندرويد 10+. تثبيت بلمسة واحدة، بلا متجر Play وبلا حساب — فيديوهات TikTok وInstagram وFacebook بجودة HD."
+    "نزّل ملف VidRidge APK مجانًا لأندرويد 10+. تثبيت بلمسة واحدة، بلا متجر Play وبلا حساب — فيديوهات TikTok وInstagram وFacebook بجودة HD.",
+    "أسئلة",
+    "هل ملف VidRidge APK مجاني؟",
+    "نعم. التطبيق مجاني بالكامل — بلا إعلانات وبلا حساب وبلا مشتريات داخل التطبيق.",
+    "هل تثبيت ملف APK خارج متجر Play آمن؟",
+    "نعم. يُبنى هذا الملف من كود vidridge.com ويُوقّع بمفتاحنا. لا يطلب سوى الوصول إلى الإنترنت، وتحذير أندرويد بشأن المصادر غير المعروفة أمر طبيعي لأي تطبيق يُثبَّت خارج متجر Play.",
+    "ما إصدارات أندرويد المدعومة؟",
+    "أندرويد 10 أو أحدث، على الهواتف والأجهزة اللوحية. حجم التنزيل نحو 38 كيلوبايت، لذا يُثبَّت في ثوانٍ."
   ];
   /* @@LANGUAGES@@ */

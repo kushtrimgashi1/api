@@ -53,6 +53,9 @@
   ol.steps li:last-child{border-bottom:0;padding-bottom:0}
   .n{flex:0 0 30px;width:30px;height:30px;border-radius:50%;background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--accent);display:grid;place-items:center;font-weight:800;font-size:13px}
   ol.steps p{font-size:13.5px;color:var(--muted);margin:0}
+  .faq .qa{padding:14px 0;border-bottom:1px solid var(--border)}
+  .faq .qa:last-child{border-bottom:0;padding-bottom:0}
+  .faq .qa p{font-size:13.5px;color:var(--muted);margin:0}
   .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px}
   .card p{font-size:13.5px;color:var(--muted)}
   .card h2{display:flex;align-items:center;gap:8px}
@@ -84,7 +87,7 @@
         <span data-i18n="dl.badge">Direct APK · Android 10+</span>
       </span>
       <h1 data-i18n="dl.h1">Get VidRidge on your phone</h1>
-      <p class="lead" data-i18n="dl.lead">Install it in one tap. No Play Store, no account, no ads.</p>
+      <p class="lead" data-i18n="dl.lead">Install it in one tap. No Play Store, no account, no ads — it is the same VidRidge, with native downloads and a share button.</p>
       <a class="install" id="apkBtn" href="/app/vidridge.apk" download rel="nofollow">
         <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M4 20h16"/></svg>
         <span data-i18n="dl.download">Download APK</span>
@@ -113,10 +116,10 @@
     <section>
       <h2 data-i18n="dl.how">How to install</h2>
       <ol class="steps">
-        <li><span class="n">1</span><div><h3 data-i18n="dl.s1">Download the APK</h3><p data-i18n="dl.s1b">Tap the button above.</p></div></li>
-        <li><span class="n">2</span><div><h3 data-i18n="dl.s2">Allow installs from this source</h3><p data-i18n="dl.s2b">Enable it for Chrome.</p></div></li>
-        <li><span class="n">3</span><div><h3 data-i18n="dl.s3">Tap Install</h3><p data-i18n="dl.s3b">Android may warn you — that is normal.</p></div></li>
-        <li><span class="n">4</span><div><h3 data-i18n="dl.s4">Choose your language</h3><p data-i18n="dl.s4b">The app remembers it.</p></div></li>
+        <li><span class="n">1</span><div><h3 data-i18n="dl.s1">Download the APK</h3><p data-i18n="dl.s1b">Tap the button above. Chrome asks you to confirm the download.</p></div></li>
+        <li><span class="n">2</span><div><h3 data-i18n="dl.s2">Allow installs from this source</h3><p data-i18n="dl.s2b">Open the downloaded file. When Android asks, tap Settings and enable “Allow from this source” for Chrome.</p></div></li>
+        <li><span class="n">3</span><div><h3 data-i18n="dl.s3">Tap Install</h3><p data-i18n="dl.s3b">Android may warn that the app is not from Play Store. That is normal for a direct APK — tap Install anyway.</p></div></li>
+        <li><span class="n">4</span><div><h3 data-i18n="dl.s4">Choose your language</h3><p data-i18n="dl.s4b">Pick once on first launch. The app remembers it and always opens in that language.</p></div></li>
       </ol>
     </section>
 
@@ -125,18 +128,34 @@
         <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
         <span data-i18n="dl.safeTitle">Why it is safe</span>
       </h2>
-      <p data-i18n="dl.safe">Built from this site's own code.</p>
+      <p data-i18n="dl.safe">The APK is built from this site's own code and signed with our key. It only asks for internet access — no camera, contacts or location. Uninstall it like any other app.</p>
     </section>
 
     <section class="card">
       <h2 data-i18n="dl.pwaTitle">No APK? Use the web app</h2>
-      <p data-i18n="dl.pwaLead">Add it to your home screen.</p>
+      <p data-i18n="dl.pwaLead">On iPhone, or if you prefer not to sideload, add VidRidge to your home screen. It opens full screen and works like an app.</p>
       <a class="ghost" href="/__LANG__/" data-i18n="dl.pwaBtn">Open VidRidge</a>
+    </section>
+
+    <section class="faq">
+      <h2 data-i18n="dl.faqTitle">Questions</h2>
+      <div class="qa">
+        <h3 data-i18n="dl.q1">Is the VidRidge APK free?</h3>
+        <p data-i18n="dl.a1">Yes. The app is completely free — no ads, no account and no in-app purchases.</p>
+      </div>
+      <div class="qa">
+        <h3 data-i18n="dl.q2">Is it safe to install an APK outside the Play Store?</h3>
+        <p data-i18n="dl.a2">Yes. This APK is built from vidridge.com's own code and signed with our key. It asks only for internet access, and Android's warning about unknown sources is standard for any app installed outside the Play Store.</p>
+      </div>
+      <div class="qa">
+        <h3 data-i18n="dl.q3">Which Android versions are supported?</h3>
+        <p data-i18n="dl.a3">Android 10 or newer, on phones and tablets. The download is about 38 KB, so it installs in seconds.</p>
+      </div>
     </section>
 
     <section>
       <h2 data-i18n="dl.update">Updates</h2>
-      <p class="note" data-i18n="dl.updateB">New versions are published here.</p>
+      <p class="note" data-i18n="dl.updateB">A new version is published on this page. Install it over the old one — your language and settings stay.</p>
     </section>
   </main>
   <footer>

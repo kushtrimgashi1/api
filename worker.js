@@ -171,6 +171,21 @@ function appJsonLd(lang, origin) {
   });
 }
 
+// FAQPage markup mirrors the visible Q&A block on /download.
+function faqJsonLd(lang) {
+  const qa = [1, 2, 3].map(i => ({
+    '@type': 'Question',
+    name: t(lang, 'dl.q' + i),
+    acceptedAnswer: { '@type': 'Answer', text: t(lang, 'dl.a' + i) }
+  }));
+  return JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    inLanguage: lang,
+    mainEntity: qa
+  });
+}
+
 function inject(html, lang, kind, origin, slug) {
   const dir = RTL.includes(lang) ? 'rtl' : 'ltr';
   html = html.replace('<html lang="en">', `<html lang="${lang}" dir="${dir}">`);
@@ -194,7 +209,8 @@ function inject(html, lang, kind, origin, slug) {
   else html = html.replace('</head>', '  ' + links + '\n</head>');
 
   if (kind === 'doc' && slug === 'download') {
-    const ld = `<script type="application/ld+json">${appJsonLd(lang, origin)}</script>`;
+    const ld = `<script type="application/ld+json">${appJsonLd(lang, origin)}</script>\n  ` +
+      `<script type="application/ld+json">${faqJsonLd(lang)}</script>`;
     html = html.replace('</head>', '  ' + ld + '\n</head>');
   }
   return html;
