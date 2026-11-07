@@ -396,7 +396,11 @@ async function handleContact(request, env) {
   const text = `From: ${name} <${email}>\n\n${message}\n\n---\nSent from vidridge.com contact form`;
   const subject = `VidRidge contact — ${name}`.slice(0, 120);
   const to = (env && env.CONTACT_TO) || CONTACT_TO;
-  const from = (env && env.CONTACT_FROM) || CONTACT_FROM;
+  // Resend's shared test sender works without a verified domain, but it only
+  // delivers to the account owner's address. Set CONTACT_FROM once the domain
+  // is verified in Resend.
+  const from = (env && env.CONTACT_FROM)
+    || ((env && env.RESEND_API_KEY) ? 'onboarding@resend.dev' : CONTACT_FROM);
 
   // 1) Cloudflare Email Service binding (requires Workers Paid).
   const binding = env && env.CONTACT_EMAIL;
@@ -482,45 +486,8 @@ async function handleContact(request, env) {
     return json({ ok: true });
   }
 
-  // 4) FormSubmit — no key and no DNS: the destination is the address in the
-  //    URL. The first submission triggers a one-time activation email.
-  {
-    let res, payload;
-    try {
-      res = await fetch('https://formsubmit.co/ajax/' + encodeURIComponent(to), {
-        method: 'POST',
-        signal: AbortSignal.timeout(7000),
-        headers: {
-          'content-type': 'application/json',
-          accept: 'application/json',
-          origin: 'https://vidridge.com',
-          referer: 'https://vidridge.com/contact'
-        },
-        body: JSON.stringify({
-          name,
-          email,
-          message,
-          _subject: subject,
-          _replyto: email,
-          _template: 'table',
-          _captcha: 'false'
-        })
-      });
-      payload = await res.json().catch(() => ({}));
-    } catch (e) {
-      return json({ ok: false, error: 'send_failed', code: 'network' }, 502);
-    }
-    const sent = payload && (payload.success === true || payload.success === 'true');
-    if (!res.ok || !sent) {
-      return json({
-        ok: false,
-        error: 'send_failed',
-        code: (payload && (payload.message || payload.error)) || ('http_' + res.status)
-      }, 502);
-    }
-    return json({ ok: true });
-  }
-
+  // 4) Nothing configured: answer immediately so the page can offer the
+  //    prefilled mail button instead of making the visitor wait.
   return json({ ok: false, error: 'not_configured' }, 503);
 }
 
