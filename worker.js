@@ -422,6 +422,7 @@ async function handleContact(request, env) {
     try {
       res = await fetch('https://api.resend.com/emails', {
         method: 'POST',
+        signal: AbortSignal.timeout(8000),
         headers: {
           authorization: 'Bearer ' + resendKey,
           'content-type': 'application/json'
@@ -456,6 +457,7 @@ async function handleContact(request, env) {
     try {
       res = await fetch('https://api.web3forms.com/submit', {
         method: 'POST',
+        signal: AbortSignal.timeout(8000),
         headers: { 'content-type': 'application/json', accept: 'application/json' },
         body: JSON.stringify({
           access_key: web3Key,
@@ -487,6 +489,7 @@ async function handleContact(request, env) {
     try {
       res = await fetch('https://formsubmit.co/ajax/' + encodeURIComponent(to), {
         method: 'POST',
+        signal: AbortSignal.timeout(7000),
         headers: {
           'content-type': 'application/json',
           accept: 'application/json',
