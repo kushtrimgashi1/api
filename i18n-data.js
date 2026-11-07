@@ -131,7 +131,8 @@
     "seo.try",
     "seo.navTiktok",
     "seo.navInstagram",
-    "seo.navFacebook"
+    "seo.navFacebook",
+    "privacy.analytics"
   ];
 
   const EN = [
@@ -174,7 +175,7 @@
     "Do not use VidRidge for private content, illegal material, bulk scraping or reselling the service. Respect creators and platform rules.",
     "No warranty",
     "The service is provided as is, without guarantees. It may change or stop at any time and we are not liable for how you use the files.",
-    "Questions? Write to hello@vidridge.com.",
+    "Questions? Write to kushtrimgashi90@gmail.com.",
     "Contact",
     "Contact",
     "Contact us",
@@ -240,7 +241,8 @@
     "Download now",
     "TikTok downloader",
     "Instagram downloader",
-    "Facebook downloader"
+    "Facebook downloader",
+    "We use Cloudflare Web Analytics: aggregate page counts without cookies. No cross-site tracking, no advertising profiles."
   ];
 
   export const LOCALES = { en: EN };
@@ -284,7 +286,7 @@
     "Mos e përdor VidRidge për përmbajtje private, materiale të paligjshme, skrapim masiv ose rishitje të shërbimit. Respekto krijuesit dhe rregullat e platformave.",
     "Pa garanci",
     "Shërbimi ofrohet ashtu si është, pa garanci. Mund të ndryshojë ose të ndalet në çdo moment dhe nuk mbajmë përgjegjësi për mënyrën si i përdor skedarët.",
-    "Pyetje? Shkruaj në hello@vidridge.com.",
+    "Pyetje? Shkruaj në kushtrimgashi90@gmail.com.",
     "Kontakt",
     "Kontakt",
     "Na shkruaj",
@@ -350,7 +352,8 @@
     "Shkarko tani",
     "Shkarkues TikTok",
     "Shkarkues Instagram",
-    "Shkarkues Facebook"
+    "Shkarkues Facebook",
+    "Përdorim Cloudflare Web Analytics: numërim faqesh agregat, pa cookies. Pa gjurmim ndër-faqe, pa profile reklamash."
   ];
   LOCALES.it = [
     'Piattaforme','Come funziona','Perché VidRidge','FAQ','Lingua','Gratis • Nessun login',
@@ -392,7 +395,7 @@
     "Non usare VidRidge per contenuti privati, materiale illegale, scraping massivo o rivendita del servizio. Rispetta i creator e le regole delle piattaforme.",
     "Nessuna garanzia",
     "Il servizio è fornito così com'è, senza garanzie. Può cambiare o interrompersi in qualsiasi momento e non siamo responsabili dell'uso che fai dei file.",
-    "Domande? Scrivi a hello@vidridge.com.",
+    "Domande? Scrivi a kushtrimgashi90@gmail.com.",
     "Contatti",
     "Contatti",
     "Scrivici",
@@ -458,7 +461,8 @@
     "Scarica ora",
     "Downloader TikTok",
     "Downloader Instagram",
-    "Downloader Facebook"
+    "Downloader Facebook",
+    "Usiamo Cloudflare Web Analytics: conteggi aggregati senza cookie. Nessun tracciamento tra siti, nessun profilo pubblicitario."
   ];
   LOCALES.de = [
     'Plattformen','So funktioniert\'s','Warum VidRidge','FAQ','Sprache','Kostenlos • Ohne Login',
@@ -500,7 +504,7 @@
     "VidRidge nicht für private Inhalte, illegales Material, massenhaftes Scraping oder den Weiterverkauf des Dienstes nutzen. Respektiere Creator und Plattformregeln.",
     "Keine Gewährleistung",
     "Der Dienst wird ohne Gewähr bereitgestellt. Er kann sich jederzeit ändern oder eingestellt werden; wir haften nicht für die Verwendung der Dateien.",
-    "Fragen? Schreib an hello@vidridge.com.",
+    "Fragen? Schreib an kushtrimgashi90@gmail.com.",
     "Kontakt",
     "Kontakt",
     "Schreib uns",
@@ -566,7 +570,8 @@
     "Jetzt herunterladen",
     "TikTok-Downloader",
     "Instagram-Downloader",
-    "Facebook-Downloader"
+    "Facebook-Downloader",
+    "Wir nutzen Cloudflare Web Analytics: aggregierte Seitenaufrufe ohne Cookies. Kein siteübergreifendes Tracking, keine Werbeprofile."
   ];
   LOCALES.fr = [
     'Plateformes','Comment ça marche','Pourquoi VidRidge','FAQ','Langue','Gratuit • Sans connexion',
@@ -608,7 +613,7 @@
     "Ne pas utiliser VidRidge pour des contenus privés, du matériel illégal, du scraping massif ou la revente du service. Respectez les créateurs et les règles des plateformes.",
     "Aucune garantie",
     "Le service est fourni tel quel, sans garantie. Il peut changer ou s'arrêter à tout moment et nous ne sommes pas responsables de l'usage des fichiers.",
-    "Une question ? Écrivez à hello@vidridge.com.",
+    "Une question ? Écrivez à kushtrimgashi90@gmail.com.",
     "Contact",
     "Contact",
     "Écrivez-nous",
@@ -674,7 +679,8 @@
     "Télécharger maintenant",
     "Téléchargeur TikTok",
     "Téléchargeur Instagram",
-    "Téléchargeur Facebook"
+    "Téléchargeur Facebook",
+    "Nous utilisons Cloudflare Web Analytics : des comptages agrégés, sans cookies. Aucun suivi entre sites, aucun profil publicitaire."
   ];
   LOCALES.es = [
     'Plataformas','Cómo funciona','Por qué VidRidge','FAQ','Idioma','Gratis • Sin registro',
@@ -716,7 +722,7 @@
     "No uses VidRidge para contenido privado, material ilegal, scraping masivo ni para revender el servicio. Respeta a los creadores y las reglas de las plataformas.",
     "Sin garantías",
     "El servicio se ofrece tal cual, sin garantías. Puede cambiar o cesar en cualquier momento y no somos responsables del uso que hagas de los archivos.",
-    "¿Preguntas? Escribe a hello@vidridge.com.",
+    "¿Preguntas? Escribe a kushtrimgashi90@gmail.com.",
     "Contacto",
     "Contacto",
     "Escríbenos",
@@ -782,7 +788,8 @@
     "Descargar ahora",
     "Descargador TikTok",
     "Descargador Instagram",
-    "Descargador Facebook"
+    "Descargador Facebook",
+    "Usamos Cloudflare Web Analytics: recuentos agregados sin cookies. Sin seguimiento entre sitios ni perfiles publicitarios."
   ];
   LOCALES.pt = [
     'Plataformas','Como funciona','Por que VidRidge','FAQ','Idioma','Grátis • Sem login',
@@ -824,7 +831,7 @@
     "Não use o VidRidge para conteúdo privado, material ilegal, recolha massiva ou revenda do serviço. Respeite os criadores e as regras das plataformas.",
     "Sem garantias",
     "O serviço é fornecido tal como está, sem garantias. Pode mudar ou terminar a qualquer momento e não somos responsáveis pela forma como usa os ficheiros.",
-    "Dúvidas? Escreva para hello@vidridge.com.",
+    "Dúvidas? Escreva para kushtrimgashi90@gmail.com.",
     "Contacto",
     "Contacto",
     "Fale connosco",
@@ -890,7 +897,8 @@
     "Baixar agora",
     "Baixador TikTok",
     "Baixador Instagram",
-    "Baixador Facebook"
+    "Baixador Facebook",
+    "Usamos o Cloudflare Web Analytics: contagens agregadas sem cookies. Sem rastreio entre sites, sem perfis publicitários."
   ];
   LOCALES.tr = [
     'Platformlar','Nasıl çalışır','Neden VidRidge','SSS','Dil','Ücretsiz • Giriş yok',
@@ -932,7 +940,7 @@
     "VidRidge'i özel içerikler, yasa dışı materyal, toplu kazıma veya hizmeti yeniden satmak için kullanmayın. İçerik üreticilerine ve platform kurallarına saygı gösterin.",
     "Garanti yok",
     "Hizmet olduğu gibi, garanti verilmeden sunulur. Her an değişebilir veya durabilir; dosyaları nasıl kullandığınızdan sorumlu değiliz.",
-    "Sorularınız mı var? hello@vidridge.com adresine yazın.",
+    "Sorularınız mı var? kushtrimgashi90@gmail.com adresine yazın.",
     "İletişim",
     "İletişim",
     "Bize yazın",
@@ -998,7 +1006,8 @@
     "Şimdi indir",
     "TikTok indirici",
     "Instagram indirici",
-    "Facebook indirici"
+    "Facebook indirici",
+    "Cloudflare Web Analytics kullanıyoruz: çerezsiz, toplu sayfa sayımları. Siteler arası izleme ve reklam profili yok."
   ];
   LOCALES.ar = [
     'المنصات','كيف يعمل','لماذا VidRidge','الأسئلة الشائعة','اللغة','مجاني • بدون تسجيل',
@@ -1040,7 +1049,7 @@
     "لا تستخدم VidRidge لمحتوى خاص أو مواد غير قانونية أو كشطاً جماعياً أو إعادة بيع الخدمة. احترم المنشئين وقواعد المنصات.",
     "لا ضمان",
     "تُقدَّم الخدمة كما هي وبدون ضمانات. قد تتغير أو تتوقف في أي وقت، ولا نتحمل مسؤولية طريقة استخدامك للملفات.",
-    "أسئلة؟ اكتب إلى hello@vidridge.com.",
+    "أسئلة؟ اكتب إلى kushtrimgashi90@gmail.com.",
     "اتصل بنا",
     "اتصل بنا",
     "راسلنا",
@@ -1106,6 +1115,7 @@
     "نزّل الآن",
     "تنزيل TikTok",
     "تنزيل Instagram",
-    "تنزيل Facebook"
+    "تنزيل Facebook",
+    "نستخدم Cloudflare Web Analytics: إحصاءات صفحات مجمّعة بلا ملفات تعريف ارتباط. بلا تتبّع بين المواقع وبلا ملفات إعلانية."
   ];
   /* @@LANGUAGES@@ */

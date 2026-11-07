@@ -87,7 +87,7 @@
       <button id="cSend" type="submit" data-i18n="contact.send">Send message</button>
       <p class="msg" id="cMsg" role="status" aria-live="polite"></p>
     </form>
-    <p class="direct"><span data-i18n="contact.direct">Or email us directly:</span> <a href="mailto:hello@vidridge.com" dir="ltr">hello@vidridge.com</a></p>
+    <p class="direct"><span data-i18n="contact.direct">Or email us directly:</span> <a href="mailto:kushtrimgashi90@gmail.com" dir="ltr">kushtrimgashi90@gmail.com</a></p>
   </main>
   <footer>
     <a href="/__LANG__/" data-i18n="watch.back">&larr; Back</a>
@@ -156,14 +156,14 @@
   // message to the visitor's own mail app instead of losing it.
   function offerMailto(data) {
     if (document.getElementById('cMailto')) return;
-    var href = 'mailto:hello@vidridge.com'
+    var href = 'mailto:kushtrimgashi90@gmail.com'
       + '?subject=' + encodeURIComponent('VidRidge contact — ' + (data.name || ''))
       + '&body=' + encodeURIComponent((data.message || '') + '\n\n— ' + (data.name || '') + ' <' + (data.email || '') + '>');
     var a = document.createElement('a');
     a.id = 'cMailto';
     a.href = href;
     a.className = 'mailto';
-    a.textContent = 'hello@vidridge.com';
+    a.textContent = 'kushtrimgashi90@gmail.com';
     out.appendChild(document.createTextNode(' '));
     out.appendChild(a);
   }

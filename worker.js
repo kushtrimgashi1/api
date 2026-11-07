@@ -26,6 +26,10 @@ const INDEXNOW_KEY = '084e6597c5a3d36a699c36eee83504ba';
 const INDEXNOW_FALLBACK_TOKEN = '9fd89838d7207dd62002f52294ce5d179988';
 const SITEMAP_LASTMOD = '2026-11-05';
 
+// Cloudflare Web Analytics beacon. Leave empty to disable; set the
+// CF_BEACON_TOKEN variable in the dashboard to turn it on without a deploy.
+const CF_BEACON_TOKEN = '';
+
 // /{lang}/<slug> for the three platform landing pages.
 const PLATFORM_RE = new RegExp('^/(' + PLATFORM_SLUGS.join('|') + ')(/|\\.html)?$');
 
@@ -201,9 +205,15 @@ function faqJsonLd(lang) {
   });
 }
 
-function inject(html, lang, kind, origin, slug) {
+function inject(html, lang, kind, origin, slug, env) {
   const dir = RTL.includes(lang) ? 'rtl' : 'ltr';
   html = html.replace('<html lang="en">', `<html lang="${lang}" dir="${dir}">`);
+
+  const beacon = (env && env.CF_BEACON_TOKEN) || CF_BEACON_TOKEN;
+  if (beacon && !html.includes('cloudflareinsights.com/beacon')) {
+    const tag = `<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='${JSON.stringify({ token: beacon })}'></script>`;
+    html = html.replace('</head>', '  ' + tag + '\n</head>');
+  }
 
   let title = META[lang].title;
   let desc = META[lang].desc;
@@ -313,7 +323,7 @@ async function serveHtml(request, env, assetPath, lang, origin, slug) {
   if (slug === 'download' && lang === 'sq') {
     html = html.split('/img/app-').join('/img/sq/app-');
   }
-  html = inject(html, lang, kind, origin, slug);
+  html = inject(html, lang, kind, origin, slug, env);
   return new Response(html, {
     status: 200,
     headers: {
@@ -357,7 +367,7 @@ function json(data, status = 200) {
   });
 }
 
-const CONTACT_TO = 'hello@vidridge.com';
+const CONTACT_TO = 'kushtrimgashi90@gmail.com';
 const CONTACT_FROM = 'noreply@vidridge.com';
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i;
 
@@ -465,6 +475,44 @@ async function handleContact(request, env) {
         ok: false,
         error: 'send_failed',
         code: (payload && payload.message) || ('http_' + res.status)
+      }, 502);
+    }
+    return json({ ok: true });
+  }
+
+  // 4) FormSubmit — no key and no DNS: the destination is the address in the
+  //    URL. The first submission triggers a one-time activation email.
+  {
+    let res, payload;
+    try {
+      res = await fetch('https://formsubmit.co/ajax/' + encodeURIComponent(to), {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          accept: 'application/json',
+          origin: 'https://vidridge.com',
+          referer: 'https://vidridge.com/contact'
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          message,
+          _subject: subject,
+          _replyto: email,
+          _template: 'table',
+          _captcha: 'false'
+        })
+      });
+      payload = await res.json().catch(() => ({}));
+    } catch (e) {
+      return json({ ok: false, error: 'send_failed', code: 'network' }, 502);
+    }
+    const sent = payload && (payload.success === true || payload.success === 'true');
+    if (!res.ok || !sent) {
+      return json({
+        ok: false,
+        error: 'send_failed',
+        code: (payload && (payload.message || payload.error)) || ('http_' + res.status)
       }, 502);
     }
     return json({ ok: true });
