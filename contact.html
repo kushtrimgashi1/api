@@ -43,6 +43,8 @@
   .msg.ok{color:var(--ok)}
   .msg.err{color:var(--err)}
   .msg a{color:inherit;font-weight:700}
+  .msg .mailto{display:inline-flex;align-items:center;gap:8px;margin-top:10px;padding:11px 16px;border-radius:11px;background:var(--accent);color:#fff;text-decoration:none;font-weight:800;font-size:13px}
+  .msg .mailto:hover{opacity:.9}
   .direct{margin-top:22px;font-size:13px;color:var(--muted)}
   .direct a{color:var(--fg);font-weight:700}
   footer{margin-top:34px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
@@ -140,12 +142,11 @@
         say('contact.ok', 'ok');
         form.reset();
       } else {
-        if (body && body.error === 'not_configured') say('contact.fallback', 'err');
-        else say('contact.err', 'err');
+        say('contact.fallback', 'err');
         offerMailto(data);
       }
     } catch (err) {
-      say('contact.err', 'err');
+      say('contact.fallback', 'err');
       offerMailto(data);
     } finally {
       btn.disabled = false;
