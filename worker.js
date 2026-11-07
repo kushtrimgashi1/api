@@ -26,9 +26,9 @@ const INDEXNOW_KEY = '084e6597c5a3d36a699c36eee83504ba';
 const INDEXNOW_FALLBACK_TOKEN = '9fd89838d7207dd62002f52294ce5d179988';
 const SITEMAP_LASTMOD = '2026-11-05';
 
-// Cloudflare Web Analytics beacon. Leave empty to disable; set the
-// CF_BEACON_TOKEN variable in the dashboard to turn it on without a deploy.
-const CF_BEACON_TOKEN = '';
+// Cloudflare Web Analytics beacon. The token is public (it ships in the page
+// source), so it lives here; CF_BEACON_TOKEN in the dashboard still wins.
+const CF_BEACON_TOKEN = 'dfb6c4334d314c1e88ceb3c8e74cb732';
 
 // /{lang}/<slug> for the three platform landing pages.
 const PLATFORM_RE = new RegExp('^/(' + PLATFORM_SLUGS.join('|') + ')(/|\\.html)?$');
@@ -211,7 +211,7 @@ function inject(html, lang, kind, origin, slug, env) {
 
   const beacon = (env && env.CF_BEACON_TOKEN) || CF_BEACON_TOKEN;
   if (beacon && !html.includes('cloudflareinsights.com/beacon')) {
-    const tag = `<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='${JSON.stringify({ token: beacon })}'></script>`;
+    const tag = `<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='${JSON.stringify({ token: beacon })}'></script>`;
     html = html.replace('</head>', '  ' + tag + '\n</head>');
   }
 
